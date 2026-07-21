@@ -305,8 +305,7 @@ function LP:GetRecommendations()
                             if not onlyBIS or isBIS then
                                 local item = self:GetBisItem(entry, phase, slot, equippedLevel)
                                 item.listOrder = listOrder
-                                if (selectedSource == "ALL" or item.tier == selectedSource)
-                                    and (self.db.showOwned or not item.completed) then
+                                if selectedSource == "ALL" or item.tier == selectedSource then
                                     table.insert(results, item)
                                 end
                             end
@@ -320,6 +319,7 @@ function LP:GetRecommendations()
     table.sort(results, function(a, b)
         if a.phase ~= b.phase then return a.phase < b.phase end
         if a.slotOrder ~= b.slotOrder then return a.slotOrder < b.slotOrder end
+        if a.completed ~= b.completed then return not a.completed end
         local aBIS = string.find(a.listRank, "BIS", 1, true) and 0 or 1
         local bBIS = string.find(b.listRank, "BIS", 1, true) and 0 or 1
         if aBIS ~= bBIS then return aBIS < bBIS end

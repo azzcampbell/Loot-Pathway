@@ -449,17 +449,20 @@ function LP:Refresh()
     local y,rowIndex=0,0
     for stage=(self.BIS_DATA_META.currentPhase or 2),0,-1 do
         local stageItems={}; for _,item in ipairs(items or {}) do if item.phase==stage then table.insert(stageItems,item) end end
-        table.sort(stageItems,function(a,b) return (a.drawerRank or 999)<(b.drawerRank or 999) end)
+        table.sort(stageItems,function(a,b)
+            if a.completed~=b.completed then return not a.completed end
+            return (a.drawerRank or 999)<(b.drawerRank or 999)
+        end)
         if #stageItems>0 then
             local collapsed=self.db.collapsedPhases[stage]
             local header=self:AcquireStageHeader(stage); header:ClearAllPoints(); header:SetPoint("TOPLEFT",0,-y); header.count:SetText(#stageItems..(#stageItems==1 and " item" or " items")); header.toggle:SetText(collapsed and "+" or "-"); header:Show(); y=y+36
             if not collapsed then
                 for _,item in ipairs(stageItems) do
-                    rowIndex=rowIndex+1; local row=self:AcquireRow(rowIndex); local tier=self.TIERS[item.tier]; local phaseMeta=PHASES[item.phase]; row.item=item; row:ClearAllPoints(); row:SetPoint("TOPLEFT",0,-y); row.icon:SetTexture(item.icon); row.rule:SetColorTexture(unpack(phaseMeta.colour))
+                    rowIndex=rowIndex+1; local row=self:AcquireRow(rowIndex); local tier=self.TIERS[item.tier]; local phaseMeta=PHASES[item.phase]; row.item=item; row:ClearAllPoints(); row:SetPoint("TOPLEFT",0,-y); row.icon:SetTexture(item.icon); row.icon:SetDesaturated(item.completed); row.rule:SetColorTexture(unpack(item.completed and C.muted or phaseMeta.colour))
                     row.number:SetText("#"..(item.drawerRank or rowIndex)); row.rankChip.label:SetText(string.upper(item.listRank)); row.rankChip:SetBackdropBorderColor(unpack(string.find(item.listRank,"BIS",1,true) and C.gold or C.muted)); row.rankChip.label:SetTextColor(unpack(string.find(item.listRank,"BIS",1,true) and C.gold or C.muted))
                     row.sourceChip.label:SetText(item.sourceKind); row.sourceChip:SetBackdropBorderColor(unpack(tier.colour)); row.sourceChip.label:SetTextColor(unpack(tier.colour)); row.level:SetText(item.level>0 and ("i"..item.level) or "")
-                    row.name:SetText(item.name); local qc=ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[item.quality]; if qc then row.name:SetTextColor(qc.r,qc.g,qc.b) else row.name:SetTextColor(unpack(C.text)) end
-                    local place=item.place~="" and item.place or item.sourceType; local source=item.boss~="" and item.boss or item.sourceType; local difficulty=item.difficulty~="" and (" "..item.difficulty) or ""; row.source:SetText(place.." - "..source..difficulty); row.tick:SetShown(item.completed); row:SetAlpha(item.completed and .62 or 1); row:Show(); y=y+89
+                    row.name:SetText(item.name); local qc=ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[item.quality]; if item.completed then row.name:SetTextColor(unpack(C.muted)) elseif qc then row.name:SetTextColor(qc.r,qc.g,qc.b) else row.name:SetTextColor(unpack(C.text)) end
+                    local place=item.place~="" and item.place or item.sourceType; local source=item.boss~="" and item.boss or item.sourceType; local difficulty=item.difficulty~="" and (" "..item.difficulty) or ""; row.source:SetText(place.." - "..source..difficulty); row.tick:SetShown(item.completed); row:SetAlpha(item.completed and .68 or 1); row:Show(); y=y+89
                 end
             end
             y=y+7
