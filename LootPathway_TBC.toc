@@ -1,0 +1,12 @@
+## Interface: 20506
+## Title: Loot Pathway
+## Notes: A visual Pre-Raid to Phase 2 BIS-list pathway for Burning Crusade Anniversary.
+## Author: Aaron & Codex
+## Version: 0.4.4
+## SavedVariables: LootPathwayDB
+
+Core.lua
+Data.lua
+BisData.lua
+Engine.lua
+UI.lua

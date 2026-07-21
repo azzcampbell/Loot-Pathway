@@ -1,0 +1,6 @@
+.agents/
+backups/
+release/
+tools/__pycache__/
+*.pyc
+LootPathway-*.zip
