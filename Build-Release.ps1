@@ -17,6 +17,7 @@ $addonFiles = @(
     "BisData.lua",
     "Engine.lua",
     "UI.lua",
+    "Assets\Brand\LootPathway-Minimap.tga",
     "README.md"
 )
 

@@ -95,7 +95,7 @@ function LP:CreateMinimapButton()
     local button=CreateFrame("Button","LootPathwayMinimapButton",Minimap); self.minimapButton=button
     button:SetSize(32,32); button:SetFrameStrata("MEDIUM"); button:SetFrameLevel((Minimap:GetFrameLevel() or 0)+8)
     button:RegisterForClicks("LeftButtonUp","RightButtonUp"); button:RegisterForDrag("LeftButton")
-    button.icon=button:CreateTexture(nil,"BACKGROUND"); button.icon:SetSize(20,20); button.icon:SetPoint("CENTER"); button.icon:SetTexture("Interface\\Icons\\INV_Misc_Map_01"); button.icon:SetTexCoord(.08,.92,.08,.92)
+    button.icon=button:CreateTexture(nil,"BACKGROUND"); button.icon:SetSize(22,22); button.icon:SetPoint("CENTER"); button.icon:SetTexture("Interface\\AddOns\\LootPathway\\Assets\\Brand\\LootPathway-Minimap"); button.icon:SetTexCoord(0,1,0,1)
     button.border=button:CreateTexture(nil,"OVERLAY"); button.border:SetSize(52,52); button.border:SetPoint("TOPLEFT"); button.border:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
     button.highlight=button:CreateTexture(nil,"HIGHLIGHT"); button.highlight:SetSize(28,28); button.highlight:SetPoint("CENTER"); button.highlight:SetTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight"); button.highlight:SetBlendMode("ADD")
     button:SetScript("OnClick",function(_,mouseButton)
