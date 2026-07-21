@@ -117,6 +117,7 @@ end
 function LP:ClassifySource(sourceType, source, location)
     local combined = (source or "") .. " " .. (location or "")
     if ContainsText(sourceType, {"quest"}) then return "QUEST" end
+    if ContainsText(sourceType, {"profession", "craft"}) then return "CRAFTABLE" end
     if ContainsText(combined, RAID_ZONES) then return "RAID" end
     if ContainsText(location, {"(H)", "Heroic"}) or ContainsText(sourceType, {"Dungeon Token"}) then return "HEROIC" end
     if ContainsText(combined, DUNGEON_ZONES) then return "NORMAL" end

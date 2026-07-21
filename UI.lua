@@ -12,6 +12,7 @@ local PHASES = {
     [2]={label="PHASE 2",colour={.72,.45,.92}},
 }
 local COLLAPSED_WIDTH = 520
+local DRAWER_WIDTH = 456
 
 local SLOT_TEXTURES = {
     [1]="Interface\\PaperDoll\\UI-PaperDoll-Slot-Head",[2]="Interface\\PaperDoll\\UI-PaperDoll-Slot-Neck",
@@ -155,7 +156,7 @@ function LP:SetDrawerOpen(open)
         self.pathPane:ClearAllPoints()
         local frameRight=self.frame:GetRight()
         local availableRight=UIParent:GetRight() or GetScreenWidth()
-        if frameRight and frameRight+424<=availableRight then self.pathPane:SetPoint("TOPLEFT",self.frame,"TOPRIGHT",-2,-68)
+        if frameRight and frameRight+DRAWER_WIDTH<=availableRight then self.pathPane:SetPoint("TOPLEFT",self.frame,"TOPRIGHT",-2,-68)
         else self.pathPane:SetPoint("TOPRIGHT",self.frame,"TOPLEFT",2,-68) end
     end
     if self.pathPane then self.pathPane:SetShown(self.drawerOpen) end
@@ -288,8 +289,8 @@ function LP:UpdateGearButton(button)
 end
 
 function LP:CreateSourceFilter(parent,key,label,x,width)
-    local button=CreateFrame("Button",nil,parent,"BackdropTemplate"); button:SetSize(width,25); button:SetPoint("TOPLEFT",x,-115); button.key=key; button.baseLabel=label
-    button.label=Text(button,8,C.muted,"CENTER",true); button.label:SetPoint("CENTER")
+    local button=CreateFrame("Button",nil,parent,"BackdropTemplate"); button:SetSize(width,27); button:SetPoint("TOPLEFT",x,-115); button.key=key; button.baseLabel=label
+    button.label=Text(button,9,C.muted,"CENTER",true); button.label:SetPoint("CENTER")
     button:SetScript("OnClick",function(self) LP.db.selectedSource=self.key; LP:Refresh() end)
     button:SetScript("OnEnter",function(self) self:SetBackdropBorderColor(1,1,1,1) end); button:SetScript("OnLeave",function() LP:UpdateSourceFilters() end)
     self.sourceFilters[key]=button
@@ -375,39 +376,44 @@ function LP:CreateUI()
     if modelOK then self:RefreshModel() else self.modelLoading:Hide() end
     self.gearButtons={}; for _,slot in ipairs(DISPLAY_SLOTS) do self:CreateGearButton(character,slot[1],slot[2],slot[3],slot[4],slot[5],slot[6]) end
 
-    local right=CreateFrame("Frame",nil,frame,"BackdropTemplate"); right:SetPoint("TOPLEFT",518,-68); right:SetSize(424,490); Backdrop(right,C.panel,C.line); self.pathPane=right
+    local right=CreateFrame("Frame",nil,frame,"BackdropTemplate"); right:SetPoint("TOPLEFT",518,-68); right:SetSize(DRAWER_WIDTH,490); Backdrop(right,C.panel,C.line); self.pathPane=right
     self.pathLabel=Text(right,10,C.gold); self.pathLabel:SetPoint("TOPLEFT",14,-18); self.pathLabel:SetText("REPLACEMENT DRAWER")
     local drawerClose=Button(right,"<",28,28); drawerClose:SetPoint("TOPRIGHT",-12,-12); drawerClose:SetScript("OnClick",function() LP:SetDrawerOpen(false); LP:Refresh() end)
     self.pathTitle=Text(right,16,C.text); self.pathTitle:SetPoint("TOPLEFT",14,-48)
-    self.pathSummary=Text(right,9,C.muted); self.pathSummary:SetPoint("TOPLEFT",self.pathTitle,"BOTTOMLEFT",0,-5); self.pathSummary:SetWidth(380)
-    self.sourceFilters={}; self:CreateSourceFilter(right,"ALL","ALL",14,48); self:CreateSourceFilter(right,"QUEST","QUEST",67,52); self:CreateSourceFilter(right,"NORMAL","DUNGEON",124,62); self:CreateSourceFilter(right,"HEROIC","HEROIC",191,58); self:CreateSourceFilter(right,"OTHER","OTHER",254,50); self:CreateSourceFilter(right,"RAID","RAID",342,64)
-    local divider=right:CreateTexture(nil,"ARTWORK"); divider:SetColorTexture(unpack(C.line)); divider:SetPoint("TOPLEFT",322,-115); divider:SetSize(1,25)
+    self.pathSummary=Text(right,10,C.muted); self.pathSummary:SetPoint("TOPLEFT",self.pathTitle,"BOTTOMLEFT",0,-5); self.pathSummary:SetWidth(412)
+    self.sourceFilters={}; self:CreateSourceFilter(right,"ALL","ALL",14,44); self:CreateSourceFilter(right,"QUEST","QUEST",64,52); self:CreateSourceFilter(right,"NORMAL","DUNGEON",122,66); self:CreateSourceFilter(right,"HEROIC","HEROIC",194,60); self:CreateSourceFilter(right,"RAID","RAID",260,50); self:CreateSourceFilter(right,"CRAFTABLE","CRAFTABLE",316,80)
     local scroll=CreateFrame("ScrollFrame","LootPathwayScrollFrame",right,"UIPanelScrollFrameTemplate"); scroll:SetPoint("TOPLEFT",14,-154); scroll:SetPoint("BOTTOMRIGHT",-36,16)
-    local content=CreateFrame("Frame",nil,scroll); content:SetSize(370,1); scroll:SetScrollChild(content); self.content=content; self.rows={}; self.stageHeaders={}
+    local content=CreateFrame("Frame",nil,scroll); content:SetSize(402,1); scroll:SetScrollChild(content); self.content=content; self.rows={}; self.stageHeaders={}
     self:CreateBrandFooter(frame); self:CreateMinimapButton(); self:CreateOptionsUI(); self:SetDrawerOpen(false)
 end
 
 function LP:AcquireStageHeader(phase)
     if self.stageHeaders[phase] then return self.stageHeaders[phase] end
-    local meta=PHASES[phase]; local header=CreateFrame("Frame",nil,self.content,"BackdropTemplate"); header:SetSize(370,27); Backdrop(header,{meta.colour[1]*.12,meta.colour[2]*.12,meta.colour[3]*.12,1},meta.colour)
-    header.label=Text(header,9,meta.colour); header.label:SetPoint("LEFT",10,0); header.label:SetText(meta.label); header.count=Text(header,9,C.muted,"RIGHT"); header.count:SetPoint("RIGHT",-9,0); self.stageHeaders[phase]=header; return header
+    local meta=PHASES[phase]; local header=CreateFrame("Button",nil,self.content,"BackdropTemplate"); header:SetSize(402,29); header.phase=phase; Backdrop(header,{meta.colour[1]*.12,meta.colour[2]*.12,meta.colour[3]*.12,1},meta.colour)
+    header.label=Text(header,10,meta.colour); header.label:SetPoint("LEFT",10,0); header.label:SetText(meta.label)
+    header.count=Text(header,9,C.muted,"RIGHT"); header.count:SetPoint("RIGHT",-30,0)
+    header.toggle=Text(header,14,meta.colour,"CENTER",true); header.toggle:SetPoint("RIGHT",-9,0)
+    header:SetScript("OnClick",function(self) LP.db.collapsedPhases[self.phase]=not LP.db.collapsedPhases[self.phase]; LP:Refresh() end)
+    header:SetScript("OnEnter",function(self) self:SetBackdropBorderColor(1,1,1,1); GameTooltip:SetOwner(self,"ANCHOR_TOP"); GameTooltip:SetText(LP.db.collapsedPhases[self.phase] and "Click to expand this phase" or "Click to collapse this phase"); GameTooltip:Show() end)
+    header:SetScript("OnLeave",function(self) self:SetBackdropBorderColor(unpack(PHASES[self.phase].colour)); GameTooltip:Hide() end)
+    self.stageHeaders[phase]=header; return header
 end
 
 local function CreateChip(row,width)
-    local chip=CreateFrame("Frame",nil,row,"BackdropTemplate"); chip:SetSize(width,15); Backdrop(chip,{.04,.05,.06,1},C.line); chip.label=Text(chip,7,C.muted,"CENTER",true); chip.label:SetPoint("CENTER"); return chip
+    local chip=CreateFrame("Frame",nil,row,"BackdropTemplate"); chip:SetSize(width,17); Backdrop(chip,{.04,.05,.06,1},C.line); chip.label=Text(chip,8,C.muted,"CENTER",true); chip.label:SetPoint("CENTER"); return chip
 end
 
 function LP:AcquireRow(index)
     if self.rows[index] then return self.rows[index] end
-    local row=CreateFrame("Frame",nil,self.content,"BackdropTemplate"); row:SetSize(370,76); row:EnableMouse(true); Backdrop(row,C.raised,C.line)
-    row.rule=row:CreateTexture(nil,"ARTWORK"); row.rule:SetPoint("LEFT"); row.rule:SetSize(3,76)
-    row.icon=row:CreateTexture(nil,"ARTWORK"); row.icon:SetSize(40,40); row.icon:SetPoint("LEFT",10,0); row.icon:SetTexCoord(.08,.92,.08,.92)
-    row.number=Text(row,10,C.gold,"LEFT",true); row.number:SetPoint("TOPLEFT",58,-9); row.number:SetWidth(28)
-    row.rankChip=CreateChip(row,44); row.rankChip:SetPoint("TOPLEFT",88,-8); row.sourceChip=CreateChip(row,62); row.sourceChip:SetPoint("LEFT",row.rankChip,"RIGHT",5,0)
-    row.level=Text(row,8,C.muted,"RIGHT"); row.level:SetPoint("TOPRIGHT",-39,-10)
-    row.name=Text(row,11,C.text); row.name:SetPoint("TOPLEFT",58,-28); row.name:SetPoint("RIGHT",-39,0)
-    row.source=Text(row,8,C.muted); row.source:SetPoint("BOTTOMLEFT",58,9); row.source:SetPoint("RIGHT",-39,0)
-    row.check=CreateFrame("Button",nil,row,"BackdropTemplate"); row.check:SetSize(24,24); row.check:SetPoint("RIGHT",-8,0); Backdrop(row.check,{.03,.04,.05,1},C.line)
+    local row=CreateFrame("Frame",nil,self.content,"BackdropTemplate"); row:SetSize(402,82); row:EnableMouse(true); Backdrop(row,C.raised,C.line)
+    row.rule=row:CreateTexture(nil,"ARTWORK"); row.rule:SetPoint("LEFT"); row.rule:SetSize(3,82)
+    row.icon=row:CreateTexture(nil,"ARTWORK"); row.icon:SetSize(42,42); row.icon:SetPoint("LEFT",10,0); row.icon:SetTexCoord(.08,.92,.08,.92)
+    row.number=Text(row,11,C.gold,"LEFT",true); row.number:SetPoint("TOPLEFT",60,-10); row.number:SetWidth(28)
+    row.rankChip=CreateChip(row,50); row.rankChip:SetPoint("TOPLEFT",92,-9); row.sourceChip=CreateChip(row,74); row.sourceChip:SetPoint("LEFT",row.rankChip,"RIGHT",6,0)
+    row.level=Text(row,9,C.muted,"RIGHT"); row.level:SetPoint("TOPRIGHT",-45,-11)
+    row.name=Text(row,12,C.text); row.name:SetPoint("TOPLEFT",60,-32); row.name:SetPoint("RIGHT",-45,0)
+    row.source=Text(row,9,C.muted); row.source:SetPoint("BOTTOMLEFT",60,10); row.source:SetPoint("RIGHT",-45,0)
+    row.check=CreateFrame("Button",nil,row,"BackdropTemplate"); row.check:SetSize(26,26); row.check:SetPoint("RIGHT",-9,0); Backdrop(row.check,{.03,.04,.05,1},C.line)
     row.tick=row.check:CreateTexture(nil,"OVERLAY"); row.tick:SetTexture("Interface\\Buttons\\UI-CheckBox-Check"); row.tick:SetAllPoints()
     row.check:SetScript("OnClick",function() if row.item then local key=tostring(row.item.id); LP.db.completed[key]=not LP.db.completed[key]; LP:Refresh() end end)
     row:SetScript("OnEnter",function(self) self:SetBackdropBorderColor(unpack(C.gold)); if self.item and self.item.link then GameTooltip:SetOwner(self,"ANCHOR_RIGHT"); GameTooltip:SetHyperlink(self.item.link); GameTooltip:Show() end end)
@@ -445,13 +451,16 @@ function LP:Refresh()
         local stageItems={}; for _,item in ipairs(items or {}) do if item.phase==stage then table.insert(stageItems,item) end end
         table.sort(stageItems,function(a,b) return (a.drawerRank or 999)<(b.drawerRank or 999) end)
         if #stageItems>0 then
-            local header=self:AcquireStageHeader(stage); header:ClearAllPoints(); header:SetPoint("TOPLEFT",0,-y); header.count:SetText(#stageItems..(#stageItems==1 and " item" or " items")); header:Show(); y=y+34
-            for _,item in ipairs(stageItems) do
-                rowIndex=rowIndex+1; local row=self:AcquireRow(rowIndex); local tier=self.TIERS[item.tier]; local phaseMeta=PHASES[item.phase]; row.item=item; row:ClearAllPoints(); row:SetPoint("TOPLEFT",0,-y); row.icon:SetTexture(item.icon); row.rule:SetColorTexture(unpack(phaseMeta.colour))
-                row.number:SetText("#"..(item.drawerRank or rowIndex)); row.rankChip.label:SetText(string.upper(item.listRank)); row.rankChip:SetBackdropBorderColor(unpack(string.find(item.listRank,"BIS",1,true) and C.gold or C.muted)); row.rankChip.label:SetTextColor(unpack(string.find(item.listRank,"BIS",1,true) and C.gold or C.muted))
-                row.sourceChip.label:SetText(item.sourceKind); row.sourceChip:SetBackdropBorderColor(unpack(tier.colour)); row.sourceChip.label:SetTextColor(unpack(tier.colour)); row.level:SetText(item.level>0 and ("i"..item.level) or "")
-                row.name:SetText(item.name); local qc=ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[item.quality]; if qc then row.name:SetTextColor(qc.r,qc.g,qc.b) else row.name:SetTextColor(unpack(C.text)) end
-                local place=item.place~="" and item.place or item.sourceType; local source=item.boss~="" and item.boss or item.sourceType; local difficulty=item.difficulty~="" and (" "..item.difficulty) or ""; row.source:SetText(place.." - "..source..difficulty); row.tick:SetShown(item.completed); row:SetAlpha(item.completed and .62 or 1); row:Show(); y=y+83
+            local collapsed=self.db.collapsedPhases[stage]
+            local header=self:AcquireStageHeader(stage); header:ClearAllPoints(); header:SetPoint("TOPLEFT",0,-y); header.count:SetText(#stageItems..(#stageItems==1 and " item" or " items")); header.toggle:SetText(collapsed and "+" or "-"); header:Show(); y=y+36
+            if not collapsed then
+                for _,item in ipairs(stageItems) do
+                    rowIndex=rowIndex+1; local row=self:AcquireRow(rowIndex); local tier=self.TIERS[item.tier]; local phaseMeta=PHASES[item.phase]; row.item=item; row:ClearAllPoints(); row:SetPoint("TOPLEFT",0,-y); row.icon:SetTexture(item.icon); row.rule:SetColorTexture(unpack(phaseMeta.colour))
+                    row.number:SetText("#"..(item.drawerRank or rowIndex)); row.rankChip.label:SetText(string.upper(item.listRank)); row.rankChip:SetBackdropBorderColor(unpack(string.find(item.listRank,"BIS",1,true) and C.gold or C.muted)); row.rankChip.label:SetTextColor(unpack(string.find(item.listRank,"BIS",1,true) and C.gold or C.muted))
+                    row.sourceChip.label:SetText(item.sourceKind); row.sourceChip:SetBackdropBorderColor(unpack(tier.colour)); row.sourceChip.label:SetTextColor(unpack(tier.colour)); row.level:SetText(item.level>0 and ("i"..item.level) or "")
+                    row.name:SetText(item.name); local qc=ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[item.quality]; if qc then row.name:SetTextColor(qc.r,qc.g,qc.b) else row.name:SetTextColor(unpack(C.text)) end
+                    local place=item.place~="" and item.place or item.sourceType; local source=item.boss~="" and item.boss or item.sourceType; local difficulty=item.difficulty~="" and (" "..item.difficulty) or ""; row.source:SetText(place.." - "..source..difficulty); row.tick:SetShown(item.completed); row:SetAlpha(item.completed and .62 or 1); row:Show(); y=y+89
+                end
             end
             y=y+7
         end

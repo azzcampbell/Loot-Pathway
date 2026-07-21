@@ -4,8 +4,9 @@ LP.TIERS = {
     QUEST={label="Quest",short="QUEST",colour={0.82,0.66,0.28},order=1},
     NORMAL={label="Dungeon",short="DUNGEON",colour={0.28,0.72,0.56},order=2},
     HEROIC={label="Heroic",short="HEROIC",colour={0.37,0.58,0.92},order=3},
-    OTHER={label="Other",short="OTHER",colour={0.56,0.59,0.64},order=4},
-    RAID={label="Raid",short="RAID",colour={0.72,0.45,0.92},order=5},
+    CRAFTABLE={label="Craftable",short="CRAFTABLE",colour={0.92,0.52,0.24},order=4},
+    OTHER={label="Other",short="OTHER",colour={0.56,0.59,0.64},order=5},
+    RAID={label="Raid",short="RAID",colour={0.72,0.45,0.92},order=6},
 }
 
 -- Talent trees are mapped to the closest embedded Loon guide. Some Loon guides

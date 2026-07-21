@@ -2,7 +2,7 @@
 ## Title: Loot Pathway
 ## Notes: A visual Pre-Raid to Phase 2 BIS-list pathway for Burning Crusade Anniversary.
 ## Author: Aaron & Codex
-## Version: 0.4.4
+## Version: 0.4.5
 ## SavedVariables: LootPathwayDB
 
 Core.lua

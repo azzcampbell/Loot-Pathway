@@ -2,12 +2,15 @@
 
 Loot Pathway is a lightweight, visual gear checklist for **World of Warcraft: The Burning Crusade Classic Anniversary Edition**. It presents your equipment like a character sheet, then lays out the BIS-list targets for your active talent tree from Pre-Raid through Phase 1 and the current Phase 2.
 
-## Version 0.4.4
+## Version 0.4.5
 
 - Live character model with left-drag rotation and right-click reset.
 - Clickable equipment slots with full Pre-Raid, Phase 1 and Phase 2 pathways.
 - Only items present in the embedded spec BIS/alternative lists can appear.
-- Quest, Dungeon, Heroic, Other and Raid source filters; raids remain visually separate.
+- Quest, Dungeon, Heroic, Raid and Craftable source filters; uncategorised items remain available through All.
+- The replacement drawer uses a clear six-button filter row ending in Raid and Craftable; Other items remain available through All.
+- Phase section headers can be clicked to collapse or expand them, with the state remembered between sessions.
+- The default interface scale and drawer typography are slightly larger, with wider rows to prevent chips and labels clipping each other.
 - Equipped BIS-list position controls which later targets remain visible. Item level is display information only and never determines list membership.
 - Checkbox progress, saved position and source/slot filters.
 - Native, block-built Northern Stack Studios footer; no extra texture assets or libraries.

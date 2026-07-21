@@ -2,12 +2,12 @@ local ADDON_NAME, LP = ...
 
 LootPathway = LP
 LP.name = ADDON_NAME
-LP.version = "0.4.4"
+LP.version = "0.4.5"
 
 local defaults = {
     minimised = false,
     locked = false,
-    scale = 1,
+    scale = 1.08,
     point = "CENTER",
     relativePoint = "CENTER",
     x = 0,
@@ -20,6 +20,7 @@ local defaults = {
     minimapHidden = false,
     showOwned = false,
     completed = {},
+    collapsedPhases = {},
 }
 
 local function CopyDefaults(source, target)
@@ -86,7 +87,13 @@ events:RegisterEvent("GET_ITEM_INFO_RECEIVED")
 events:SetScript("OnEvent", function(_, event, arg1)
     if event == "ADDON_LOADED" and arg1 == ADDON_NAME then
         LootPathwayDB = LootPathwayDB or {}
+        local previousScaleRevision = LootPathwayDB.uiScaleRevision
         CopyDefaults(defaults, LootPathwayDB)
+        if not previousScaleRevision then
+            LootPathwayDB.scale = math.max(tonumber(LootPathwayDB.scale) or 1, 1.08)
+            LootPathwayDB.uiScaleRevision = 1
+        end
+        if LootPathwayDB.selectedSource == "OTHER" then LootPathwayDB.selectedSource = "ALL" end
         LP.db = LootPathwayDB
     elseif event == "PLAYER_LOGIN" then
         LP:CreateUI()

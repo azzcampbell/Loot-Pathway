@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $releaseRoot = Join-Path $projectRoot "release"
 $addonRoot = Join-Path $releaseRoot "LootPathway"
-$zipPath = Join-Path $projectRoot "LootPathway-0.4.4.zip"
+$zipPath = Join-Path $projectRoot "LootPathway-0.4.5.zip"
 
 if (Test-Path -LiteralPath $addonRoot) {
     Remove-Item -LiteralPath $addonRoot -Recurse -Force
