@@ -2,6 +2,18 @@
 
 Run this checklist against the exact release-candidate ZIP in TBC Anniversary with Lua errors enabled. Record the character, result and screenshot or chat output for every row. Do not alter or delete live SavedVariables merely to manufacture a fresh-install result; use a backed-up test account or character where needed.
 
+## Current pre-release package
+
+- Tested runtime source commit: `9182b35`; later documentation-only commits do not alter the package runtime.
+- Addon version under test: `0.4.7` (the version will become `1.0.0` only after acceptance).
+- Package: `LootPathway-0.4.7.zip`.
+- SHA-256: `1D79254944859780E04F439B4FC846EE81AB5B2B79E6EDBA99E934B32B4FA070`.
+- Package structure: one `LootPathway` root containing 12 approved files, byte-identical to source.
+- Installed copy: all 12 files byte-identical to this package on 22 July 2026.
+- Automated evidence: 7,188 BIS rows validated; 24 engine checks and 14 profile-migration checks passed with Lua 5.1.5.
+
+Any runtime-file change invalidates this evidence and requires a new package, hash and complete affected test rerun.
+
 ## Core smoke test
 
 - [ ] Start with Loot Pathway enabled and no Lua error on login.
@@ -40,8 +52,8 @@ Run this checklist against the exact release-candidate ZIP in TBC Anniversary wi
 
 ## Display matrix
 
-- [ ] 1920×1080 at 100% UI scale.
-- [ ] 2560×1440 at 100% UI scale, if available.
+- [ ] 1920x1080 at 100% UI scale.
+- [ ] 2560x1440 at 100% UI scale, if available.
 - [ ] One smaller or scaled layout representative of laptop play.
 - [ ] Drawer opened on both sides of the character panel near screen edges; no clipped close button, filter, row, footer or tooltip.
 
