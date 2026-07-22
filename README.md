@@ -2,6 +2,8 @@
 
 Loot Pathway is a lightweight, visual gear checklist for **World of Warcraft: The Burning Crusade Classic Anniversary Edition**. It presents your equipment like a character sheet, then lays out the BIS-list targets for your active talent tree from Pre-Raid through Phase 1 and the current Phase 2.
 
+> **Loot Pathway is intended for max-level (level 70) characters only. It is not a levelling addon.**
+
 ## Road to v1 development line
 
 - Live character model with left-drag rotation and right-click reset.

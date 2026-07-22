@@ -12,6 +12,7 @@ ignore:
   - Build-Release.ps1
   - Publish-Release.ps1
   - RELEASING.md
+  - CURSEFORGE.md
   - tools
   - tests
   - docs
