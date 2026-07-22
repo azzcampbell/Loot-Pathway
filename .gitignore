@@ -1,6 +1,7 @@
 .agents/
 backups/
 release/
+artifacts/
 tools/__pycache__/
 *.pyc
 LootPathway-*.zip

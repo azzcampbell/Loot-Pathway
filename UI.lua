@@ -386,15 +386,15 @@ function LP:RefreshModel()
     local ok=pcall(self.playerModel.SetUnit,self.playerModel,"player")
     if ok then
         local phase=tonumber(self.db.displayPhase) or -1
-        if phase>=0 and self.playerModel.TryOn then
-            for _,button in ipairs(self.gearButtons or {}) do
-                local targets=self:GetPhasePrimaryTargets(button.slotKey,phase)
-                local target=targets[button.ordinal or 1]
-                if target and target.id then pcall(self.playerModel.TryOn,self.playerModel,"item:"..target.id) end
-            end
+        local plan=self:GetModelPreviewPlan(phase,self.previewItem)
+        if self.playerModel.UndressSlot then
+            if plan.clearMainHand then pcall(self.playerModel.UndressSlot,self.playerModel,INVSLOT_MAINHAND or 16) end
+            if plan.clearOffHand then pcall(self.playerModel.UndressSlot,self.playerModel,INVSLOT_OFFHAND or 17) end
         end
-        if self.previewItem and self.previewItem.id and self.playerModel.TryOn then
-            pcall(self.playerModel.TryOn,self.playerModel,"item:"..self.previewItem.id)
+        if self.playerModel.TryOn then
+            for _,item in ipairs(plan.items) do
+                if item.id then pcall(self.playerModel.TryOn,self.playerModel,"item:"..item.id) end
+            end
         end
         SetModelFacing(self.playerModel,self.db.modelFacing or 0)
         if self.modelPreviewLabel then
@@ -412,7 +412,7 @@ end
 function LP:ToggleItemPreview(item)
     if not item then return end
     if self.previewItem and self.previewItem.id==item.id and self.previewItem.phase==item.phase then self.previewItem=nil
-    else self.previewItem={id=item.id,name=item.name,phase=item.phase,slot=item.slot} end
+    else self.previewItem={id=item.id,name=item.name,phase=item.phase,slot=item.slot,bisSlot=item.bisSlot} end
     self:RefreshModel()
     self:Refresh()
 end

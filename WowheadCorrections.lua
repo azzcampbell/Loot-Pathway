@@ -1,9 +1,77 @@
 local _, LP = ...
 
--- Reviewed additions from the current TBC Anniversary Phase 2 Wowhead guides.
+-- Reviewed additions and narrow removals from the current TBC Anniversary
+-- Pre-Raid, Phase 1 and Phase 2 Wowhead guides.
 -- These remain separate from generated BisData.lua so every post-Loon change
 -- has an explicit source and can be re-audited when a guide is updated.
 local corrections = {
+    {
+        class="DRUID", guide="Cat", phase=1,
+        source="https://www.wowhead.com/tbc/guide/feral-druid-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow",
+        items={
+            {30676,"Waist","BIS","Lurker's Grasp","Drop","Hyakiss the Lurker","Karazhan","B"},
+            {30685,"Wrist","Alt","Ravager's Wrist-Wraps","Drop","Rokad the Ravager","Karazhan","B"},
+        },
+    },
+    {
+        class="HUNTER", guide="Survival", phase=1,
+        source="https://www.wowhead.com/tbc/guide/survival-hunter-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow",
+        items={
+            {30682,"Feet","BIS","Glider's Sabatons","Drop","Shadikith the Glider","Karazhan","B"},
+            {30677,"Waist","BIS","Lurker's Belt","Drop","Hyakiss the Lurker","Karazhan","B"},
+            {30686,"Wrist","BIS","Ravager's Bands","Drop","Rokad the Ravager","Karazhan","B"},
+        },
+    },
+    {
+        class="MAGE", guide="Arcane", phase=1,
+        source="https://www.wowhead.com/tbc/guide/arcane-mage-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow",
+        items={
+            {29333,"Neck","Alt","Torc of the Sethekk Prophet","Quest","Brother Against Brother","Sethekk Halls","B"},
+        },
+    },
+    {
+        class="WARLOCK", guide="Affliction", phase=1,
+        source="https://www.wowhead.com/tbc/guide/affliction-warlock-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow",
+        items={
+            {24692,"Wrist","Alt","Elementalist Bracelets","Drop","World Drop","","B"},
+        },
+    },
+    {
+        class="WARLOCK", guide="Demonology", phase=1,
+        source="https://www.wowhead.com/tbc/guide/demonology-warlock-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow",
+        items={
+            {24692,"Wrist","Alt","Elementalist Bracelets","Drop","World Drop","","B"},
+        },
+    },
+    {
+        class="WARRIOR", guide="Fury", phase=1,
+        source="https://www.wowhead.com/tbc/guide/fury-warrior-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow",
+        items={
+            {24544,"Chest","Alt","Gladiator's Plate Chestpiece","PvP","Arena Points","Arena Vendor","B"},
+            {29020,"Hands","Alt","Warbringer Gauntlets","Tier Token","The Curator","Karazhan","B"},
+            {30538,"Legs","Alt","Midnight Legguards","Drop","Quagmirran","The Slave Pens (H)","B"},
+            {28584,"Main Hand","Alt","Big Bad Wolf's Paw","Drop","Opera Event (Wolf)","Karazhan","B"},
+            {28657,"Main Hand","Alt","Fool's Bane","Drop","Terestian Illhoof","Karazhan","B"},
+            {29348,"Main Hand","Alt","The Bladefist","Drop","Warchief Kargath Bladefist","The Shattered Halls (H)","B"},
+            {28767,"Main Hand","Alt","The Decapitator","Drop","Prince Malchezaar","Karazhan","B"},
+            {23542,"Off Hand","Alt","Fel Edged Battleaxe","Profession","Blacksmithing (365)","29694","B"},
+            {28649,"Ring","Alt","Garona's Signet Ring","Drop","The Curator","Karazhan","B"},
+        },
+    },
+    {
+        class="MAGE", guide="Arcane", phase=0,
+        source="https://www.wowhead.com/tbc/guide/classes/mage/arcane/dps-bis-gear-pve-pre-raid",
+        items={
+            {27540,"Ranged/Relic","Alt","Nexus Torch","Drop","Warchief Kargath Bladefist","The Shattered Halls","B"},
+        },
+    },
+    {
+        class="SHAMAN", guide="Elemental", phase=0,
+        source="https://www.wowhead.com/tbc/guide/classes/shaman/elemental/dps-bis-gear-pve-pre-raid",
+        items={
+            {31201,"Back","Alt","Illidari Cloak","Drop","World Drop","","B"},
+        },
+    },
     {
         class="DRUID", guide="Cat", phase=2,
         source="https://www.wowhead.com/tbc/guide/classes/druid/feral/dps-bis-gear-pve-phase-2",
@@ -89,7 +157,18 @@ local slotCorrections = {
     {class="WARRIOR",guide="Fury",phase=2,item=30082,from="Main Hand~Off Hand",to="Off Hand",source="https://www.wowhead.com/tbc/guide/classes/warrior/fury/dps-bis-gear-pve-phase-2"},
 }
 
-LP.BIS_CORRECTION_META = {source="Wowhead TBC Anniversary",phase=2,reviewed="2026-07-22",groups=#corrections,slotCorrections=#slotCorrections}
+local removals = {
+    {class="WARRIOR",guide="Fury",phase=1,item=30257,source="https://www.wowhead.com/tbc/guide/fury-warrior-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow"},
+    {class="WARRIOR",guide="Fury",phase=1,item=31695,source="https://www.wowhead.com/tbc/guide/fury-warrior-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow"},
+    {class="WARRIOR",guide="Fury",phase=1,item=28307,source="https://www.wowhead.com/tbc/guide/fury-warrior-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow"},
+    {class="WARRIOR",guide="Fury",phase=1,item=28189,source="https://www.wowhead.com/tbc/guide/fury-warrior-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow"},
+    {class="WARRIOR",guide="Fury",phase=1,item=28573,source="https://www.wowhead.com/tbc/guide/fury-warrior-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow"},
+    {class="WARRIOR",guide="Fury",phase=1,item=24550,source="https://www.wowhead.com/tbc/guide/fury-warrior-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow"},
+    {class="WARRIOR",guide="Fury",phase=1,item=28773,source="https://www.wowhead.com/tbc/guide/fury-warrior-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow"},
+    {class="WARRIOR",guide="Fury",phase=1,item=28429,source="https://www.wowhead.com/tbc/guide/fury-warrior-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow"},
+}
+
+LP.BIS_CORRECTION_META = {source="Wowhead TBC Anniversary",phases="0,1,2",reviewed="2026-07-22",groups=#corrections,slotCorrections=#slotCorrections,removals=#removals}
 
 local knownItems = {}
 for _, classGuides in pairs(LP.BIS_LISTS or {}) do
@@ -101,6 +180,17 @@ for _, classGuides in pairs(LP.BIS_LISTS or {}) do
 end
 
 LP.BIS_CORRECTION_SOURCES = {}
+for _, correction in ipairs(removals) do
+    local phaseEntries = LP.BIS_LISTS[correction.class][correction.guide][correction.phase]
+    for index = #phaseEntries, 1, -1 do
+        if phaseEntries[index][1] == correction.item then
+            table.remove(phaseEntries, index)
+            LP.BIS_DATA_META.entries = LP.BIS_DATA_META.entries - 1
+        end
+    end
+    LP.BIS_CORRECTION_SOURCES[correction.class .. ":" .. correction.guide .. ":" .. correction.phase .. ":" .. correction.item] = correction.source
+end
+
 for _, correction in ipairs(corrections) do
     local phaseEntries = LP.BIS_LISTS[correction.class][correction.guide][correction.phase]
     for _, item in ipairs(correction.items) do

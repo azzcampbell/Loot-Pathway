@@ -78,7 +78,7 @@ if (-not (Test-Path -LiteralPath $correctionPath)) {
 } else {
     $correctionRaw = Get-Content -LiteralPath $correctionPath -Raw
     $correctionItems = [regex]::Matches($correctionRaw, '(?m)^\s+\{(\d+),"([^"]+)","([^"]+)","([^"]*)","([^"]*)","([^"]*)","([^"]*)","([ABH])"\},$')
-    if ($correctionItems.Count -ne 29) { Add-ValidationError "Expected 29 reviewed Wowhead Phase 2 additions, found $($correctionItems.Count)." }
+    if ($correctionItems.Count -ne 48) { Add-ValidationError "Expected 48 reviewed Wowhead additions, found $($correctionItems.Count)." }
     if ($correctionRaw -notmatch 'source="Wowhead TBC Anniversary"') { Add-ValidationError "Wowhead correction provenance metadata is missing." }
     foreach ($item in $correctionItems) {
         if ($item.Groups[2].Value -notin $validSlots) { Add-ValidationError "Correction item $($item.Groups[1].Value) uses unknown slot '$($item.Groups[2].Value)'." }
@@ -92,6 +92,8 @@ if (-not (Test-Path -LiteralPath $correctionPath)) {
             Add-ValidationError "Slot correction for item $($slotCorrection.Groups[4].Value) uses an unknown slot."
         }
     }
+    $removals = [regex]::Matches($correctionRaw, '\{class="([^"]+)",guide="([^"]+)",phase=(\d+),item=(\d+),source="(https://www\.wowhead\.com/tbc/guide/[^"]+)"\}')
+    if ($removals.Count -ne 8) { Add-ValidationError "Expected 8 reviewed Wowhead removals, found $($removals.Count)." }
 }
 $uniqueItems = @($entries.Id | Sort-Object -Unique).Count
 if ($uniqueItems -ne [int]$metaUnique) {
@@ -165,6 +167,42 @@ if (-not (Test-Path -LiteralPath $phase2ManifestPath)) {
                 Add-ValidationError "$className guide '$guideName' does not have exactly one Phase 2 Wowhead source."
             } elseif ($source[0].url -notmatch '^https://www\.wowhead\.com/tbc/guide/') {
                 Add-ValidationError "$className guide '$guideName' has an invalid Wowhead source URL."
+            }
+        }
+    }
+}
+
+$preRaidManifestPath = Join-Path $projectRoot "tools\wowhead-pre-raid-guides.json"
+if (-not (Test-Path -LiteralPath $preRaidManifestPath)) {
+    Add-ValidationError "The Wowhead pre-raid provenance manifest is missing."
+} else {
+    $preRaidManifest = Get-Content -LiteralPath $preRaidManifestPath -Raw | ConvertFrom-Json
+    if ($preRaidManifest.Count -ne 25) { Add-ValidationError "Expected 25 Wowhead pre-raid guide records, found $($preRaidManifest.Count)." }
+    foreach ($className in $guides.Keys) {
+        foreach ($guideName in $guides[$className].Keys) {
+            $source = @($preRaidManifest | Where-Object { $_.class -eq $className -and $_.guide -eq $guideName -and $_.phase -eq 0 })
+            if ($source.Count -ne 1) {
+                Add-ValidationError "$className guide '$guideName' does not have exactly one pre-raid Wowhead source."
+            } elseif ($source[0].url -notmatch '^https://www\.wowhead\.com/tbc/guide/') {
+                Add-ValidationError "$className guide '$guideName' has an invalid pre-raid Wowhead source URL."
+            }
+        }
+    }
+}
+
+$phase1ManifestPath = Join-Path $projectRoot "tools\wowhead-phase1-guides.json"
+if (-not (Test-Path -LiteralPath $phase1ManifestPath)) {
+    Add-ValidationError "The Wowhead Phase 1 provenance manifest is missing."
+} else {
+    $phase1Manifest = Get-Content -LiteralPath $phase1ManifestPath -Raw | ConvertFrom-Json
+    if ($phase1Manifest.Count -ne 25) { Add-ValidationError "Expected 25 Wowhead Phase 1 guide records, found $($phase1Manifest.Count)." }
+    foreach ($className in $guides.Keys) {
+        foreach ($guideName in $guides[$className].Keys) {
+            $source = @($phase1Manifest | Where-Object { $_.class -eq $className -and $_.guide -eq $guideName -and $_.phase -eq 1 })
+            if ($source.Count -ne 1) {
+                Add-ValidationError "$className guide '$guideName' does not have exactly one Phase 1 Wowhead source."
+            } elseif ($source[0].url -notmatch '^https://www\.wowhead\.com/tbc/guide/') {
+                Add-ValidationError "$className guide '$guideName' has an invalid Phase 1 Wowhead source URL."
             }
         }
     }

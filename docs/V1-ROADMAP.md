@@ -17,11 +17,19 @@ This document records the evidence required before Loot Pathway can be called v1
 - [x] A repeatable item-ID audit exists for all 25 official Wowhead Phase 2 guides.
 - [x] Review the Phase 2 differences: add 29 current Wowhead items, retain 22 entries explicitly mentioned in guide text and correct nine guide-slot errors.
 - [x] Record Phase 2 additions, ranks, acquisition details and item-level source URLs in the separate correction layer.
-- [ ] Add and audit the official Wowhead Pre-Raid guide manifest.
-- [ ] Add and audit the official Wowhead Phase 1 guide manifest.
-- [ ] Make unresolved provenance differences fail the release-candidate gate.
+- [x] Add and audit the official Wowhead Pre-Raid guide manifest.
+- [x] Add and audit the official Wowhead Phase 1 guide manifest.
+- [x] Make unresolved provenance differences fail the release-candidate gate.
 
-The strict Phase 2 audit covers all 25 guides and 2,412 linked Wowhead items with no missing items and no addon-only items absent from the relevant guide text. Remaining shape differences are two-handed weapons shown under Wowhead's generic weapon headings. Pre-Raid and Phase 1 remain unverified.
+Strict audits now cover all 25 guides in each tier: 2,369 linked Pre-Raid rows, 2,343 Phase 1 rows and 2,412 Phase 2 rows. Each tier has no missing items and no addon-only items absent from the relevant guide text. Remaining slot-shape reports are predominantly two-handed or ranged weapons shown beneath Wowhead's generic weapon headings.
+
+## Automated behaviour
+
+- [x] Flexible one-hand items work in both main-hand and off-hand routes.
+- [x] Two-handed model previews suppress and clear incompatible off-hand previews.
+- [x] Owned recommendations remain visible, sort below unowned items and can be unticked.
+- [x] Source filtering and faction eligibility have executable regression coverage.
+- [x] GitHub validation and release workflows require the Lua 5.1 engine behaviour suite.
 
 ## Behaviour acceptance
 

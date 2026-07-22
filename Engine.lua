@@ -11,6 +11,13 @@ local SLOT_MAP = {
 }
 LP.BIS_SLOT_MAP = SLOT_MAP
 
+function LP:EntryFitsSlot(entrySlot, slotKey)
+    if entrySlot == "Main Hand~Off Hand" then
+        return slotKey == "MAINHAND" or slotKey == "OFFHAND"
+    end
+    return SLOT_MAP[entrySlot] == slotKey
+end
+
 local RAID_ZONES = {
     "Karazhan", "Gruul's Lair", "Magtheridon's Lair", "Serpentshrine Cavern",
     "The Eye", "Tempest Keep", "Hyjal", "Black Temple", "Zul'Aman", "Sunwell",
@@ -169,7 +176,7 @@ function LP:GetListPosition(slotKey, guide)
     local bestPhase, bestRank, bestIsBIS = -1, nil, false
     for phase = 0, (self.BIS_DATA_META.currentPhase or 2) do
         for _, entry in ipairs(guide[phase] or {}) do
-            if SLOT_MAP[entry[2]] == slotKey and equipped[entry[1]] then
+            if self:EntryFitsSlot(entry[2], slotKey) and equipped[entry[1]] then
                 local rank = self:GetEffectiveRank(phase, entry[1], entry[3])
                 local isBIS = string.find(rank, "BIS", 1, true) ~= nil
                 if (isBIS and (not bestIsBIS or phase > bestPhase)) or (not bestIsBIS and phase > bestPhase) then
@@ -188,7 +195,7 @@ function LP:GetInventoryListPosition(inventory, slotKey, guide)
     local bestPhase, bestRank, bestIsBIS = -1, nil, false
     for phase = 0, (self.BIS_DATA_META.currentPhase or 2) do
         for _, entry in ipairs(guide[phase] or {}) do
-            if entry[1] == itemID and SLOT_MAP[entry[2]] == slotKey then
+            if entry[1] == itemID and self:EntryFitsSlot(entry[2], slotKey) then
                 local rank = self:GetEffectiveRank(phase, entry[1], entry[3])
                 local isBIS = string.find(rank, "BIS", 1, true) ~= nil
                 if (isBIS and (not bestIsBIS or phase > bestPhase)) or (not bestIsBIS and phase > bestPhase) then
@@ -212,21 +219,21 @@ function LP:GetItemBISPhase(itemID, slotKey)
     for phase = 0, (self.BIS_DATA_META.currentPhase or 2) do
         for _, entry in ipairs(guide and guide[phase] or {}) do
             local rank = self:GetEffectiveRank(phase, entry[1], entry[3])
-            if entry[1] == itemID and SLOT_MAP[entry[2]] == slotKey and string.find(rank, "BIS", 1, true) then bestPhase = phase end
+            if entry[1] == itemID and self:EntryFitsSlot(entry[2], slotKey) and string.find(rank, "BIS", 1, true) then bestPhase = phase end
         end
     end
     return bestPhase
 end
 
 function LP:GetBisItem(entry, phase, slot, equippedLevel)
-    local itemID, _, rank, fallbackName, sourceType, source, location = unpack(entry)
+    local itemID, bisSlot, rank, fallbackName, sourceType, source, location = unpack(entry)
     rank = self:GetEffectiveRank(phase, itemID, rank)
     local name, link, quality, level, _, _, _, _, _, icon = GetItemInfo(itemID)
     local tier = self:ClassifySource(sourceType, source, location)
     return {
         id = itemID, name = name or fallbackName, link = link, quality = quality or 3,
         level = level or 0, icon = icon or "Interface\\Icons\\INV_Misc_QuestionMark",
-        slot = slot.key, slotLabel = slot.label,
+        slot = slot.key, slotLabel = slot.label, bisSlot = bisSlot,
         slotOrder = type(slot.inventory) == "table" and slot.inventory[1] or slot.inventory,
         tier = tier, sourceKind = self.TIERS[tier].short,
         sourceType = sourceType or "Other", boss = source or "", place = location or "",
@@ -255,7 +262,7 @@ function LP:GetPhaseSlotItems(slotKey, phase, applySourceFilter)
     local playerFaction = UnitFactionGroup and UnitFactionGroup("player") or nil
     local sourceFilter = self.db.selectedSource or "ALL"
     for listOrder, entry in ipairs(guide[phase] or {}) do
-        if SLOT_MAP[entry[2]] == slotKey and IsFactionMatch(entry[8], playerFaction) then
+        if self:EntryFitsSlot(entry[2], slotKey) and IsFactionMatch(entry[8], playerFaction) then
             local item = self:GetBisItem(entry, phase, slot, equippedLevel)
             item.listOrder = listOrder
             if not applySourceFilter or sourceFilter == "ALL" or item.tier == sourceFilter then
@@ -284,6 +291,48 @@ function LP:GetPhasePrimaryTargets(slotKey, phase)
     end
     if #primary == 0 then primary = fallback end
     return primary
+end
+
+function LP:GetModelPreviewPlan(phase, previewItem)
+    local plan = {items={}, clearMainHand=false, clearOffHand=false}
+    local phaseUsesTwoHand = false
+    phase = tonumber(phase) or -1
+
+    if phase >= 0 then
+        for _, slot in ipairs(self.SLOTS or {}) do
+            if slot.key ~= "OFFHAND" or not phaseUsesTwoHand then
+                local targets = self:GetPhasePrimaryTargets(slot.key, phase)
+                local inventories = type(slot.inventory) == "table" and slot.inventory or {slot.inventory}
+                for ordinal = 1, #inventories do
+                    local target = targets[ordinal]
+                    if target then
+                        target.previewInventory = inventories[ordinal]
+                        table.insert(plan.items, target)
+                        if slot.key == "MAINHAND" and target.bisSlot == "Two Hand" then
+                            phaseUsesTwoHand = true
+                            plan.clearOffHand = true
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    if previewItem then
+        for index = #plan.items, 1, -1 do
+            local current = plan.items[index]
+            if current.slot == previewItem.slot or
+               (previewItem.slot == "MAINHAND" and previewItem.bisSlot == "Two Hand" and current.slot == "OFFHAND") or
+               (previewItem.slot == "OFFHAND" and current.slot == "MAINHAND" and current.bisSlot == "Two Hand") then
+                table.remove(plan.items, index)
+            end
+        end
+        if previewItem.slot == "MAINHAND" and previewItem.bisSlot == "Two Hand" then plan.clearOffHand = true end
+        if previewItem.slot == "OFFHAND" and phaseUsesTwoHand then plan.clearMainHand = true end
+        table.insert(plan.items, previewItem)
+    end
+
+    return plan
 end
 
 function LP:IsTargetMet(target, phase, inventory)
@@ -327,7 +376,7 @@ function LP:GetRecommendations()
                 local onlyBIS = samePhase
                 if includePhase then
                     for listOrder, entry in ipairs(guide[phase] or {}) do
-                        if SLOT_MAP[entry[2]] == slot.key and not equippedIDs[entry[1]] and IsFactionMatch(entry[8], playerFaction) then
+                        if self:EntryFitsSlot(entry[2], slot.key) and not equippedIDs[entry[1]] and IsFactionMatch(entry[8], playerFaction) then
                             local effectiveRank = self:GetEffectiveRank(phase, entry[1], entry[3])
                             local isBIS = string.find(effectiveRank, "BIS", 1, true) ~= nil
                             if not onlyBIS or isBIS then

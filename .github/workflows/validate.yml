@@ -24,3 +24,7 @@ jobs:
       - name: Validate data and runtime contracts
         shell: pwsh
         run: ./tests/Test-All.ps1
+
+      - name: Require engine behaviour tests
+        shell: pwsh
+        run: ./tests/Test-LuaEngine.ps1 -RequireLua

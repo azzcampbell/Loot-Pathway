@@ -45,6 +45,9 @@ function LP:RunSelfTests()
     check(self:ClassifySource("Drop", "Pathaleon", "The Mechanar") == "NORMAL", "normal dungeon source classification failed")
     check(self:GetDifficultySuffix("Drop", "Quagmirran", "The Slave Pens (H)") == "(H)", "heroic difficulty suffix failed")
     check(self:GetDifficultySuffix("Drop", "Pathaleon", "The Mechanar") == "(N) (H)", "normal/heroic difficulty suffix failed")
+    check(self:EntryFitsSlot("Main Hand~Off Hand", "MAINHAND"), "flexible weapon did not match main hand")
+    check(self:EntryFitsSlot("Main Hand~Off Hand", "OFFHAND"), "flexible weapon did not match off hand")
+    check(not self:EntryFitsSlot("Main Hand", "OFFHAND"), "main-hand-only weapon incorrectly matched off hand")
 
     local testItem = 2147483647
     local previous = self.characterDB.completed[tostring(testItem)]

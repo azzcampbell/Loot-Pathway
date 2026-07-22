@@ -3,6 +3,7 @@ param(
     [string]$Guide,
     [int]$Phase = 2,
     [string]$Manifest = ".\tools\wowhead-phase2-guides.json",
+    [string]$OutputPath,
     [switch]$Strict
 )
 
@@ -70,6 +71,11 @@ function Read-AddonEntries([string]$ClassName, [string]$GuideName, [int]$PhaseNu
             }
         }
     }
+    foreach ($removal in [regex]::Matches($correctionRaw, '\{class="([^"]+)",guide="([^"]+)",phase=(\d+),item=(\d+),source="https://www\.wowhead\.com/tbc/guide/[^\"]+"\}')) {
+        if ($removal.Groups[1].Value -eq $ClassName -and $removal.Groups[2].Value -eq $GuideName -and [int]$removal.Groups[3].Value -eq $PhaseNumber) {
+            [void]$result.Remove([int]$removal.Groups[4].Value)
+        }
+    }
     return $result
 }
 
@@ -78,7 +84,7 @@ foreach ($guideRecord in $guides) {
     $response = Invoke-WebRequest -UseBasicParsing -Uri $guideRecord.url -TimeoutSec 45
     $html = $response.Content
     $title = ConvertFrom-HtmlText ([regex]::Match($html, '<title>(.*?)</title>', 'IgnoreCase,Singleline').Groups[1].Value)
-    if ($title -notmatch 'TBC Classic') { throw "$($guideRecord.class)/$($guideRecord.guide) resolved to a non-TBC guide: $title" }
+    if ($title -notmatch '(TBC|Burning Crusade) Classic') { throw "$($guideRecord.class)/$($guideRecord.guide) resolved to a non-TBC guide: $title" }
 
     $wowheadItems = @{}
     $sections = [regex]::Matches($html, '<h3[^>]*>(.*?)</h3>(.*?)(?=<h3[^>]*>|<h2[^>]*>|$)', 'IgnoreCase,Singleline')
@@ -92,10 +98,15 @@ foreach ($guideRecord in $guides) {
             $itemMatch = [regex]::Match($cells[1].Groups[1].Value, '/tbc/item=(\d+)/[^"'']+[^>]*>(.*?)</a>', 'IgnoreCase,Singleline')
             if (-not $itemMatch.Success) { continue }
             $itemId = [int]$itemMatch.Groups[1].Value
+            $rank = ConvertFrom-HtmlText $cells[0].Groups[1].Value
+            $source = if ($cells.Count -ge 3) { ConvertFrom-HtmlText $cells[2].Groups[1].Value } else { "" }
+            # Some guides nest their gem table beneath the final gear h3. Those
+            # coloured gem rows are recommendations, but not equippable gear slots.
+            if (-not $source -and $rank -match '^(Meta|Red|Blue|Yellow|Orange|Purple|Green)$') { continue }
             $wowheadItems[$itemId] = [pscustomobject]@{
-                id=$itemId; slot=$slot; rank=(ConvertFrom-HtmlText $cells[0].Groups[1].Value)
+                id=$itemId; slot=$slot; rank=$rank
                 name=(ConvertFrom-HtmlText $itemMatch.Groups[2].Value); heading=$heading
-                source=if ($cells.Count -ge 3) { ConvertFrom-HtmlText $cells[2].Groups[1].Value } else { "" }
+                source=$source
             }
         }
     }
@@ -128,4 +139,13 @@ if ($Strict) {
     }
 }
 
-$reports | ConvertTo-Json -Depth 6
+$json = $reports | ConvertTo-Json -Depth 6
+if ($OutputPath) {
+    $resolvedOutputPath = if ([System.IO.Path]::IsPathRooted($OutputPath)) { $OutputPath } else { Join-Path $projectRoot $OutputPath }
+    $outputDirectory = Split-Path -Parent $resolvedOutputPath
+    if ($outputDirectory -and -not (Test-Path -LiteralPath $outputDirectory)) {
+        New-Item -ItemType Directory -Path $outputDirectory | Out-Null
+    }
+    Set-Content -LiteralPath $resolvedOutputPath -Value $json -Encoding UTF8
+}
+$json
