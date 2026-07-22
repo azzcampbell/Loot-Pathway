@@ -139,6 +139,12 @@ foreach ($guideRecord in $guides) {
     foreach ($item in $slotDifferences) {
         $item | Add-Member -NotePropertyName addonSlot -NotePropertyValue $addonItems[$item.id].slot
     }
+    $rankDifferences = @($wowheadItems.Values | Where-Object {
+        $addonItems.ContainsKey($_.id) -and $addonItems[$_.id].rank -ne $_.rank
+    } | Sort-Object slot,order)
+    foreach ($item in $rankDifferences) {
+        $item | Add-Member -NotePropertyName addonRank -NotePropertyValue $addonItems[$item.id].rank
+    }
     $orderDifferences = @()
     foreach ($slot in @($wowheadItems.Values.slot | Sort-Object -Unique)) {
         $wowheadSequence = @($wowheadItems.Values | Where-Object {
@@ -172,7 +178,8 @@ foreach ($guideRecord in $guides) {
     $reports += [pscustomobject]@{
         class=$guideRecord.class; guide=$guideRecord.guide; phase=$guideRecord.phase; title=$title; url=$guideRecord.url
         wowheadItems=$wowheadItems.Count; addonItems=$addonItems.Count; missingFromAddon=$missing
-        addonOnly=$extra; slotDifferences=$slotDifferences; orderDifferences=$orderDifferences
+        addonOnly=$extra; slotDifferences=$slotDifferences; rankDifferences=$rankDifferences; orderDifferences=$orderDifferences
+        wowheadRankings=@($wowheadItems.Values | Sort-Object slot,order)
         displayOrders=$displayOrders; displayOrderDifferences=$displayOrderDifferences
     }
 }
@@ -180,9 +187,10 @@ foreach ($guideRecord in $guides) {
 if ($Strict) {
     $unresolvedMissing = @($reports | ForEach-Object { @($_.missingFromAddon) })
     $unmentionedAddonOnly = @($reports | ForEach-Object { @($_.addonOnly) | Where-Object { -not $_.mentionedInGuide } })
+    $rankDifferences = @($reports | ForEach-Object { @($_.rankDifferences) })
     $displayOrderDifferences = @($reports | ForEach-Object { @($_.displayOrderDifferences) })
-    if ($unresolvedMissing.Count -gt 0 -or $unmentionedAddonOnly.Count -gt 0 -or $displayOrderDifferences.Count -gt 0) {
-        throw "Wowhead audit failed: $($unresolvedMissing.Count) missing items, $($unmentionedAddonOnly.Count) unmentioned addon-only items and $($displayOrderDifferences.Count) display-order differences."
+    if ($unresolvedMissing.Count -gt 0 -or $unmentionedAddonOnly.Count -gt 0 -or $rankDifferences.Count -gt 0 -or $displayOrderDifferences.Count -gt 0) {
+        throw "Wowhead audit failed: $($unresolvedMissing.Count) missing items, $($unmentionedAddonOnly.Count) unmentioned addon-only items, $($rankDifferences.Count) rank differences and $($displayOrderDifferences.Count) display-order differences."
     }
 }
 

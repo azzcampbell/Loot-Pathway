@@ -31,7 +31,12 @@ finally {
     Pop-Location
 }
 
-$packagerFiles = @($trackedFiles | Where-Object {
+$approvedUntrackedFiles = @($expectedFiles | Where-Object {
+    $_ -notin $trackedFiles -and (Test-Path -LiteralPath (Join-Path $projectRoot ($_ -replace '/', [System.IO.Path]::DirectorySeparatorChar)))
+})
+$repositoryFiles = @($trackedFiles) + @($approvedUntrackedFiles)
+
+$packagerFiles = @($repositoryFiles | Where-Object {
     $path = $_ -replace '\\', '/'
     if ($path -match '(^|/)\.[^/]+') { return $false }
     foreach ($ignored in $ignoreEntries) {

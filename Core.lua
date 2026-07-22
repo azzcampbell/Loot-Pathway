@@ -166,7 +166,11 @@ events:SetScript("OnEvent", function(_, event, arg1)
             LootPathwayDB.scale = math.max(tonumber(LootPathwayDB.scale) or 1, 1.08)
             LootPathwayDB.uiScaleRevision = 1
         end
-        if LootPathwayDB.selectedSource == "OTHER" then LootPathwayDB.selectedSource = "ALL" end
+        if LootPathwayDB.selectedSource == "NORMAL" or LootPathwayDB.selectedSource == "HEROIC" then
+            LootPathwayDB.selectedSource = "DUNGEON"
+        elseif LootPathwayDB.selectedSource == "OTHER" then
+            LootPathwayDB.selectedSource = "ALL"
+        end
         LP.db = LootPathwayDB
     elseif event == "PLAYER_LOGIN" then
         LP:ActivateCharacterProfile()

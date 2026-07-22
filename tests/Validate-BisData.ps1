@@ -24,7 +24,7 @@ $validSlots = @(
     "Two Hand", "Off Hand", "Ranged/Relic"
 )
 $requiredArmourSlots = @("Head", "Neck", "Shoulder", "Back", "Chest", "Wrist", "Hands", "Waist", "Legs", "Feet", "Ring", "Trinket", "Ranged/Relic")
-$validRank = '^(BIS|Alt)(/BIS)?( (Mit|Stam|Thrt))?$'
+$validRank = '^.{2,80}$'
 
 $inLists = $false
 $class = $null
@@ -63,6 +63,7 @@ foreach ($line in $lines) {
         if ($entry.Id -le 0) { Add-ValidationError "$bucketKey contains invalid item ID $($entry.Id)." }
         if ($entry.Slot -notin $validSlots) { Add-ValidationError "$bucketKey item $($entry.Id) uses unknown slot '$($entry.Slot)'." }
         if ($entry.Rank -notmatch $validRank) { Add-ValidationError "$bucketKey item $($entry.Id) uses unknown rank '$($entry.Rank)'." }
+        if ($entry.Rank -ceq 'Alt' -or $entry.Rank -ceq 'BIS') { Add-ValidationError "$bucketKey item $($entry.Id) still uses the retired generic rank '$($entry.Rank)'." }
         if ($entry.DisplayOrder -le 0) { Add-ValidationError "$bucketKey item $($entry.Id) has invalid display order $($entry.DisplayOrder)." }
         if ([string]::IsNullOrWhiteSpace($entry.Name)) { Add-ValidationError "$bucketKey item $($entry.Id) has no name." }
         if ($entry.SourceType -in @('', 'Unknown') -or $entry.Source -eq 'Unknown' -or $entry.Location -eq 'Unknown') {
@@ -73,6 +74,11 @@ foreach ($line in $lines) {
 
 if ($entries.Count -ne [int]$metaEntries) {
     Add-ValidationError "Metadata says $metaEntries entries but parsed $($entries.Count)."
+}
+if ($raw -notmatch 'rankSource\s*=\s*"Wowhead guide tables"' -or
+    $raw -notmatch 'linkedRankings\s*=\s*7124' -or
+    $raw -notmatch 'reviewedFallbackRankings\s*=\s*104') {
+    Add-ValidationError "Wowhead ranking provenance metadata is incomplete."
 }
 
 if (-not (Test-Path -LiteralPath $correctionPath)) {

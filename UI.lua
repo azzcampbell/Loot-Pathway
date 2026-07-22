@@ -12,7 +12,8 @@ local PHASES = {
     [2]={label="PHASE 2",colour={.72,.45,.92}},
 }
 local COLLAPSED_WIDTH = 520
-local DRAWER_WIDTH = 456
+local DRAWER_WIDTH = 480
+local DRAWER_CONTENT_WIDTH = 426
 
 local SLOT_TEXTURES = {
     [1]="Interface\\PaperDoll\\UI-PaperDoll-Slot-Head",[2]="Interface\\PaperDoll\\UI-PaperDoll-Slot-Neck",
@@ -99,7 +100,7 @@ end
 local function CreateAugmentBadge(parent,label)
     local badge=CreateFrame("Button",nil,parent,"BackdropTemplate"); badge:SetSize(16,20); Backdrop(badge,{.018,.023,.030,.96},C.line)
     badge.icon=badge:CreateTexture(nil,"ARTWORK"); badge.icon:SetPoint("TOPLEFT",2,-2); badge.icon:SetPoint("BOTTOMRIGHT",-2,2); badge.icon:SetTexCoord(.08,.92,.08,.92)
-    badge.letter=Text(badge,7,C.text,"CENTER",true); badge.letter:SetPoint("BOTTOMRIGHT",0,0); badge.letter:SetText(label)
+    badge.letter=Text(badge,8,C.text,"CENTER",true); badge.letter:SetPoint("BOTTOMRIGHT",0,0); badge.letter:SetText(label)
     badge:SetScript("OnEnter",function(self) self:SetBackdropBorderColor(unpack(C.gold)); LP:ShowAugmentTooltip(self) end)
     badge:SetScript("OnLeave",function(self) self:SetBackdropBorderColor(unpack(C.line)); GameTooltip:Hide() end)
     return badge
@@ -164,16 +165,16 @@ function LP:CreateOptionsUI()
     local top=frame:CreateTexture(nil,"ARTWORK"); top:SetColorTexture(unpack(C.gold)); top:SetPoint("TOPLEFT"); top:SetPoint("TOPRIGHT"); top:SetHeight(3)
     local title=Text(frame,16,C.text); title:SetPoint("TOPLEFT",18,-17); title:SetText("LOOT PATHWAY OPTIONS")
     local close=CloseButton(frame,26); close:SetPoint("TOPRIGHT",-13,-13); close:SetScript("OnClick",function() frame:Hide() end)
-    local description=Text(frame,9,C.muted); description:SetPoint("TOPLEFT",18,-48); description:SetWidth(300); description:SetText("Choose whether Loot Pathway keeps a button around the minimap.")
+    local description=Text(frame,10,C.muted); description:SetPoint("TOPLEFT",18,-48); description:SetWidth(300); description:SetText("Choose whether Loot Pathway keeps a button around the minimap.")
     local check=CreateFrame("Button",nil,frame,"BackdropTemplate"); check:SetSize(26,26); check:SetPoint("TOPLEFT",18,-80); Backdrop(check,{.03,.04,.05,1},C.gold)
     self.optionsTick=check:CreateTexture(nil,"OVERLAY"); self.optionsTick:SetTexture("Interface\\Buttons\\UI-CheckBox-Check"); self.optionsTick:SetVertexColor(unpack(C.green)); self.optionsTick:SetAllPoints()
     local label=Text(frame,11,C.text); label:SetPoint("LEFT",check,"RIGHT",10,0); label:SetText("Show the minimap button")
     local hit=CreateFrame("Button",nil,frame); hit:SetPoint("TOPLEFT",check); hit:SetSize(260,28); hit:SetFrameLevel(check:GetFrameLevel()+2)
     hit:SetScript("OnClick",function() LP.db.minimapHidden=not LP.db.minimapHidden; LP:PositionMinimapButton(); LP:UpdateOptions() end)
     hit:SetScript("OnEnter",function() label:SetTextColor(unpack(C.gold)) end); hit:SetScript("OnLeave",function() label:SetTextColor(unpack(C.text)) end)
-    self.optionsStatus=Text(frame,9,C.muted); self.optionsStatus:SetPoint("TOPLEFT",18,-112)
+    self.optionsStatus=Text(frame,10,C.muted); self.optionsStatus:SetPoint("TOPLEFT",18,-112)
     local reset=Button(frame,"RESET MINIMAP POSITION",156,24); reset:SetPoint("TOPLEFT",18,-132); reset:SetScript("OnClick",function() LP.db.minimapAngle=0; LP:PositionMinimapButton(); LP:Print("Minimap button reset to 3 o'clock.") end)
-    local hint=Text(frame,8,C.muted); hint:SetPoint("BOTTOMLEFT",18,9); hint:SetText("Ctrl-right-click the minimap button to hide it quickly.")
+    local hint=Text(frame,9,C.muted); hint:SetPoint("BOTTOMLEFT",18,9); hint:SetText("Ctrl-right-click the minimap button to hide it quickly.")
     self:UpdateOptions(); frame:Hide()
 end
 
@@ -187,10 +188,22 @@ function LP:SetDrawerOpen(open)
     if not self.frame then return end
     if self.drawerOpen and self.pathPane then
         self.pathPane:ClearAllPoints()
-        local frameRight=self.frame:GetRight()
+        local frameLeft,frameRight=self.frame:GetLeft(),self.frame:GetRight()
+        local availableLeft=UIParent:GetLeft() or 0
         local availableRight=UIParent:GetRight() or GetScreenWidth()
-        if frameRight and frameRight+DRAWER_WIDTH<=availableRight then self.pathPane:SetPoint("TOPLEFT",self.frame,"TOPRIGHT",-2,-68)
-        else self.pathPane:SetPoint("TOPRIGHT",self.frame,"TOPLEFT",2,-68) end
+        local uiScale=UIParent:GetEffectiveScale() or 1
+        local frameScale=self.frame:GetEffectiveScale() or uiScale
+        local drawerScreenWidth=DRAWER_WIDTH*(frameScale/uiScale)
+        if frameRight and frameRight+drawerScreenWidth<=availableRight then
+            self.pathPane:SetPoint("TOPLEFT",self.frame,"TOPRIGHT",-2,-68)
+            self.pathPane:SetFrameLevel(self.frame:GetFrameLevel()+1)
+        elseif frameLeft and frameLeft-drawerScreenWidth>=availableLeft then
+            self.pathPane:SetPoint("TOPRIGHT",self.frame,"TOPLEFT",2,-68)
+            self.pathPane:SetFrameLevel(self.frame:GetFrameLevel()+1)
+        else
+            self.pathPane:SetPoint("CENTER",UIParent,"CENTER",0,0)
+            self.pathPane:SetFrameLevel(self.frame:GetFrameLevel()+20)
+        end
     end
     if self.pathPane then self.pathPane:SetShown(self.drawerOpen) end
 end
@@ -222,8 +235,8 @@ function LP:ToggleGuideMenu()
         end
         option.guideName=guideName
         local label=guideName
-        if guideName==automatic then label=label.." - Current"
-        elseif guideName==selected then label=label.." - Selected" end
+        if guideName==automatic then label=label.." (Auto)"
+        elseif guideName==selected then label=label.." (Selected)" end
         option.label:SetText(label)
         local isSelected=guideName==selected
         option.isSelected=isSelected
@@ -245,13 +258,15 @@ function LP:CreatePhaseButton(parent,phase,label,x,width)
     button.rule=button:CreateTexture(nil,"OVERLAY"); button.rule:SetPoint("BOTTOMLEFT",1,1); button.rule:SetPoint("BOTTOMRIGHT",-1,1); button.rule:SetHeight(2)
     button:SetScript("OnClick",function(self)
         LP.db.displayPhase=self.phase
+        LP.db.selectedSource="ALL"
+        if self.phase>=0 then LP.db.collapsedPhases[self.phase]=false end
         LP.previewItem=nil
         LP:RefreshModel()
         LP:Refresh()
     end)
     button:SetScript("OnEnter",function(self)
         self:SetBackdropBorderColor(1,1,1,1); GameTooltip:SetOwner(self,"ANCHOR_TOP")
-        GameTooltip:SetText(self.phase<0 and "Show currently equipped items" or "Preview this phase's BIS-list targets")
+        GameTooltip:SetText(self.phase<0 and "Show your equipped gear" or "Preview this phase's guide items")
         GameTooltip:Show()
     end)
     button:SetScript("OnLeave",function() GameTooltip:Hide(); LP:UpdatePhaseButtons() end)
@@ -265,7 +280,7 @@ function LP:UpdatePhaseButtons()
         Backdrop(button,selected and {colour[1]*.30,colour[2]*.30,colour[3]*.30,1} or C.raised,colour)
         button.label:SetText(button.baseLabel); button.label:SetTextColor(unpack(selected and C.text or colour)); button.rule:SetColorTexture(unpack(colour)); button.rule:SetShown(selected)
     end
-    if self.metLegend then self.metLegend:SetShown(current>=0) end
+    if self.metLegend then self.metLegend:Show() end
 end
 
 function LP:ShowAugmentTooltip(badge)
@@ -318,10 +333,10 @@ function LP:CreateGearButton(parent,inventory,slotKey,anchor,x,y,ordinal)
         if self.displayItem and self.displayItem.link then GameTooltip:SetHyperlink(self.displayItem.link)
         elseif self.displayItem then GameTooltip:SetText(self.displayItem.name)
         else local link=GetInventoryItemLink("player",self.inventory); if link then GameTooltip:SetHyperlink(link) else GameTooltip:SetText(LP:GetSlot(self.slotKey).label) end end
-        if self.targetMet then GameTooltip:AddLine(self.metReason or "Same or better equipped",C.green[1],C.green[2],C.green[3]) end
-        if self.priorBISPhase then local label=self.priorBISPhase==0 and "Pre-Raid" or ("Phase "..self.priorBISPhase); GameTooltip:AddLine(label.." BIS - not current Phase 2 BIS",C.gold[1],C.gold[2],C.gold[3]) end
-        if self.gemBadge:IsShown() or self.enchantBadge:IsShown() then GameTooltip:AddLine("Recommended gems and enchant shown beside this item",C.gold[1],C.gold[2],C.gold[3]) end
-        GameTooltip:AddLine("Click for replacement items",C.gold[1],C.gold[2],C.gold[3]); GameTooltip:Show()
+        if self.targetMet then GameTooltip:AddLine(self.metReason or "This guide item is equipped.",C.green[1],C.green[2],C.green[3]) end
+        if self.priorBISPhase then local label=self.priorBISPhase==0 and "Pre-Raid" or ("Phase "..self.priorBISPhase); GameTooltip:AddLine("Best-ranked in "..label.."; not a current Phase 2 target.",C.gold[1],C.gold[2],C.gold[3]) end
+        if self.gemBadge:IsShown() or self.enchantBadge:IsShown() then GameTooltip:AddLine("Recommended gems and enchant for this guide preview.",C.gold[1],C.gold[2],C.gold[3]) end
+        GameTooltip:AddLine("Click to see this slot's guide choices.",C.gold[1],C.gold[2],C.gold[3]); GameTooltip:Show()
     end)
     button:SetScript("OnLeave",function(self) GameTooltip:Hide(); LP:UpdateGearButton(self) end)
     table.insert(self.gearButtons,button)
@@ -339,14 +354,14 @@ function LP:UpdateGearButton(button)
         texture=GetInventoryItemTexture("player",button.inventory); local link=GetInventoryItemLink("player",button.inventory)
         level=link and select(4,GetItemInfo(link)) or 0; quality=link and select(3,GetItemInfo(link)); itemID=(GetInventoryItemID and GetInventoryItemID("player",button.inventory)) or ItemIDFromLink(link)
         local bisPhase=self:GetItemBISPhase(itemID,button.slotKey)
-        if bisPhase==(self.BIS_DATA_META.currentPhase or 2) then targetMet=true; button.metReason="Current Phase 2 BIS equipped"
+        if bisPhase==(self.BIS_DATA_META.currentPhase or 2) then targetMet=true; button.metReason="Current Phase 2 guide target equipped."
         elseif bisPhase then priorBISPhase=bisPhase end
     end
     button.displayItem,button.targetMet,button.priorBISPhase=displayItem,targetMet,priorBISPhase; if not targetMet then button.metReason=nil end
     button.icon:SetTexture(texture or SLOT_TEXTURES[button.inventory] or "Interface\\Icons\\INV_Misc_QuestionMark"); button.icon:SetDesaturated((not texture) or targetMet)
     button.icon:SetVertexColor(targetMet and .46 or 1,targetMet and .46 or 1,targetMet and .46 or 1)
     button.shade:SetShown(targetMet); button.tickBack:SetShown(targetMet); button.tick:SetShown(targetMet); button.level:SetText(level and level>0 and level or "")
-    button.rank:SetText(targetMet and "MET" or (priorBISPhase and (priorBISPhase==0 and "PR BIS" or ("P"..priorBISPhase.." BIS")) or (phase>=0 and displayItem and displayItem.listRank or ""))); button.rank:SetTextColor(unpack(targetMet and C.green or C.gold))
+    button.rank:SetText(targetMet and "MET" or (priorBISPhase and (priorBISPhase==0 and "PR BEST" or ("P"..priorBISPhase.." BEST")) or (phase>=0 and displayItem and self:GetRankDisplayLabel(displayItem.listRank) or ""))); button.rank:SetTextColor(unpack(targetMet and C.green or C.gold))
     local borderColour=quality and ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[quality]; local br,bg,bb=C.gold[1],C.gold[2],C.gold[3]
     if borderColour then br,bg,bb=borderColour.r,borderColour.g,borderColour.b end
     button.qualityFrame:SetBackdropBorderColor(br,bg,bb,1); button.qualityFrame:SetShown(priorBISPhase~=nil and not targetMet)
@@ -371,8 +386,8 @@ function LP:UpdateGearButton(button)
 end
 
 function LP:CreateSourceFilter(parent,key,label,x,width)
-    local button=CreateFrame("Button",nil,parent,"BackdropTemplate"); button:SetSize(width,27); button:SetPoint("TOPLEFT",x,-115); button.key=key; button.baseLabel=label
-    button.label=Text(button,9,C.muted,"CENTER",true); button.label:SetPoint("CENTER")
+    local button=CreateFrame("Button",nil,parent,"BackdropTemplate"); button:SetSize(width,28); button:SetPoint("TOPLEFT",x,-119); button.key=key; button.baseLabel=label
+    button.label=Text(button,10,C.muted,"CENTER",true); button.label:SetPoint("CENTER")
     button:SetScript("OnClick",function(self) LP.db.selectedSource=self.key; LP:Refresh() end)
     button:SetScript("OnEnter",function(self) self:SetBackdropBorderColor(1,1,1,1) end); button:SetScript("OnLeave",function() LP:UpdateSourceFilters() end)
     self.sourceFilters[key]=button
@@ -443,15 +458,6 @@ function LP:RefreshModel()
             if plan.clearOffHand then pcall(self.playerModel.UndressSlot,self.playerModel,INVSLOT_OFFHAND or 17) end
         end
         SetModelFacing(self.playerModel,self.db.modelFacing or 0)
-        if self.modelPreviewLabel then
-            if self.previewItem then
-                self.modelPreviewLabel:SetText("PREVIEW: "..string.upper(self.previewItem.name or "SELECTED ITEM"))
-                self.modelPreviewLabel:Show()
-            elseif phase>=0 then
-                self.modelPreviewLabel:SetText(PHASES[phase].label.." BIS PREVIEW")
-                self.modelPreviewLabel:Show()
-            else self.modelPreviewLabel:Hide() end
-        end
     else self.playerModel:Hide(); self.modelFallback:Show(); if self.modelLoading then self.modelLoading:Hide() end end
 end
 
@@ -473,7 +479,7 @@ function LP:CreateUI()
     local title=Text(frame,20,C.text,"CENTER",true); title:SetPoint("TOP",0,-12); title:SetWidth(300); title:SetText("Loot Pathway")
     local titleRuleLeft=frame:CreateTexture(nil,"ARTWORK"); titleRuleLeft:SetColorTexture(C.gold[1],C.gold[2],C.gold[3],.72); titleRuleLeft:SetPoint("TOPRIGHT",frame,"TOP",-86,-25); titleRuleLeft:SetSize(54,2)
     local titleRuleRight=frame:CreateTexture(nil,"ARTWORK"); titleRuleRight:SetColorTexture(C.gold[1],C.gold[2],C.gold[3],.72); titleRuleRight:SetPoint("TOPLEFT",frame,"TOP",86,-25); titleRuleRight:SetSize(54,2)
-    local subtitle=Text(frame,9,C.muted,"CENTER"); subtitle:SetPoint("TOP",title,"BOTTOM",0,-2); subtitle:SetWidth(360); subtitle:SetText("See what to chase next, and where it drops.")
+    local subtitle=Text(frame,10,C.muted,"CENTER"); subtitle:SetPoint("TOP",title,"BOTTOM",0,-2); subtitle:SetWidth(360); subtitle:SetText("Click a gear slot to see its guide choices.")
     local headerDivider=frame:CreateTexture(nil,"ARTWORK"); headerDivider:SetColorTexture(unpack(C.line)); headerDivider:SetPoint("TOPLEFT",18,-59); headerDivider:SetPoint("TOPRIGHT",-18,-59); headerDivider:SetHeight(1)
     local headerAccent=frame:CreateTexture(nil,"OVERLAY"); headerAccent:SetColorTexture(unpack(C.gold)); headerAccent:SetPoint("TOP",0,-58); headerAccent:SetSize(72,2)
     local close=CloseButton(frame,28); close:SetPoint("TOPRIGHT",-16,-16); close:SetScript("OnClick",function() frame:Hide() end)
@@ -482,19 +488,25 @@ function LP:CreateUI()
     self.characterName=Text(character,14,C.text,"CENTER"); self.characterName:SetPoint("TOP",0,-12)
     self.guideButton=Button(character,"",310,20); self.guideButton:SetPoint("TOP",self.characterName,"BOTTOM",0,-2); self.characterBuild=self.guideButton.label
     self.guideButton:SetScript("OnClick",function() LP:ToggleGuideMenu() end)
+    self.guideButton:HookScript("OnEnter",function(self)
+        GameTooltip:SetOwner(self,"ANCHOR_TOP")
+        GameTooltip:SetText("Gear guide",unpack(C.gold))
+        GameTooltip:AddLine("Auto follows your talent tree.",1,1,1)
+        GameTooltip:AddLine("Choose another guide if your role differs.",unpack(C.muted))
+        GameTooltip:Show()
+    end)
+    self.guideButton:HookScript("OnLeave",function() GameTooltip:Hide() end)
     self.guideArrow=Text(self.guideButton,10,C.gold,"RIGHT",true); self.guideArrow:SetPoint("RIGHT",-8,0); self.guideArrow:SetText("v")
     self.guideMenu=CreateFrame("Frame",nil,character,"BackdropTemplate"); self.guideMenu:SetPoint("TOP",self.guideButton,"BOTTOM",0,-2); self.guideMenu:SetWidth(310); self.guideMenu:SetFrameLevel(character:GetFrameLevel()+20); Backdrop(self.guideMenu,C.panel,C.gold); self.guideMenu:Hide(); self.guideOptions={}
-    self.phaseButtons={}; self:CreatePhaseButton(character,-1,"RESET",20,76); self:CreatePhaseButton(character,0,"PRE-RAID",102,106); self:CreatePhaseButton(character,1,"PHASE 1",214,106); self:CreatePhaseButton(character,2,"PHASE 2",326,138)
+    self.phaseButtons={}; self:CreatePhaseButton(character,-1,"EQUIPPED",20,76); self:CreatePhaseButton(character,0,"PRE-RAID",102,106); self:CreatePhaseButton(character,1,"PHASE 1",214,106); self:CreatePhaseButton(character,2,"PHASE 2",326,138)
 
     local modelBackdrop=CreateFrame("Frame",nil,character,"BackdropTemplate"); modelBackdrop:SetPoint("TOPLEFT",84,-96); modelBackdrop:SetPoint("BOTTOMRIGHT",-84,88); Backdrop(modelBackdrop,{.018,.023,.030,1},C.bronze)
     local glow=modelBackdrop:CreateTexture(nil,"BACKGROUND"); glow:SetColorTexture(.04,.075,.10,.32); glow:SetAllPoints()
     self.modelFallback=modelBackdrop:CreateTexture(nil,"ARTWORK"); self.modelFallback:SetSize(150,150); self.modelFallback:SetPoint("CENTER"); SetPortraitTexture(self.modelFallback,"player"); self.modelFallback:Hide()
     self.modelHint=nil
-    self.metLegend=Text(character,8,C.green,"CENTER",true); self.metLegend:SetPoint("BOTTOM",0,4); self.metLegend:SetWidth(220); self.metLegend:SetText("MET = SAME OR BETTER EQUIPPED")
+    self.metLegend=Text(character,10,C.green,"CENTER",true); self.metLegend:SetPoint("BOTTOM",0,4); self.metLegend:SetWidth(260); self.metLegend:SetText("MET = THIS GUIDE ITEM IS EQUIPPED")
     local modelOK=pcall(function() self.playerModel=CreateFrame("DressUpModel",nil,modelBackdrop); self.playerModel:SetAllPoints(); if self.playerModel.SetCamDistanceScale then self.playerModel:SetCamDistanceScale(.9) end; self:EnableModelRotation(self.playerModel,self.modelHint) end)
     if not modelOK then if self.playerModel then self.playerModel:Hide() end; self.modelFallback:Show() end
-    local previewLabelFrame=CreateFrame("Frame",nil,modelBackdrop); previewLabelFrame:SetPoint("TOPLEFT",8,-7); previewLabelFrame:SetPoint("TOPRIGHT",-8,-7); previewLabelFrame:SetHeight(20); previewLabelFrame:SetFrameLevel(modelBackdrop:GetFrameLevel()+4)
-    self.modelPreviewLabel=Text(previewLabelFrame,9,C.gold,"CENTER",true); self.modelPreviewLabel:SetAllPoints(); self.modelPreviewLabel:Hide()
     self.modelLoading=CreateFrame("Frame",nil,modelBackdrop); self.modelLoading:SetAllPoints(); self.modelLoading:SetFrameLevel(modelBackdrop:GetFrameLevel()+10)
     self.modelLoading.shade=self.modelLoading:CreateTexture(nil,"BACKGROUND"); self.modelLoading.shade:SetColorTexture(.01,.015,.022,.98); self.modelLoading.shade:SetAllPoints()
     self.modelLoading.text=Text(self.modelLoading,14,C.gold,"CENTER",true); self.modelLoading.text:SetPoint("CENTER"); self.modelLoading.text:SetText("Loading...")
@@ -502,19 +514,19 @@ function LP:CreateUI()
     if modelOK then self:RefreshModel() else self.modelLoading:Hide() end
 
     local right=CreateFrame("Frame",nil,frame,"BackdropTemplate"); right:SetPoint("TOPLEFT",518,-68); right:SetSize(DRAWER_WIDTH,490); Backdrop(right,C.panel,C.line); self.pathPane=right
-    self.pathLabel=Text(right,10,C.gold); self.pathLabel:SetPoint("TOPLEFT",14,-18); self.pathLabel:SetText("REPLACEMENT DRAWER")
+    self.pathLabel=Text(right,10,C.gold); self.pathLabel:SetPoint("TOPLEFT",14,-18); self.pathLabel:SetText("GUIDE CHOICES")
     local drawerClose=Button(right,"<",28,28); drawerClose:SetPoint("TOPRIGHT",-12,-12); drawerClose:SetScript("OnClick",function() LP:SetDrawerOpen(false); LP:Refresh() end)
     self.pathTitle=Text(right,16,C.text); self.pathTitle:SetPoint("TOPLEFT",14,-48)
-    self.pathSummary=Text(right,10,C.muted); self.pathSummary:SetPoint("TOPLEFT",self.pathTitle,"BOTTOMLEFT",0,-5); self.pathSummary:SetWidth(412)
-    self.sourceFilters={}; self:CreateSourceFilter(right,"ALL","ALL",14,44); self:CreateSourceFilter(right,"QUEST","QUEST",64,52); self:CreateSourceFilter(right,"NORMAL","DUNGEON",122,66); self:CreateSourceFilter(right,"HEROIC","HEROIC",194,60); self:CreateSourceFilter(right,"RAID","RAID",260,50); self:CreateSourceFilter(right,"CRAFTABLE","CRAFTABLE",316,80)
-    local scroll=CreateFrame("ScrollFrame","LootPathwayScrollFrame",right,"UIPanelScrollFrameTemplate"); scroll:SetPoint("TOPLEFT",14,-154); scroll:SetPoint("BOTTOMRIGHT",-36,16)
-    local content=CreateFrame("Frame",nil,scroll); content:SetSize(402,1); scroll:SetScrollChild(content); self.content=content; self.rows={}; self.stageHeaders={}
+    self.pathSummary=Text(right,10,C.muted); self.pathSummary:SetPoint("TOPLEFT",self.pathTitle,"BOTTOMLEFT",0,-6); self.pathSummary:SetWidth(440)
+    self.sourceFilters={}; self:CreateSourceFilter(right,"ALL","ALL",14,44); self:CreateSourceFilter(right,"QUEST","QUEST",66,56); self:CreateSourceFilter(right,"DUNGEON","DUNGEON / HEROIC",130,132); self:CreateSourceFilter(right,"RAID","RAID",270,54); self:CreateSourceFilter(right,"CRAFTABLE","CRAFTABLE",332,94)
+    local scroll=CreateFrame("ScrollFrame","LootPathwayScrollFrame",right,"UIPanelScrollFrameTemplate"); scroll:SetPoint("TOPLEFT",14,-160); scroll:SetPoint("BOTTOMRIGHT",-36,16)
+    local content=CreateFrame("Frame",nil,scroll); content:SetSize(DRAWER_CONTENT_WIDTH,1); scroll:SetScrollChild(content); self.content=content; self.rows={}; self.stageHeaders={}
     self:CreateBrandFooter(frame); self:CreateMinimapButton(); self:CreateOptionsUI(); self:SetDrawerOpen(false)
 end
 
 function LP:AcquireStageHeader(phase)
     if self.stageHeaders[phase] then return self.stageHeaders[phase] end
-    local meta=PHASES[phase]; local header=CreateFrame("Button",nil,self.content,"BackdropTemplate"); header:SetSize(402,29); header.phase=phase; Backdrop(header,{meta.colour[1]*.12,meta.colour[2]*.12,meta.colour[3]*.12,1},meta.colour)
+    local meta=PHASES[phase]; local header=CreateFrame("Button",nil,self.content,"BackdropTemplate"); header:SetSize(DRAWER_CONTENT_WIDTH,30); header.phase=phase; Backdrop(header,{meta.colour[1]*.12,meta.colour[2]*.12,meta.colour[3]*.12,1},meta.colour)
     header.label=Text(header,10,meta.colour); header.label:SetPoint("LEFT",10,0); header.label:SetText(meta.label)
     header.count=Text(header,9,C.muted,"RIGHT"); header.count:SetPoint("RIGHT",-30,0)
     header.toggle=Text(header,14,meta.colour,"CENTER",true); header.toggle:SetPoint("RIGHT",-9,0)
@@ -525,37 +537,50 @@ function LP:AcquireStageHeader(phase)
 end
 
 local function CreateChip(row,width)
-    local chip=CreateFrame("Frame",nil,row,"BackdropTemplate"); chip:SetSize(width,17); Backdrop(chip,{.04,.05,.06,1},C.line); chip.label=Text(chip,8,C.muted,"CENTER",true); chip.label:SetPoint("CENTER"); return chip
+    local chip=CreateFrame("Frame",nil,row,"BackdropTemplate"); chip:SetSize(width,18); Backdrop(chip,{.04,.05,.06,1},C.line); chip.label=Text(chip,9,C.muted,"CENTER",true); chip.label:SetPoint("CENTER"); return chip
 end
 
 function LP:AcquireRow(index)
     if self.rows[index] then return self.rows[index] end
-    local row=CreateFrame("Button",nil,self.content,"BackdropTemplate"); row:SetSize(402,82); row:RegisterForClicks("LeftButtonUp"); Backdrop(row,C.raised,C.line)
-    row.rule=row:CreateTexture(nil,"ARTWORK"); row.rule:SetPoint("LEFT"); row.rule:SetSize(3,82)
+    local row=CreateFrame("Button",nil,self.content,"BackdropTemplate"); row:SetSize(DRAWER_CONTENT_WIDTH,86); row:RegisterForClicks("LeftButtonUp"); Backdrop(row,C.raised,C.line)
+    row.rule=row:CreateTexture(nil,"ARTWORK"); row.rule:SetPoint("LEFT"); row.rule:SetSize(3,86)
     row.hoverBorder={}
     local hoverEdges={
-        {"TOPLEFT",1,-1,400,2},
-        {"BOTTOMLEFT",1,1,400,2},
-        {"TOPLEFT",1,-1,2,80},
-        {"TOPRIGHT",-1,-1,2,80},
+        {"TOPLEFT",1,-1,DRAWER_CONTENT_WIDTH-2,2},
+        {"BOTTOMLEFT",1,1,DRAWER_CONTENT_WIDTH-2,2},
+        {"TOPLEFT",1,-1,2,84},
+        {"TOPRIGHT",-1,-1,2,84},
     }
     for _,edge in ipairs(hoverEdges) do
         local border=row:CreateTexture(nil,"OVERLAY"); border:SetColorTexture(unpack(C.gold)); border:SetPoint(edge[1],edge[2],edge[3]); border:SetSize(edge[4],edge[5])
         border:Hide(); table.insert(row.hoverBorder,border)
     end
-    row.icon=row:CreateTexture(nil,"ARTWORK"); row.icon:SetSize(42,42); row.icon:SetPoint("LEFT",10,0); row.icon:SetTexCoord(.08,.92,.08,.92)
-    row.number=Text(row,11,C.gold,"LEFT",true); row.number:SetPoint("TOPLEFT",60,-10); row.number:SetWidth(28)
-    row.rankChip=CreateChip(row,50); row.rankChip:SetPoint("TOPLEFT",92,-9); row.sourceChip=CreateChip(row,74); row.sourceChip:SetPoint("LEFT",row.rankChip,"RIGHT",6,0)
-    row.level=Text(row,9,C.muted,"RIGHT"); row.level:SetPoint("TOPRIGHT",-45,-11)
-    row.name=Text(row,12,C.text); row.name:SetPoint("TOPLEFT",60,-32); row.name:SetPoint("RIGHT",-45,0)
-    row.source=Text(row,9,C.muted); row.source:SetPoint("BOTTOMLEFT",60,10); row.source:SetPoint("RIGHT",-45,0)
-    row.check=CreateFrame("Button",nil,row,"BackdropTemplate"); row.check:SetSize(26,26); row.check:SetPoint("RIGHT",-9,0); Backdrop(row.check,{.03,.04,.05,1},C.line)
+    row.icon=row:CreateTexture(nil,"ARTWORK"); row.icon:SetSize(44,44); row.icon:SetPoint("LEFT",12,0); row.icon:SetTexCoord(.08,.92,.08,.92)
+    row.number=Text(row,11,C.gold,"LEFT",true); row.number:SetPoint("TOPLEFT",64,-11); row.number:SetWidth(28)
+    row.rankChip=CreateChip(row,68); row.rankChip:SetPoint("TOPLEFT",96,-10); row.sourceChip=CreateChip(row,120); row.sourceChip:SetPoint("LEFT",row.rankChip,"RIGHT",7,0)
+    row.context=Text(row,9,C.gold,"LEFT",true); row.context:SetPoint("TOPLEFT",298,-13); row.context:SetWidth(70)
+    row.level=Text(row,10,C.muted,"RIGHT"); row.level:SetPoint("TOPRIGHT",-48,-12)
+    row.name=Text(row,12,C.text); row.name:SetPoint("TOPLEFT",64,-35); row.name:SetPoint("RIGHT",-48,0)
+    row.source=Text(row,10,C.muted); row.source:SetPoint("BOTTOMLEFT",64,11); row.source:SetPoint("RIGHT",-48,0)
+    row.check=CreateFrame("Button",nil,row,"BackdropTemplate"); row.check:SetSize(26,26); row.check:SetPoint("RIGHT",-10,0); Backdrop(row.check,{.03,.04,.05,1},C.line)
     row.tick=row.check:CreateTexture(nil,"OVERLAY"); row.tick:SetTexture("Interface\\Buttons\\UI-CheckBox-Check"); row.tick:SetAllPoints()
     row.check:SetScript("OnClick",function() if row.item then LP:ToggleItemCompleted(row.item.id); LP:Refresh() end end)
+    row.check:SetScript("OnEnter",function()
+        GameTooltip:SetOwner(row.check,"ANCHOR_RIGHT")
+        if row.item and row.item.completed then
+            GameTooltip:SetText("Marked as owned",unpack(C.gold))
+            GameTooltip:AddLine("Click to remove this mark.",1,1,1)
+        else
+            GameTooltip:SetText("Mark as owned",unpack(C.gold))
+            GameTooltip:AddLine("Manual note only; this does not equip the item.",1,1,1)
+        end
+        GameTooltip:Show()
+    end)
+    row.check:SetScript("OnLeave",function() GameTooltip:Hide() end)
     row:SetScript("OnClick",function(self) if self.item then LP:ToggleItemPreview(self.item) end end)
     row:SetScript("OnEnter",function(self)
         for _,border in ipairs(self.hoverBorder) do border:Show() end
-        if self.item and self.item.link then GameTooltip:SetOwner(self,"ANCHOR_RIGHT"); GameTooltip:SetHyperlink(self.item.link); GameTooltip:AddLine("Click to preview on your character",C.gold[1],C.gold[2],C.gold[3]); GameTooltip:Show() end
+        if self.item and self.item.link then GameTooltip:SetOwner(self,"ANCHOR_RIGHT"); GameTooltip:SetHyperlink(self.item.link); GameTooltip:AddLine("Guide rank: "..tostring(self.item.listRank),1,1,1); GameTooltip:AddLine("Preview on your character.",C.gold[1],C.gold[2],C.gold[3]); GameTooltip:AddLine("Preview only; your equipped gear will not change.",unpack(C.muted)); GameTooltip:Show() end
     end)
     row:SetScript("OnLeave",function(self)
         local selected=self.item and LP.previewItem and self.item.id==LP.previewItem.id and self.item.phase==LP.previewItem.phase
@@ -566,8 +591,14 @@ end
 
 function LP:Refresh()
     if not self.frame or not self.db then return end
-    local _,classToken=UnitClass("player"); local _,spec=self:GetPlayerBuild(); local embeddedSpec=self:GetEmbeddedSpec(classToken,spec); local automatic=self.BIS_SPEC_MAP[classToken] and self.BIS_SPEC_MAP[classToken][spec]
-    self.characterName:SetText(UnitName("player") or "Your character"); self.characterBuild:SetText((embeddedSpec or spec)..(embeddedSpec==automatic and " - Current" or " - Selected"))
+    local _,classToken=UnitClass("player"); local _,spec=self:GetPlayerBuild(); local embeddedSpec,embeddedGuide=self:GetEmbeddedSpec(classToken,spec); local automatic=self.BIS_SPEC_MAP[classToken] and self.BIS_SPEC_MAP[classToken][spec]
+    self.characterName:SetText(UnitName("player") or "Your character")
+    local guideLabel
+    local resolvedGuide=embeddedSpec or spec
+    if not resolvedGuide then guideLabel="No guide selected"
+    elseif not spec or embeddedSpec==spec then guideLabel=resolvedGuide.." guide"
+    else guideLabel=spec.." · "..resolvedGuide.." guide" end
+    self.characterBuild:SetText(guideLabel..(embeddedSpec==automatic and " (Auto)" or " (Selected)"))
     local previewPhase=tonumber(self.db.displayPhase) or -1; if self.modelHint then self.modelHint:SetShown(self.playerModel~=nil) end
     self:UpdatePhaseButtons(); self:UpdateSourceFilters()
     for _,button in ipairs(self.gearButtons) do self:UpdateGearButton(button) end
@@ -578,8 +609,8 @@ function LP:Refresh()
     else
         items=self:GetRecommendations()
     end
-    self.pathTitle:SetText(selected and selected.label or "Replacement items")
-    self.pathSummary:SetText("Best-in-slot items are ranked best first. Click a source below to filter.")
+    self.pathTitle:SetText(selected and selected.label or "Guide choices")
+    self.pathSummary:SetText("Guide-ranked as Best, Strong or Option. Filter by source.")
 
     local ranked={}; for _,item in ipairs(items or {}) do table.insert(ranked,item) end
     table.sort(ranked,function(a,b)
@@ -598,23 +629,37 @@ function LP:Refresh()
         end)
         if #stageItems>0 then
             local collapsed=self.db.collapsedPhases[stage]
-            local header=self:AcquireStageHeader(stage); header:ClearAllPoints(); header:SetPoint("TOPLEFT",0,-y); header.count:SetText(#stageItems..(#stageItems==1 and " item" or " items")); header.toggle:SetText(collapsed and "+" or "-"); header:Show(); y=y+36
+            local header=self:AcquireStageHeader(stage); header:ClearAllPoints(); header:SetPoint("TOPLEFT",0,-y); header.count:SetText(#stageItems..(#stageItems==1 and " item" or " items")); header.toggle:SetText(collapsed and "+" or "-"); header:Show(); y=y+39
             if not collapsed then
                 for _,item in ipairs(stageItems) do
                     rowIndex=rowIndex+1; local row=self:AcquireRow(rowIndex); local tier=self.TIERS[item.tier]; local phaseMeta=PHASES[item.phase]; row.item=item; row:ClearAllPoints(); row:SetPoint("TOPLEFT",0,-y); row.icon:SetTexture(item.icon); row.icon:SetDesaturated(item.completed); row.rule:SetColorTexture(unpack(item.completed and C.muted or phaseMeta.colour))
-                    row.number:SetText("#"..(item.drawerRank or rowIndex)); row.rankChip.label:SetText(string.upper(item.listRank)); row.rankChip:SetBackdropBorderColor(unpack(string.find(item.listRank,"BIS",1,true) and C.gold or C.muted)); row.rankChip.label:SetTextColor(unpack(string.find(item.listRank,"BIS",1,true) and C.gold or C.muted))
+                    local rankTier=self:GetRankTier(item.listRank); local rankColour=rankTier=="BEST" and C.gold or (rankTier=="STRONG" and PHASES[0].colour or C.muted)
+                    row.number:SetText("#"..(item.drawerRank or rowIndex)); row.rankChip.label:SetText(self:GetRankDisplayLabel(item.listRank)); row.rankChip:SetBackdropBorderColor(unpack(rankColour)); row.rankChip.label:SetTextColor(unpack(rankColour)); row.context:SetText(item.rankContext or "")
                     row.sourceChip.label:SetText(item.sourceKind); row.sourceChip:SetBackdropBorderColor(unpack(tier.colour)); row.sourceChip.label:SetTextColor(unpack(tier.colour)); row.level:SetText(item.level>0 and ("i"..item.level) or "")
                     row.name:SetText(item.name); local qc=ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[item.quality]; if item.completed then row.name:SetTextColor(unpack(C.muted)) elseif qc then row.name:SetTextColor(qc.r,qc.g,qc.b) else row.name:SetTextColor(unpack(C.text)) end
-                    local place=item.place~="" and item.place or item.sourceType; local source=item.boss~="" and item.boss or item.sourceType; local difficulty=item.difficulty~="" and (" "..item.difficulty) or ""; row.source:SetText(place.." - "..source..difficulty); row.tick:SetShown(item.completed); row:SetAlpha(item.completed and .68 or 1); row:Show(); y=y+89
+                    local place=item.place~="" and item.place or item.sourceType; local source=item.boss~="" and item.boss or item.sourceType; local difficulty=item.difficulty~="" and (" "..item.difficulty) or ""; row.source:SetText(place.." - "..source..difficulty); row.tick:SetShown(item.completed); row:SetAlpha(item.completed and .68 or 1); row:Show(); y=y+96
                     local selected=self.previewItem and item.id==self.previewItem.id and item.phase==self.previewItem.phase; row:SetBackdropBorderColor(unpack(C.line)); for _,border in ipairs(row.hoverBorder) do border:SetShown(selected) end
                 end
             end
-            y=y+7
+            y=y+10
         end
     end
     if rowIndex==0 then
         if not self.empty then self.empty=Text(self.content,11,C.muted,"CENTER"); self.empty:SetPoint("TOP",0,-48); self.empty:SetWidth(350) end
-        self.empty:SetText("No replacement items match this source filter.\nChoose ALL to see the complete list."); self.empty:Show()
+        local selectedSource=self.db.selectedSource or "ALL"
+        if not embeddedGuide then
+            self.empty:SetText("No guide is available for this build.\nChoose a different guide above.")
+        elseif #(items or {})>0 then
+            self.empty:SetText("All phase sections are collapsed.\nOpen a phase to see its choices.")
+        elseif selectedSource~="ALL" then
+            local sourceLabel=self.TIERS[selectedSource] and self.TIERS[selectedSource].label or selectedSource
+            self.empty:SetText("No "..sourceLabel.." choices are listed for "..(selected and selected.label or "this slot")..".\nChoose ALL to see every source.")
+        elseif phase<0 then
+            self.empty:SetText("No remaining guide choices are listed for "..(selected and selected.label or "this slot")..".\nTry another slot or phase.")
+        else
+            self.empty:SetText("No guide choices are listed for "..(selected and selected.label or "this slot")..".\nTry another phase or guide.")
+        end
+        self.empty:Show()
     elseif self.empty then self.empty:Hide() end
     self.content:SetHeight(math.max(360,y))
 end

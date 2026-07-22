@@ -1,6 +1,7 @@
-# Loot Pathway 1.0.0
+# Loot Pathway 1.0.1
 
-- Added complete level 70 BIS routes for every class and spec, from Pre-Raid through Phase 2.
-- Added character previews, ranked alternatives, source filters, gems and enchants.
-- Added per-character progress and a simple spec picker.
-- Improved weapon, ring and trinket handling, phase previews, minimap controls and interface layout.
+- Expanded every guide with Best, Strong and Option choices.
+- Added exact Normal and Heroic dungeon labels.
+- Fixed weapon, ring, trinket and MET detection.
+- Improved the layout, wording and small-screen behaviour.
+- Added clearer guide selection and ownership controls.

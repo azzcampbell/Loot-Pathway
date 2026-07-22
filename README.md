@@ -4,7 +4,7 @@ I made Loot Pathway to answer one simple question: **what gear should I go for n
 
 > **Loot Pathway is intended for max-level (level 70) characters only. It is not a levelling addon.**
 
-Loot Pathway turns your BIS lists into a clear route through Pre-Raid, Phase 1 and Phase 2. Open it, click an equipment slot and see the relevant items for your class, talent tree and selected role. They are ranked best first and show exactly where to get them, whether that means a quest, a Normal or Heroic dungeon, a raid or a profession.
+Loot Pathway turns your BIS lists into a clear route through Pre-Raid, Phase 1 and Phase 2. Open it, click an equipment slot and see what the guide ranks as Best, plus strong alternatives and useful fallback options for your class, talent tree and selected role. Every choice shows where to get it, whether that means a quest, a dungeon, a raid or a profession.
 
 The familiar character-screen layout lets you compare your equipped gear with each phase, preview items on your character and tick off anything you already own. Checked items stay visible at the bottom of the list, so you can always undo a mistake.
 
@@ -13,9 +13,9 @@ Loot Pathway does not guess upgrades from item level or promise that every liste
 ## Features
 
 - Pre-Raid, Phase 1 and Phase 2 BIS-list routes
-- Ranked BIS and alternative items, with the best choices shown first
-- Clear sources for quests, dungeons, Heroics, raids and crafted items
-- Normal and Heroic dungeon labels
+- Wowhead-ranked Best, Strong and Option choices, with the best item shown first
+- Clear sources for quests, Dungeon / Heroic runs, raids and crafted items
+- Exact `(N)`, `(H)` and `(N) (H)` dungeon-mode labels
 - Character-sheet layout with item and phase previews
 - Recommended gems and enchants in phase previews
 - Per-character owned-item checklists
@@ -24,7 +24,7 @@ Loot Pathway does not guess upgrades from item level or promise that every liste
 - Source filters, collapsible phases and minimap controls
 - Standalone operation; no other BIS addon is needed
 
-The 25 bundled class, spec and role guides are reviewed against the corresponding current [Wowhead TBC BIS guides](https://www.wowhead.com/tbc/guides/classes/best-in-slot-guides-burning-crusade-classic). Item level is shown for reference, but it does not decide which items appear or how they are ranked. The reviewed runtime dataset contains 7,228 entries and 1,462 unique items.
+The 25 bundled class, spec and role guides are reviewed against the corresponding current [Wowhead TBC BIS guides](https://www.wowhead.com/tbc/guides/classes/best-in-slot-guides-burning-crusade-classic). Their table order and detailed rank wording are bundled with the addon, so it works without a browser or another BIS addon. Item level is shown for reference, but it does not decide which items appear or how they are ranked. The reviewed runtime dataset contains 7,188 entries and 1,450 unique items.
 
 ## Screenshots
 
@@ -52,7 +52,7 @@ The folder must directly contain `LootPathway_TBC.toc`. Restart the game or type
 
 ## Data maintenance
 
-`BisData.lua` is generated and bundled with the addon. The source manifests under `tools/` identify the exact Wowhead guide used for every supported class/spec/role and phase.
+`BisData.lua` is generated and bundled with the addon. The source manifests under `tools/` identify the exact Wowhead guide used for every supported class/spec/role and phase. `DungeonDifficultyData.lua` contains the reviewed Normal/Heroic mode map used by the standalone addon.
 
 Run `tests/Test-All.ps1` before packaging. With Lua 5.1 available, it also exercises spec resolution, guide selection, ownership ordering, source and faction filters, flexible weapon slots, model-preview conflicts, fresh profiles and legacy SavedVariables migration. `/lpw selftest` provides the final runtime check inside TBC Anniversary.
 
@@ -69,13 +69,13 @@ Copyright (c) 2026 Northern Stack Studios. All Rights Reserved. See [LICENSE](LI
 Commit the addon changes first, then run:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\Publish-Release.ps1 -Version 1.0.0
+powershell -ExecutionPolicy Bypass -File .\Publish-Release.ps1 -Version 1.0.1
 ```
 
 Before publishing, replace `CHANGELOG.md` with the complete player-facing notes for that version and show the entire file to Aaron. Only after he explicitly approves the exact wording should the command be rerun with `-ChangelogApproved`:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\Publish-Release.ps1 -Version 1.0.0 -ChangelogApproved
+powershell -ExecutionPolicy Bypass -File .\Publish-Release.ps1 -Version 1.0.1 -ChangelogApproved
 ```
 
 The script updates the single version field, builds the matching ZIP, commits the version bump, and pushes the new tag. GitHub Actions uses the approved `CHANGELOG.md` verbatim for the GitHub release and passes the same file to CurseForge packaging.

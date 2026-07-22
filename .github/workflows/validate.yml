@@ -19,7 +19,7 @@ jobs:
           luaVersion: "5.1.5"
 
       - name: Check Lua syntax
-        run: luac -p Core.lua Data.lua BisData.lua WowheadCorrections.lua Engine.lua Diagnostics.lua UI.lua
+        run: luac -p Core.lua Data.lua BisData.lua WowheadCorrections.lua DungeonDifficultyData.lua Engine.lua Diagnostics.lua UI.lua
 
       - name: Validate data and runtime contracts
         shell: pwsh

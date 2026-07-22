@@ -22,7 +22,7 @@
     #loot-pathway-preview .lp-shell {
       position: relative;
       width: 100%;
-      max-width: 960px;
+      max-width: 1000px;
       margin: 0 auto;
       background: rgba(7,10,14,.985);
       border: 1px solid var(--lp-gold);
@@ -55,11 +55,7 @@
     #loot-pathway-preview .lp-model-image {
       position: absolute; width: 960px; height: 628px; max-width: none; left: -103px; top: -163px; user-select: none; pointer-events: none;
     }
-    #loot-pathway-preview .lp-preview-label {
-      position: absolute; left: 8px; right: 8px; top: 8px; text-align: center; color: var(--lp-gold); font: 10px Arial, sans-serif; letter-spacing: .08em; text-shadow: 0 1px 2px #000; min-height: 14px;
-    }
-    #loot-pathway-preview .lp-model-hint { position: absolute; bottom: 54px; left: 66px; color: var(--lp-muted); font: 10px Arial, sans-serif; }
-    #loot-pathway-preview .lp-met { position: absolute; right: 66px; bottom: 54px; color: var(--lp-green); font: 9px Arial, sans-serif; }
+    #loot-pathway-preview .lp-met { position: absolute; left: 0; right: 0; bottom: -22px; color: var(--lp-green); font: 10px Arial, sans-serif; text-align: center; }
     #loot-pathway-preview .lp-slots { position: absolute; inset: 0; pointer-events: none; }
     #loot-pathway-preview .lp-slot {
       position: absolute; width: 46px; height: 46px; border: 2px solid #087bc5; background-image: url('Assets/Screenshots/loot-pathway-main-hand.png'); background-size: 960px 628px; background-repeat: no-repeat; cursor: pointer; pointer-events: auto; padding: 0;
@@ -83,20 +79,20 @@
     #loot-pathway-preview .lp-slot-ranged { left: 255px; bottom: 0; background-position: -293px -488px; }
     #loot-pathway-preview .lp-footer { position: absolute; bottom: -59px; left: 16px; right: 16px; height: 51px; border-top: 1px solid var(--lp-line); display: flex; align-items: center; justify-content: center; gap: 7px; color: var(--lp-text); font: 11px Arial, sans-serif; letter-spacing: .05em; }
     #loot-pathway-preview .lp-ns-mark { width: 24px; height: 24px; background: linear-gradient(90deg,#fff 0 50%,#11bfe8 50%); clip-path: polygon(0 0,34% 0,34% 22%,52% 22%,52% 0,70% 0,70% 38%,100% 38%,100% 100%,66% 100%,66% 74%,48% 74%,48% 52%,30% 52%,30% 100%,0 100%); }
-    #loot-pathway-preview .lp-drawer { min-height: 485px; border: 1px solid var(--lp-line); background: var(--lp-panel); padding: 15px 12px; }
+    #loot-pathway-preview .lp-drawer { min-height: 485px; border: 1px solid var(--lp-line); background: var(--lp-panel); padding: 17px 14px; }
     #loot-pathway-preview .lp-drawer-kicker { color: var(--lp-gold); font: 10px Arial, sans-serif; letter-spacing: .09em; }
-    #loot-pathway-preview .lp-drawer-title { font-size: 17px; margin-top: 17px; }
-    #loot-pathway-preview .lp-drawer-copy { color: var(--lp-muted); font: 11px Arial, sans-serif; margin-top: 4px; }
-    #loot-pathway-preview .lp-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 28px; }
-    #loot-pathway-preview .lp-filter { padding: 0 10px; min-height: 28px; border-color: var(--lp-gold); color: var(--lp-gold); }
-    #loot-pathway-preview .lp-filter[data-filter="Dungeon"] { border-color: #48b88f; color: #48b88f; }
-    #loot-pathway-preview .lp-filter[data-filter="Heroic"] { border-color: var(--lp-blue); color: var(--lp-blue); }
+    #loot-pathway-preview .lp-drawer-title { font-size: 17px; margin-top: 19px; }
+    #loot-pathway-preview .lp-drawer-copy { color: var(--lp-muted); font: 11px Arial, sans-serif; margin-top: 5px; }
+    #loot-pathway-preview .lp-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 30px; }
+    #loot-pathway-preview .lp-filter { padding: 0 11px; min-height: 29px; border-color: var(--lp-gold); color: var(--lp-gold); }
+    #loot-pathway-preview .lp-filter[data-filter="Quest"] { border-color: var(--lp-green); color: var(--lp-green); }
+    #loot-pathway-preview .lp-filter[data-filter="Dungeon / Heroic"] { border-color: var(--lp-blue); color: var(--lp-blue); }
     #loot-pathway-preview .lp-filter[data-filter="Raid"] { border-color: var(--lp-purple); color: var(--lp-purple); }
     #loot-pathway-preview .lp-filter[data-filter="Craftable"] { border-color: var(--lp-orange); color: var(--lp-orange); }
     #loot-pathway-preview .lp-filter.is-active { color: var(--lp-text); background: rgba(214,171,92,.16); }
     #loot-pathway-preview .lp-stage-header { width: 100%; min-height: 30px; margin-top: 12px; background: rgba(184,115,235,.09); border: 1px solid var(--lp-purple); color: var(--lp-purple); display: flex; align-items: center; justify-content: space-between; padding: 0 9px; cursor: pointer; text-transform: uppercase; font: 10px Arial, sans-serif; letter-spacing: .06em; }
-    #loot-pathway-preview .lp-rows { display: grid; gap: 7px; margin-top: 7px; }
-    #loot-pathway-preview .lp-row { position: relative; min-height: 78px; border: 1px solid var(--lp-line); background: var(--lp-raised); display: grid; grid-template-columns: 46px 1fr 28px; gap: 9px; padding: 9px; text-align: left; color: var(--lp-text); cursor: pointer; }
+    #loot-pathway-preview .lp-rows { display: grid; gap: 10px; margin-top: 9px; }
+    #loot-pathway-preview .lp-row { position: relative; min-height: 86px; border: 1px solid var(--lp-line); background: var(--lp-raised); display: grid; grid-template-columns: 48px 1fr 28px; gap: 11px; padding: 11px; text-align: left; color: var(--lp-text); cursor: pointer; }
     #loot-pathway-preview .lp-row.is-preview { border-color: var(--lp-gold); }
     #loot-pathway-preview .lp-item-icon { width: 42px; height: 42px; background: #080b10; border-left: 3px solid var(--lp-purple); display: grid; place-items: center; color: var(--lp-gold); font: 16px Arial, sans-serif; }
     #loot-pathway-preview .lp-row-top { display: flex; align-items: center; gap: 7px; font: 10px Arial, sans-serif; color: var(--lp-gold); }
@@ -127,16 +123,16 @@
   <section class="lp-shell" aria-label="Interactive Loot Pathway interface preview">
     <header class="lp-topbar">
       <div class="lp-title-row"><span class="lp-title-rule"></span><div class="lp-title">Loot Pathway</div><span class="lp-title-rule"></span></div>
-      <div class="lp-subtitle">See what to chase next, and where it drops.</div>
+      <div class="lp-subtitle">Click a gear slot to see its guide choices.</div>
       <div class="lp-header-divider"></div>
-      <button type="button" class="lp-close" aria-label="Close preview">╳</button>
+      <button type="button" class="lp-close" aria-label="Close preview">X</button>
     </header>
     <div class="lp-layout">
       <section class="lp-character">
         <div class="lp-name">Mozul</div>
-        <div class="lp-build">Warlock / Destruction - Destruction list</div>
+        <div class="lp-build">Destruction guide (Auto)</div>
         <div class="lp-phase-controls" aria-label="Gear preview phase">
-          <button type="button" class="lp-phase is-active" data-phase="-1">Reset</button>
+          <button type="button" class="lp-phase is-active" data-phase="-1">Equipped</button>
           <button type="button" class="lp-phase" data-phase="0">Pre-Raid</button>
           <button type="button" class="lp-phase" data-phase="1">Phase 1</button>
           <button type="button" class="lp-phase" data-phase="2">Phase 2</button>
@@ -144,7 +140,6 @@
         <div class="lp-paperdoll">
           <div class="lp-model">
             <img class="lp-model-image" src="Assets/Screenshots/loot-pathway-main-hand.png" alt="Static captured character model used by the offline preview">
-            <div class="lp-preview-label" aria-live="polite"></div>
           </div>
           <div class="lp-slots" aria-label="Equipment slots">
             <button type="button" class="lp-slot lp-slot-head" data-slot="Head" data-rank=""></button>
@@ -163,25 +158,23 @@
             <button type="button" class="lp-slot lp-slot-off" data-slot="Off hand" data-rank=""></button>
             <button type="button" class="lp-slot lp-slot-ranged" data-slot="Ranged" data-rank=""></button>
           </div>
-          <div class="lp-model-hint">Static model capture</div>
-          <div class="lp-met">MET = SAME OR BETTER EQUIPPED</div>
+          <div class="lp-met">MET = THIS GUIDE ITEM IS EQUIPPED</div>
         </div>
         <footer class="lp-footer"><span class="lp-ns-mark" aria-hidden="true"></span><span>Northern Stack Studios</span></footer>
       </section>
 
       <aside class="lp-drawer">
-        <div class="lp-drawer-kicker">REPLACEMENT DRAWER</div>
+        <div class="lp-drawer-kicker">GUIDE CHOICES</div>
         <div class="lp-drawer-title"><span data-drawer-slot>Hands</span></div>
-        <div class="lp-drawer-copy">Best-in-slot items are ranked best first. Click a source below to filter.</div>
+        <div class="lp-drawer-copy">Guide-ranked as Best, Strong or Option. Filter by source.</div>
         <div class="lp-filters" aria-label="Source filter">
           <button type="button" class="lp-filter is-active" data-filter="All">All</button>
           <button type="button" class="lp-filter" data-filter="Quest">Quest</button>
-          <button type="button" class="lp-filter" data-filter="Dungeon">Dungeon</button>
-          <button type="button" class="lp-filter" data-filter="Heroic">Heroic</button>
+          <button type="button" class="lp-filter" data-filter="Dungeon / Heroic">Dungeon / Heroic</button>
           <button type="button" class="lp-filter" data-filter="Raid">Raid</button>
           <button type="button" class="lp-filter" data-filter="Craftable">Craftable</button>
         </div>
-        <button type="button" class="lp-stage-header" aria-expanded="true"><span>Phase 2</span><span data-count>3 items&nbsp;&nbsp;−</span></button>
+        <button type="button" class="lp-stage-header" aria-expanded="true"><span>Phase 2</span><span data-count>3 items&nbsp;&nbsp;-</span></button>
         <div class="lp-rows" aria-live="polite"></div>
       </aside>
     </div>
@@ -193,27 +186,27 @@
       const data = {
         'Hands': [
           {rank:1,name:'Spellfire Gloves',kind:'Craftable',source:'Tailoring (365)',level:105},
-          {rank:2,name:'Voidheart Gloves',kind:'Raid',source:'Karazhan • Curator',level:120},
-          {rank:3,name:'Gloves of the Deadwatcher',kind:'Heroic',source:'Auchenai Crypts • Shirrak (H)',level:115}
+          {rank:2,name:'Voidheart Gloves',kind:'Raid',source:'Karazhan - Curator',level:120},
+          {rank:3,name:'Gloves of the Deadwatcher',kind:'Dungeon / Heroic',source:'Auchenai Crypts - Shirrak (H)',level:115}
         ],
         'Head': [
           {rank:1,name:'Spellstrike Hood',kind:'Craftable',source:'Tailoring (375)',level:105},
           {rank:2,name:"Evoker's Helmet of Second Sight",kind:'Quest',source:'Shadowmoon Valley quest',level:109},
-          {rank:3,name:'Hood of Oblivion',kind:'Dungeon',source:'The Arcatraz • Harbinger Skyriss (N) (H)',level:115}
+          {rank:3,name:'Hood of Oblivion',kind:'Dungeon / Heroic',source:'The Arcatraz - Harbinger Skyriss (N) (H)',level:115}
         ],
         'Main hand': [
           {rank:1,name:"Merciless Gladiator's Spellblade",kind:'Other',source:'Arena Vendor',level:136},
-          {rank:2,name:'Fang of the Leviathan',kind:'Raid',source:'Serpentshrine Cavern • Leotheras',level:134},
+          {rank:2,name:'Fang of the Leviathan',kind:'Raid',source:'Serpentshrine Cavern - Leotheras',level:134},
           {rank:3,name:'Atiesh, Greatstaff of the Guardian',kind:'Quest',source:'Legendary quest',level:90}
         ],
         'Trinket': [
-          {rank:1,name:"Quagmirran's Eye",kind:'Heroic',source:'The Slave Pens • Quagmirran (H)',level:115},
-          {rank:2,name:'Icon of the Silver Crescent',kind:'Heroic',source:'Badge of Justice vendor',level:110}
+          {rank:1,name:"Quagmirran's Eye",kind:'Dungeon / Heroic',source:'The Slave Pens - Quagmirran (H)',level:115},
+          {rank:2,name:'Icon of the Silver Crescent',kind:'Dungeon / Heroic',source:'Badge of Justice vendor',level:110}
         ]
       };
       const generic = slot => [
-        {rank:1,name:`${slot} BIS target`,kind:'Raid',source:'Current phase BIS list',level:120},
-        {rank:2,name:`Alternative ${slot.toLowerCase()} item`,kind:'Dungeon',source:'Dungeon boss (N) (H)',level:115}
+        {rank:1,name:`Best-ranked ${slot.toLowerCase()} choice`,kind:'Raid',source:'Current phase guide',level:120},
+        {rank:2,name:`Alternative ${slot.toLowerCase()} item`,kind:'Dungeon / Heroic',source:'Dungeon boss (N) (H)',level:115}
       ];
       let slot = 'Hands';
       let filter = 'All';
@@ -221,17 +214,10 @@
       let selected = null;
       let collapsed = false;
       const rows = root.querySelector('.lp-rows');
-      const label = root.querySelector('.lp-preview-label');
-
-      function updateLabel() {
-        if (selected) label.textContent = `PREVIEW: ${selected.name.toUpperCase()}`;
-        else if (phase >= 0) label.textContent = `${phase === 0 ? 'PRE-RAID' : `PHASE ${phase}`} BIS PREVIEW`;
-        else label.textContent = '';
-      }
       function renderRows() {
         const items = (data[slot] || generic(slot)).filter(item => filter === 'All' || item.kind === filter);
         root.querySelector('[data-drawer-slot]').textContent = slot;
-        root.querySelector('[data-count]').textContent = `${items.length} ${items.length === 1 ? 'item' : 'items'}  ${collapsed ? '+' : '−'}`;
+        root.querySelector('[data-count]').textContent = `${items.length} ${items.length === 1 ? 'item' : 'items'}  ${collapsed ? '+' : '-'}`;
         rows.hidden = collapsed;
         rows.innerHTML = items.length ? items.map(item => `
           <button type="button" class="lp-row${selected && selected.name === item.name ? ' is-preview' : ''}" data-item="${item.name.replace(/"/g,'&quot;')}">
@@ -246,7 +232,6 @@
         rows.querySelectorAll('.lp-row').forEach(button => button.addEventListener('click', () => {
           const item = items.find(candidate => candidate.name === button.dataset.item);
           selected = selected && selected.name === item.name ? null : item;
-          updateLabel();
           renderRows();
         }));
       }
@@ -254,8 +239,7 @@
         phase = Number(button.dataset.phase);
         selected = null;
         root.querySelectorAll('.lp-phase').forEach(peer => peer.classList.toggle('is-active', peer === button));
-        root.querySelectorAll('.lp-slot').forEach(item => item.dataset.rank = phase < 0 ? '' : (phase === 0 ? 'PR BIS' : `P${phase} BIS`));
-        updateLabel();
+        root.querySelectorAll('.lp-slot').forEach(item => item.dataset.rank = phase < 0 ? '' : (phase === 0 ? 'PR BEST' : `P${phase} BEST`));
         renderRows();
       }));
       root.querySelectorAll('.lp-filter').forEach(button => button.addEventListener('click', () => {
@@ -267,7 +251,6 @@
         slot = button.dataset.slot;
         selected = null;
         root.querySelectorAll('.lp-slot').forEach(peer => peer.classList.toggle('is-selected', peer === button));
-        updateLabel();
         renderRows();
       }));
       root.querySelector('.lp-stage-header').addEventListener('click', event => {

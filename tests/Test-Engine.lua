@@ -32,9 +32,10 @@ function LP:IsItemCompleted(itemID) return self.characterDB.completed[tostring(i
 loadAddonFile("Data.lua", LP)
 loadAddonFile("BisData.lua", LP)
 loadAddonFile("WowheadCorrections.lua", LP)
+loadAddonFile("DungeonDifficultyData.lua", LP)
 loadAddonFile("Engine.lua", LP)
 
-check(LP.BIS_DATA_META.entries == 7228 and LP.BIS_DATA_META.uniqueItems == 1462, "reviewed runtime dataset totals must remain stable")
+check(LP.BIS_DATA_META.entries == 7188 and LP.BIS_DATA_META.uniqueItems == 1450, "reviewed runtime dataset totals must remain stable")
 local orderFailure
 for class, guides in pairs(LP.BIS_LISTS) do
     for guideName, phases in pairs(guides) do
@@ -81,11 +82,31 @@ check(not pickerCoverageFailure, "every embedded guide must be reachable through
 check(LP:EntryFitsSlot("Main Hand~Off Hand", "MAINHAND"), "flexible weapon must fit main hand")
 check(LP:EntryFitsSlot("Main Hand~Off Hand", "OFFHAND"), "flexible weapon must fit off hand")
 check(not LP:EntryFitsSlot("Main Hand", "OFFHAND"), "main-hand-only weapon must not fit off hand")
+check(LP:GetEffectiveEntrySlot("Main Hand", "Best OH") == "Off Hand", "explicit OH guide rank must resolve to off hand")
+check(LP:GetEffectiveEntrySlot("Main Hand", "Optional MH/OH") == "Main Hand~Off Hand", "explicit MH/OH guide rank must resolve to either hand")
+local hunterPhoenixOffHand
+for _, entry in ipairs(LP.BIS_LISTS.HUNTER["Beast Mastery"][2]) do
+    if entry[1] == 29948 then hunterPhoenixOffHand = LP:GetEffectiveEntrySlot(entry[2], entry[3]) end
+end
+check(hunterPhoenixOffHand == "Off Hand", "Claw of the Phoenix must remain reachable as a Beast Mastery off-hand target")
 check(LP:ClassifySource("Quest", "Example", "Shadowmoon Valley") == "QUEST", "quest source classification")
 check(LP:ClassifySource("Profession", "Blacksmithing", "375") == "CRAFTABLE", "craft source classification")
 check(LP:ClassifySource("Drop", "Prince Malchezaar", "Karazhan") == "RAID", "raid source classification")
-check(LP:ClassifySource("Drop", "Quagmirran", "The Slave Pens (H)") == "HEROIC", "heroic source classification")
-check(LP:GetDifficultySuffix("Drop", "Pathaleon", "The Mechanar") == "(N) (H)", "normal plus heroic suffix")
+check(LP:ClassifySource("Drop", "Quagmirran", "The Slave Pens (H)") == "DUNGEON", "heroic source classification")
+check(LP:GetDifficultySuffix("Drop", "Ghaz'an", "The Underbog", 24462) == "(N)", "normal difficulty suffix")
+check(LP:ClassifySource("Drop", "Ghaz'an", "The Underbog", 27758) == "DUNGEON", "Hydra-fang dungeon source classification")
+check(LP:GetDifficultySuffix("Drop", "Ghaz'an", "The Underbog", 27758) == "(H)", "Hydra-fang heroic difficulty suffix")
+check(LP:GetDifficultySuffix("Drop", "Pathaleon", "The Mechanar", 28342) == "(N) (H)", "both-mode difficulty suffix")
+check(LP:GetDifficultySuffix("Drop", "Unknown", "The Mechanar", 999999) == "(?)", "unknown dungeon mode must not be guessed")
+check(LP:IsBestRank("Best"), "Wowhead Best rank must be a primary target")
+check(LP:IsBestRank("BiS - Raid DPS"), "qualified Wowhead BiS rank must be a primary target")
+check(not LP:IsBestRank("Best Until Tier 5"), "Best Until Tier 5 must be a strong alternative")
+check(not LP:IsBestRank("Near Best"), "Near Best must be a strong alternative")
+check(LP:GetRankTier("Great") == "STRONG", "Great must be grouped as a strong alternative")
+check(LP:GetRankTier("Optional") == "OPTION", "Optional must be grouped as an option")
+check(LP:GetRankDisplayLabel("Best Until Tier 5") == "UNTIL T5", "Best Until rank label must remain informative")
+check(LP:GetRankContextLabel("Best Mitigation") == "MITIGATION", "mitigation context must remain visible")
+check(LP:GetRankContextLabel("Best OH - Personal DPS") == "PERSONAL", "personal-DPS context must remain visible")
 
 local fury = LP.BIS_LISTS.WARRIOR.Fury[1]
 local furyIDs = {}
@@ -116,9 +137,12 @@ check(LP:IsTargetMet(trinketAssignments[2], 2, 14),
     "equipped Bloodlust Brooch must report its own target as met")
 check(not LP:IsTargetMet(trinketAssignments[1], 2, 14),
     "lower-ranked Bloodlust Brooch must not satisfy Dragonspine Trophy")
-equipped[14] = 28830
-check(LP:IsTargetMet(trinketAssignments[2], 2, 14),
-    "higher-ranked Dragonspine Trophy may satisfy the Bloodlust Brooch target")
+equipped[13], equipped[14] = 28830, nil
+check(LP:IsTargetMet(trinketAssignments[1], 2, 14),
+    "an exact paired-slot target must be recognised even when checked from the other trinket button")
+equipped[13], equipped[14] = nil, 28830
+check(not LP:IsTargetMet(trinketAssignments[2], 2, 14),
+    "a different guide item must not claim the Bloodlust Brooch target is met")
 equipped[11], equipped[12], equipped[13], equipped[14] = nil, nil, nil, nil
 
 LP.GetPlayerBuild = function() return "HUNTER", "Survival", nil end

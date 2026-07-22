@@ -87,6 +87,10 @@ playerName = "LegacyAlt"
 legacy:ActivateCharacterProfile()
 check(not legacy:IsItemCompleted(42), "migrated legacy ownership leaked to a second character")
 
+playerName = "DungeonFilter"
+local oldDungeonFilter = loadCore({schemaVersion=2, selectedSource="HEROIC", scale=1.08, uiScaleRevision=1})
+check(oldDungeonFilter.db.selectedSource == "DUNGEON", "retired Heroic filter was not merged into Dungeon / Heroic")
+
 if #failures > 0 then
     error("Core migration tests failed (" .. #failures .. "/" .. checks .. "):\n - " .. table.concat(failures, "\n - "))
 end

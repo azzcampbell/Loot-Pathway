@@ -7,7 +7,7 @@ $curseForge = Get-Content -LiteralPath (Join-Path $projectRoot "CURSEFORGE.md") 
 $releaseGuide = Get-Content -LiteralPath (Join-Path $projectRoot "RELEASING.md") -Raw
 $publisher = Get-Content -LiteralPath (Join-Path $projectRoot "Publish-Release.ps1") -Raw
 $license = Get-Content -LiteralPath (Join-Path $projectRoot "LICENSE") -Raw
-$playerFiles = @("BisData.lua", "Data.lua", "WowheadCorrections.lua", "README.md", "CURSEFORGE.md")
+$playerFiles = @("BisData.lua", "Data.lua", "WowheadCorrections.lua", "DungeonDifficultyData.lua", "README.md", "CURSEFORGE.md")
 $errors = [System.Collections.Generic.List[string]]::new()
 
 if ($toc -notmatch '(?m)^## Interface:\s*20506\s*$') { $errors.Add("TOC does not target TBC Anniversary interface 20506.") }
@@ -24,15 +24,15 @@ foreach ($publicCopy in @(@{Name="README"; Text=$readme}, @{Name="CurseForge des
     if ($publicCopy.Text -notmatch '(?is)what gear should I go for next.*where does it come from') {
         $errors.Add("$($publicCopy.Name) does not lead with the agreed player question.")
     }
-    if ($publicCopy.Text -notmatch '(?is)ranked best first.*(where|source)') {
-        $errors.Add("$($publicCopy.Name) does not clearly connect ranked targets to acquisition sources.")
+    if ($publicCopy.Text -notmatch '(?is)guide ranks as Best.*(where|source)') {
+        $errors.Add("$($publicCopy.Name) does not clearly connect guide-ranked choices to acquisition sources.")
     }
 }
 if ($releaseGuide -notmatch 'Show the complete changelog to Aaron') { $errors.Add("Release guide does not require Aaron's changelog approval.") }
 if ($releaseGuide -notmatch 'live GitHub README' -or $releaseGuide -notmatch 'repository summary' -or $releaseGuide -notmatch 'live CurseForge description') {
     $errors.Add("Release guide does not require all public GitHub and CurseForge copy to be reconciled.")
 }
-if ($readme -notmatch 'Publish-Release\.ps1 -Version 1\.0\.0 -ChangelogApproved') { $errors.Add("README publish instructions omit the changelog approval switch.") }
+if ($readme -notmatch 'Publish-Release\.ps1 -Version 1\.0\.1 -ChangelogApproved') { $errors.Add("README publish instructions omit the changelog approval switch.") }
 if ($readme -notmatch 'uses the approved `CHANGELOG\.md` verbatim') { $errors.Add("README does not describe the approved changelog as the release notes source.") }
 foreach ($playerFile in $playerFiles) {
     $playerText = Get-Content -LiteralPath (Join-Path $projectRoot $playerFile) -Raw

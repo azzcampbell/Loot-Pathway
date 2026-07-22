@@ -5,6 +5,7 @@ function Get-LootPathwayReleaseFiles {
         "Data.lua",
         "BisData.lua",
         "WowheadCorrections.lua",
+        "DungeonDifficultyData.lua",
         "Engine.lua",
         "Diagnostics.lua",
         "UI.lua",

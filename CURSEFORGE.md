@@ -4,13 +4,13 @@
 
 I made Loot Pathway to answer one simple question: **what gear should I go for next, and where does it come from?**
 
-Click any equipment slot to see the relevant BIS and alternative items for your class, talent tree and selected role. Choices are ranked best first and grouped across Pre-Raid, Phase 1 and Phase 2, with a clear source shown for each item.
+Click any equipment slot to see what the guide ranks as Best, plus strong alternatives and useful fallback options for your class, talent tree and selected role. Choices follow the reviewed Wowhead order across Pre-Raid, Phase 1 and Phase 2, with a clear source shown for each item.
 
 ## What it includes
 
 - Pre-Raid, Phase 1 and Phase 2 BIS-list routes
-- Ranked alternatives from quests, dungeons, Heroics, raids and professions
-- Clear Normal and Heroic dungeon labels
+- Best, Strong and Option rankings from quests, Dungeon / Heroic runs, raids and professions
+- Exact `(N)`, `(H)` and `(N) (H)` dungeon-mode labels
 - Character-model item and phase previews
 - Recommended gems and enchants
 - Per-character owned-item checklists

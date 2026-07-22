@@ -69,13 +69,31 @@ function LP:RunSelfTests()
     check(self:ClassifySource("Quest", "Example", "Shadowmoon Valley") == "QUEST", "quest source classification failed")
     check(self:ClassifySource("Profession", "Tailoring", "375") == "CRAFTABLE", "craftable source classification failed")
     check(self:ClassifySource("Drop", "Prince Malchezaar", "Karazhan") == "RAID", "raid source classification failed")
-    check(self:ClassifySource("Drop", "Quagmirran", "The Slave Pens (H)") == "HEROIC", "heroic source classification failed")
-    check(self:ClassifySource("Drop", "Pathaleon", "The Mechanar") == "NORMAL", "normal dungeon source classification failed")
+    check(self:ClassifySource("Drop", "Quagmirran", "The Slave Pens (H)") == "DUNGEON", "heroic dungeon source classification failed")
+    check(self:ClassifySource("Drop", "Pathaleon", "The Mechanar") == "DUNGEON", "normal dungeon source classification failed")
     check(self:GetDifficultySuffix("Drop", "Quagmirran", "The Slave Pens (H)") == "(H)", "heroic difficulty suffix failed")
-    check(self:GetDifficultySuffix("Drop", "Pathaleon", "The Mechanar") == "(N) (H)", "normal/heroic difficulty suffix failed")
+    check(self:GetDifficultySuffix("Drop", "Ghaz'an", "The Underbog", 24462) == "(N)", "normal difficulty suffix failed")
+    check(self:ClassifySource("Drop", "Ghaz'an", "The Underbog", 27758) == "DUNGEON", "Hydra-fang dungeon source classification failed")
+    check(self:GetDifficultySuffix("Drop", "Ghaz'an", "The Underbog", 27758) == "(H)", "Hydra-fang heroic difficulty suffix failed")
+    check(self:GetDifficultySuffix("Drop", "Pathaleon", "The Mechanar", 28342) == "(N) (H)", "both-mode difficulty suffix failed")
+    check(self:GetDifficultySuffix("Drop", "Unknown", "The Mechanar", 999999) == "(?)", "unknown dungeon mode was guessed")
+    check(self:IsBestRank("Best"), "Wowhead Best rank was not treated as a primary target")
+    check(self:IsBestRank("BiS - Raid DPS"), "qualified Wowhead BiS rank was not treated as a primary target")
+    check(not self:IsBestRank("Best Until Tier 5"), "temporary Best Until rank was treated as the final target")
+    check(self:GetRankTier("Great") == "STRONG", "strong alternative rank grouping failed")
+    check(self:GetRankTier("Optional") == "OPTION", "optional rank grouping failed")
+    check(self:GetRankContextLabel("Best Mitigation") == "MITIGATION", "mitigation guide context was lost")
+    check(self:GetRankContextLabel("Best OH - Personal DPS") == "PERSONAL", "personal-DPS guide context was lost")
     check(self:EntryFitsSlot("Main Hand~Off Hand", "MAINHAND"), "flexible weapon did not match main hand")
     check(self:EntryFitsSlot("Main Hand~Off Hand", "OFFHAND"), "flexible weapon did not match off hand")
     check(not self:EntryFitsSlot("Main Hand", "OFFHAND"), "main-hand-only weapon incorrectly matched off hand")
+    check(self:GetEffectiveEntrySlot("Main Hand", "Best OH") == "Off Hand", "explicit off-hand guide rank did not resolve to off hand")
+    check(self:GetEffectiveEntrySlot("Main Hand", "Optional MH/OH") == "Main Hand~Off Hand", "flexible guide rank did not resolve to both hands")
+    local hunterPhoenixOffHand
+    for _, entry in ipairs(self.BIS_LISTS.HUNTER["Beast Mastery"][2]) do
+        if entry[1] == 29948 then hunterPhoenixOffHand = self:GetEffectiveEntrySlot(entry[2], entry[3]) end
+    end
+    check(hunterPhoenixOffHand == "Off Hand", "Claw of the Phoenix is missing from the Beast Mastery off-hand route")
 
     local testItem = 2147483647
     local previous = self.characterDB.completed[tostring(testItem)]

@@ -11,7 +11,7 @@ Double-click `index.html`. It opens with the Loot Pathway example loaded.
 1. Create a self-contained HTML mock for the addon UI.
 2. Open the harness.
 3. Select **Load preview** and choose the HTML file.
-4. Use the zoom and backdrop controls to inspect alignment, clipping and readability.
+4. Use the screen-size, zoom and backdrop controls to inspect alignment, clipping and readability.
 
 The harness does not depend on Loot Pathway. Its bundled screen is only an example and can be replaced by any local HTML preview.
 

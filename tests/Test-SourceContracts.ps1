@@ -5,9 +5,10 @@ $core = Get-Content -LiteralPath (Join-Path $projectRoot "Core.lua") -Raw
 $data = Get-Content -LiteralPath (Join-Path $projectRoot "Data.lua") -Raw
 $engine = Get-Content -LiteralPath (Join-Path $projectRoot "Engine.lua") -Raw
 $corrections = Get-Content -LiteralPath (Join-Path $projectRoot "WowheadCorrections.lua") -Raw
+$difficulty = Get-Content -LiteralPath (Join-Path $projectRoot "DungeonDifficultyData.lua") -Raw
 $ui = Get-Content -LiteralPath (Join-Path $projectRoot "UI.lua") -Raw
 $diagnostics = Get-Content -LiteralPath (Join-Path $projectRoot "Diagnostics.lua") -Raw
-$allRuntime = $core + "`n" + $data + "`n" + $corrections + "`n" + $engine + "`n" + $diagnostics + "`n" + $ui
+$allRuntime = $core + "`n" + $data + "`n" + $corrections + "`n" + $difficulty + "`n" + $engine + "`n" + $diagnostics + "`n" + $ui
 $errors = [System.Collections.Generic.List[string]]::new()
 
 function Require-Match([string]$Text, [string]$Pattern, [string]$Message) {
@@ -30,8 +31,8 @@ Require-Match $engine 'function LP:SetGuideOverride' "Guide override persistence
 Require-Match $engine 'override\s*=\s*self:GetGuideOverride' "Embedded guide resolution does not consult the character override."
 Require-Match $engine 'function LP:GetClassGuideChoices' "The class-wide spec picker choices are missing."
 Require-Match $ui 'function LP:ToggleGuideMenu' "The in-game spec picker is missing."
-Require-Match $ui 'label=label\.\." - Current"' "The detected talent spec is not labelled Current in the picker."
-Require-Match $ui 'label=label\.\." - Selected"' "The manually selected guide is not labelled Selected in the picker."
+Require-Match $ui 'label=label\.\." \(Auto\)"' "The detected talent guide is not labelled Auto in the picker."
+Require-Match $ui 'label=label\.\." \(Selected\)"' "The manually selected guide is not labelled Selected in the picker."
 if ($ui -match 'Automatically follows your talent tree') { $errors.Add("The retired automatic-guide tooltip is still rendered.") }
 Require-Match $ui 'RegisterEscapeClose\("LootPathwayFrame"\)' "The main window is not registered for Escape-key closing."
 Require-Match $ui 'RegisterEscapeClose\("LootPathwayOptionsFrame"\)' "The options window is not registered for Escape-key closing."
@@ -42,20 +43,41 @@ Require-Match $ui 'CreateFrame\("DressUpModel"' "DressUpModel preview is missing
 Require-Match $ui 'playerModel\.TryOn' "Item preview dressing is missing."
 Require-Match $ui 'playerModel\.UndressSlot' "Conflicting weapon preview clearing is missing."
 Require-Match $ui 'button\.closeBorder' "Close buttons are missing their explicit unclipped border."
-Require-Match $ui 'See what to chase next, and where it drops\.' "The main header is missing its plain-English subtext."
+Require-Match $ui 'Click a gear slot to see its guide choices\.' "The main header is missing its action-led subtext."
 Require-Match $ui 'titleRuleLeft' "The main title is missing its left decorative rule."
 Require-Match $ui 'headerAccent' "The main header is missing its centred accent divider."
 Require-Match $ui 'button\.closeGlyph=.*SetText\("X"\)' "Close buttons are missing their centred X glyph."
 Require-Match $ui '\{"BOTTOMLEFT",1,1,size-2,2\}' "Close buttons are not using fixed pixel-safe border geometry."
 if ($ui -match 'closeLines|line\.SetRotation') { $errors.Add("Close buttons still use glitch-prone rotated line textures.") }
 Require-Match $ui 'row\.hoverBorder' "Drawer rows are missing their inset unclipped hover border."
-Require-Match $ui '\{"BOTTOMLEFT",1,1,400,2\}' "Drawer hover border is not using fixed pixel-safe bottom-edge geometry."
+Require-Match $ui '\{"BOTTOMLEFT",1,1,DRAWER_CONTENT_WIDTH-2,2\}' "Drawer hover border is not using fixed pixel-safe bottom-edge geometry."
 Require-Match $ui 'qualityFrame:SetShown\(priorBISPhase~=nil and not targetMet\)' "A prior-phase quality border can still override a green MET border."
 if ($ui -match 'displayItem then button:SetBackdropBorderColor\(unpack\(PHASES\[phase\]\.colour\)\)') { $errors.Add("Gear preview borders still use phase colours instead of item quality colours.") }
 Require-Match $engine 'function LP:GetEffectiveDisplayOrder' "Reviewed cross-category display-order overrides are missing."
+Require-Match $engine 'function LP:IsBestRank' "Wowhead Best/BiS rank interpretation is missing."
+Require-Match $engine 'function LP:GetRankTier' "Wowhead rank grouping is missing."
+Require-Match $engine 'function LP:GetRankDisplayLabel' "Readable Wowhead rank labels are missing."
+Require-Match $ui 'Guide rank:' "The drawer tooltip does not expose the original guide rank."
+Require-Match $engine 'function LP:GetRankContextLabel' "Contextual guide ranks are not labelled for players."
+Require-Match $engine 'function LP:GetEffectiveEntrySlot' "Rank-labelled off-hand items are not normalised to the correct slot."
+Require-Match $engine 'equippedID == target\.id' "MET does not require the exact guide item to be equipped."
+if ($engine -match 'positionPhase > phase|positionPhase == phase and positionRank <= targetRank') { $errors.Add("MET still infers same-or-better status from phase ordering.") }
+Require-Match $data 'DUNGEON=\{label="Dungeon / Heroic",short="DUNGEON / HEROIC"' "Dungeon and Heroic are not merged into one source tier."
+Require-Match $difficulty '\[27758\]\s*=\s*"HEROIC"' "Hydra-fang Necklace is not explicitly marked Heroic-only."
+Require-Match $difficulty '\[24462\]\s*=\s*"NORMAL"' "Luminous Pearls of Insight is not explicitly marked Normal-only."
+Require-Match $difficulty '\[28342\]\s*=\s*"BOTH"' "Warp Infused Drape is not explicitly marked for both modes."
+Require-Match $engine 'return "\(\?\)"' "Unknown dungeon modes are still silently guessed."
+Require-Match $ui '"DUNGEON","DUNGEON / HEROIC"' "The merged Dungeon / Heroic filter is missing."
+Require-Match $ui 'LP\.db\.selectedSource="ALL"' "Phase selection does not reset the drawer source filter."
+Require-Match $ui 'LP\.db\.collapsedPhases\[self\.phase\]=false' "Phase selection does not expand the selected drawer section."
 Require-Match $engine 'BIS_PREVIEW_OVERRIDES' "Reviewed phase-preview target overrides are missing."
 if ($ui -match 'Drag to rotate - Right-click to reset') { $errors.Add("Removed model rotation instruction is still rendered.") }
+if ($ui -match 'modelPreviewLabel|BIS PREVIEW|PREVIEW:') { $errors.Add("The removed character-model preview caption is still rendered.") }
 Require-Match $ui 'metLegend:SetPoint\("BOTTOM",0,4\)' "The MET legend is not centred clear of the trinket column."
+Require-Match $ui 'MET = THIS GUIDE ITEM IS EQUIPPED' "The MET legend does not explain its exact meaning."
+Require-Match $ui 'All phase sections are collapsed' "Collapsed phase sections still produce a misleading empty state."
+Require-Match $ui 'Manual note only; this does not equip the item\.' "Owned-state guidance is missing."
+Require-Match $ui 'Preview only; your equipped gear will not change\.' "Preview-state guidance is missing."
 Require-Match $engine 'function LP:EntryFitsSlot' "Flexible hand-slot matching is missing."
 Require-Match $engine 'function LP:GetModelPreviewPlan' "Model preview planning is missing."
 Require-Match $engine 'function LP:GetPhaseTargetAssignments' "Paired-slot phase target assignment is missing."

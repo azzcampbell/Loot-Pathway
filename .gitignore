@@ -3,6 +3,8 @@ backups/
 release/
 artifacts/
 tools/__pycache__/
+tools/audit-*.json
+tools/dungeon-difficulty-audit.json
 *.pyc
 LootPathway-*.zip
 northernstack-studios-site/

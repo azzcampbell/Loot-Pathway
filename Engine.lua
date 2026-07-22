@@ -11,7 +11,18 @@ local SLOT_MAP = {
 }
 LP.BIS_SLOT_MAP = SLOT_MAP
 
-function LP:EntryFitsSlot(entrySlot, slotKey)
+function LP:GetEffectiveEntrySlot(entrySlot, rank)
+    if entrySlot ~= "Main Hand" then return entrySlot end
+    local value = string.lower(tostring(rank or ""))
+    local hasMain = string.find(value, "main hand", 1, true) or string.find(value, "main-hand", 1, true) or string.match(value, "%f[%a]mh%f[%A]")
+    local hasOff = string.find(value, "off hand", 1, true) or string.find(value, "off-hand", 1, true) or string.match(value, "%f[%a]oh%f[%A]")
+    if hasMain and hasOff then return "Main Hand~Off Hand" end
+    if hasOff then return "Off Hand" end
+    return entrySlot
+end
+
+function LP:EntryFitsSlot(entrySlot, slotKey, rank)
+    entrySlot = self:GetEffectiveEntrySlot(entrySlot, rank)
     if entrySlot == "Main Hand~Off Hand" then
         return slotKey == "MAINHAND" or slotKey == "OFFHAND"
     end
@@ -142,7 +153,52 @@ function LP:GetEffectiveRank(phase, itemID, rank)
     local class, talentSpec = self:GetPlayerBuild()
     local embeddedSpec = self:GetEmbeddedSpec(class, talentSpec)
     local key = class .. ":" .. tostring(embeddedSpec or talentSpec) .. ":" .. tostring(phase) .. ":" .. tostring(itemID)
-    return (self.BIS_RANK_OVERRIDES and self.BIS_RANK_OVERRIDES[key]) or rank or "Alt"
+    return (self.BIS_RANK_OVERRIDES and self.BIS_RANK_OVERRIDES[key]) or rank or "Optional"
+end
+
+function LP:IsBestRank(rank)
+    local value = string.lower(tostring(rank or ""))
+    if string.find(value, "best until", 1, true) or string.find(value, "near best", 1, true) or
+       string.find(value, "2nd best", 1, true) or string.find(value, "p1 best", 1, true) or
+       string.find(value, "p1 bis", 1, true) or string.find(value, "pre%-?raid") or
+       string.find(value, "pre raid", 1, true) then
+        return false
+    end
+    return string.find(value, "bis", 1, true) ~= nil or string.sub(value, 1, 4) == "best"
+end
+
+function LP:GetRankTier(rank)
+    if self:IsBestRank(rank) then return "BEST" end
+    local value = string.lower(tostring(rank or ""))
+    if string.find(value, "great", 1, true) or string.find(value, "strong", 1, true) or
+       string.find(value, "alternative", 1, true) or string.find(value, "close second", 1, true) or
+       string.find(value, "near best", 1, true) or string.find(value, "best until", 1, true) or
+       string.find(value, "2nd best", 1, true) or string.find(value, "recommended", 1, true) then
+        return "STRONG"
+    end
+    return "OPTION"
+end
+
+function LP:GetRankDisplayLabel(rank)
+    local tierNumber = string.match(string.lower(tostring(rank or "")), "until tier%s*(%d+)")
+    if tierNumber then return "UNTIL T" .. tierNumber end
+    return self:GetRankTier(rank)
+end
+
+function LP:GetRankContextLabel(rank)
+    local value = string.lower(tostring(rank or ""))
+    local contexts = {
+        {"personal dps", "PERSONAL"}, {"raid dps", "RAID DPS"}, {"raid support", "RAID SUPPORT"},
+        {"mitigation", "MITIGATION"}, {"threat", "THREAT"}, {"hit cap", "HIT SET"}, {"hit set", "HIT SET"},
+        {"set bonus", "SET BONUS"}, {"4p", "SET BONUS"}, {"2p", "SET BONUS"},
+        {"pvp", "PVP"}, {"unrealistic", "UNREALISTIC"}, {"realistic", "REALISTIC"}, {"expensive", "EXPENSIVE"},
+        {"demon", "DEMONS"}, {"undead", "UNDEAD"}, {"human", "HUMAN"}, {"orc", "ORC"},
+        {"fast", "FAST"}, {"slow", "SLOW"},
+    }
+    for _, context in ipairs(contexts) do
+        if string.find(value, context[1], 1, true) then return context[2] end
+    end
+    return nil
 end
 
 function LP:GetEffectiveDisplayOrder(phase, itemID, displayOrder)
@@ -180,25 +236,25 @@ function LP:GetEquippedIDs(slot)
     return ids
 end
 
-function LP:ClassifySource(sourceType, source, location)
+function LP:ClassifySource(sourceType, source, location, itemID)
     local combined = (source or "") .. " " .. (location or "")
     if ContainsText(sourceType, {"quest"}) then return "QUEST" end
     if ContainsText(sourceType, {"profession", "craft"}) then return "CRAFTABLE" end
     if ContainsText(combined, RAID_ZONES) then return "RAID" end
-    if ContainsText(location, {"(H)", "Heroic"}) or ContainsText(sourceType, {"Dungeon Token"}) then return "HEROIC" end
-    if ContainsText(combined, DUNGEON_ZONES) then return "NORMAL" end
+    if ContainsText(location, {"(H)", "Heroic"}) or ContainsText(sourceType, {"Dungeon Token"}) then return "DUNGEON" end
+    if ContainsText(combined, DUNGEON_ZONES) then return "DUNGEON" end
     return "OTHER"
 end
 
-function LP:GetDifficultySuffix(sourceType, source, location)
+function LP:GetDifficultySuffix(sourceType, source, location, itemID)
     local combined = (source or "") .. " " .. (location or "")
     if not ContainsText(combined, DUNGEON_ZONES) then return "" end
-    local heroic = ContainsText(combined, {"(H)", "Heroic"})
-    local multiple = string.find(combined, "~", 1, true) ~= nil
-    if heroic and multiple then return "(N) (H)" end
-    if heroic then return "(H)" end
-    -- Normal dungeon loot remains on the boss's loot table in Heroic mode.
-    return "(N) (H)"
+    local difficulty = self.DUNGEON_DIFFICULTY and self.DUNGEON_DIFFICULTY[itemID]
+    if difficulty == "HEROIC" then return "(H)" end
+    if difficulty == "BOTH" then return "(N) (H)" end
+    if difficulty == "NORMAL" then return "(N)" end
+    if ContainsText(combined, {"(H)", "Heroic"}) then return "(H)" end
+    return "(?)"
 end
 
 function LP:GetListPosition(slotKey, guide)
@@ -208,9 +264,9 @@ function LP:GetListPosition(slotKey, guide)
     local bestPhase, bestRank, bestIsBIS = -1, nil, false
     for phase = 0, (self.BIS_DATA_META.currentPhase or 2) do
         for _, entry in ipairs(guide[phase] or {}) do
-            if self:EntryFitsSlot(entry[2], slotKey) and equipped[entry[1]] then
-                local rank = self:GetEffectiveRank(phase, entry[1], entry[3])
-                local isBIS = string.find(rank, "BIS", 1, true) ~= nil
+            local rank = self:GetEffectiveRank(phase, entry[1], entry[3])
+            if self:EntryFitsSlot(entry[2], slotKey, rank) and equipped[entry[1]] then
+                local isBIS = self:IsBestRank(rank)
                 if (isBIS and (not bestIsBIS or phase > bestPhase)) or (not bestIsBIS and phase > bestPhase) then
                     bestPhase, bestRank, bestIsBIS = phase, rank, isBIS
                 end
@@ -227,9 +283,9 @@ function LP:GetInventoryListPosition(inventory, slotKey, guide)
     local bestPhase, bestRank, bestOrder, bestIsBIS = -1, nil, nil, false
     for phase = 0, (self.BIS_DATA_META.currentPhase or 2) do
         for _, entry in ipairs(guide[phase] or {}) do
-            if entry[1] == itemID and self:EntryFitsSlot(entry[2], slotKey) then
-                local rank = self:GetEffectiveRank(phase, entry[1], entry[3])
-                local isBIS = string.find(rank, "BIS", 1, true) ~= nil
+            local rank = self:GetEffectiveRank(phase, entry[1], entry[3])
+            if entry[1] == itemID and self:EntryFitsSlot(entry[2], slotKey, rank) then
+                local isBIS = self:IsBestRank(rank)
                 if (isBIS and (not bestIsBIS or phase > bestPhase)) or (not bestIsBIS and phase > bestPhase) then
                     bestPhase, bestRank, bestOrder, bestIsBIS = phase, rank, entry[9], isBIS
                 end
@@ -251,7 +307,7 @@ function LP:GetItemBISPhase(itemID, slotKey)
     for phase = 0, (self.BIS_DATA_META.currentPhase or 2) do
         for _, entry in ipairs(guide and guide[phase] or {}) do
             local rank = self:GetEffectiveRank(phase, entry[1], entry[3])
-            if entry[1] == itemID and self:EntryFitsSlot(entry[2], slotKey) and string.find(rank, "BIS", 1, true) then bestPhase = phase end
+            if entry[1] == itemID and self:EntryFitsSlot(entry[2], slotKey, rank) and self:IsBestRank(rank) then bestPhase = phase end
         end
     end
     return bestPhase
@@ -260,9 +316,10 @@ end
 function LP:GetBisItem(entry, phase, slot, equippedLevel)
     local itemID, bisSlot, rank, fallbackName, sourceType, source, location, _, displayOrder = unpack(entry)
     rank = self:GetEffectiveRank(phase, itemID, rank)
+    bisSlot = self:GetEffectiveEntrySlot(bisSlot, rank)
     displayOrder = self:GetEffectiveDisplayOrder(phase, itemID, displayOrder)
     local name, link, quality, level, _, _, _, _, _, icon = GetItemInfo(itemID)
-    local tier = self:ClassifySource(sourceType, source, location)
+    local tier = self:ClassifySource(sourceType, source, location, itemID)
     return {
         id = itemID, name = name or fallbackName, link = link, quality = quality or 3,
         level = level or 0, icon = icon or "Interface\\Icons\\INV_Misc_QuestionMark",
@@ -270,8 +327,9 @@ function LP:GetBisItem(entry, phase, slot, equippedLevel)
         slotOrder = type(slot.inventory) == "table" and slot.inventory[1] or slot.inventory,
         tier = tier, sourceKind = self.TIERS[tier].short,
         sourceType = sourceType or "Other", boss = source or "", place = location or "",
-        difficulty = self:GetDifficultySuffix(sourceType, source, location),
+        difficulty = self:GetDifficultySuffix(sourceType, source, location, itemID),
         listRank = rank or "Alt", phase = phase, phaseLabel = PHASE_LABELS[phase],
+        rankContext = self:GetRankContextLabel(rank),
         displayOrder = displayOrder,
         equippedLevel = equippedLevel or 0,
         completed = self:IsItemCompleted(itemID),
@@ -296,7 +354,8 @@ function LP:GetPhaseSlotItems(slotKey, phase, applySourceFilter)
     local playerFaction = UnitFactionGroup and UnitFactionGroup("player") or nil
     local sourceFilter = self.db.selectedSource or "ALL"
     for listOrder, entry in ipairs(guide[phase] or {}) do
-        if self:EntryFitsSlot(entry[2], slotKey) and IsFactionMatch(entry[8], playerFaction) then
+        local effectiveRank = self:GetEffectiveRank(phase, entry[1], entry[3])
+        if self:EntryFitsSlot(entry[2], slotKey, effectiveRank) and IsFactionMatch(entry[8], playerFaction) then
             local item = self:GetBisItem(entry, phase, slot, equippedLevel)
             item.listOrder = item.displayOrder or listOrder
             if not applySourceFilter or sourceFilter == "ALL" or item.tier == sourceFilter then
@@ -319,7 +378,7 @@ function LP:GetPhasePrimaryTargets(slotKey, phase)
     for _, item in ipairs(items) do
         if not seen[item.id] then
             seen[item.id] = true
-            if string.find(item.listRank, "BIS", 1, true) then table.insert(primary, item)
+            if self:IsBestRank(item.listRank) then table.insert(primary, item)
             else table.insert(fallback, item) end
         end
     end
@@ -428,24 +487,12 @@ end
 
 function LP:IsTargetMet(target, phase, inventory)
     if not target then return false end
-    local class, talentSpec = self:GetPlayerBuild()
-    local _, guide = self:GetEmbeddedSpec(class, talentSpec)
     local slot = self:GetSlot(target.slot)
-    if not guide or not slot then return false end
+    if not slot then return false end
     local link = inventory and GetInventoryItemLink("player", inventory)
     local equippedID = inventory and ((GetInventoryItemID and GetInventoryItemID("player", inventory)) or ItemIDFromLink(link))
-    if equippedID == target.id then return true, "Same target equipped" end
-
-    local equippedPhase, equippedRank, equippedOrder
-    if inventory then equippedPhase, equippedRank, equippedOrder = self:GetInventoryListPosition(inventory, target.slot, guide)
-    else equippedPhase, equippedRank = self:GetListPosition(target.slot, guide) end
-    if equippedPhase > phase then return true, "Later BIS-list target equipped" end
-    local targetOrder = target.displayOrder or target.listOrder
-    if equippedPhase == phase and equippedRank and string.find(equippedRank, "BIS", 1, true) and
-       equippedOrder and targetOrder and equippedOrder <= targetOrder then
-        return true, equippedOrder < targetOrder and "Higher-ranked same-phase target equipped" or "Same-ranked BIS target equipped"
-    end
-
+    if equippedID == target.id then return true, "This guide item is equipped." end
+    if self:GetEquippedIDs(slot)[target.id] then return true, "This guide item is equipped." end
     return false, nil
 end
 
@@ -471,9 +518,9 @@ function LP:GetRecommendations()
                 local onlyBIS = samePhase
                 if includePhase then
                     for listOrder, entry in ipairs(guide[phase] or {}) do
-                        if self:EntryFitsSlot(entry[2], slot.key) and not equippedIDs[entry[1]] and IsFactionMatch(entry[8], playerFaction) then
-                            local effectiveRank = self:GetEffectiveRank(phase, entry[1], entry[3])
-                            local isBIS = string.find(effectiveRank, "BIS", 1, true) ~= nil
+                        local effectiveRank = self:GetEffectiveRank(phase, entry[1], entry[3])
+                        if self:EntryFitsSlot(entry[2], slot.key, effectiveRank) and not equippedIDs[entry[1]] and IsFactionMatch(entry[8], playerFaction) then
+                            local isBIS = self:IsBestRank(effectiveRank)
                             if not onlyBIS or isBIS then
                                 local item = self:GetBisItem(entry, phase, slot, equippedLevel)
                                 item.listOrder = item.displayOrder or listOrder
