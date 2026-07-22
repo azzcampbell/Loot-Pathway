@@ -53,3 +53,13 @@ The folder must directly contain `LootPathway_TBC.toc`. Restart the game or type
 ## Data maintenance
 
 `BisData.lua` is generated and bundled with the addon. The development helper at `tools/generate_bis_data.py` rebuilds the standalone snapshot from a local Loon installation; Loot Pathway itself never loads or depends on Loon.
+
+## Publishing a release
+
+Commit the addon changes first, then run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\Publish-Release.ps1 -Version 0.4.6
+```
+
+The script updates the single version field, builds the matching ZIP, commits the version bump, and pushes the new tag. GitHub Actions creates the GitHub release and CurseForge packages the same tagged commit with an automatic changelog.

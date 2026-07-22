@@ -2,7 +2,7 @@ local ADDON_NAME, LP = ...
 
 LootPathway = LP
 LP.name = ADDON_NAME
-LP.version = "0.4.5"
+LP.version = (GetAddOnMetadata and GetAddOnMetadata(ADDON_NAME, "Version")) or "dev"
 
 local defaults = {
     minimised = false,

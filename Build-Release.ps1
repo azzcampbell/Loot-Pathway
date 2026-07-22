@@ -3,7 +3,17 @@ $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $releaseRoot = Join-Path $projectRoot "release"
 $addonRoot = Join-Path $releaseRoot "LootPathway"
-$zipPath = Join-Path $projectRoot "LootPathway-0.4.5.zip"
+$tocPath = Join-Path $projectRoot "LootPathway_TBC.toc"
+$tocText = Get-Content -LiteralPath $tocPath -Raw
+$versionMatch = [regex]::Match($tocText, '(?m)^## Version:\s*([^\r\n]+)')
+if (-not $versionMatch.Success) {
+    throw "LootPathway_TBC.toc does not contain a Version field."
+}
+$version = $versionMatch.Groups[1].Value.Trim()
+if ($version -notmatch '^\d+\.\d+\.\d+$') {
+    throw "Invalid addon version '$version'. Expected a semantic version such as 0.4.6."
+}
+$zipPath = Join-Path $projectRoot "LootPathway-$version.zip"
 
 if (Test-Path -LiteralPath $addonRoot) {
     Remove-Item -LiteralPath $addonRoot -Recurse -Force

@@ -1,0 +1,43 @@
+name: Publish release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@v4
+
+      - name: Verify tag and addon version
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}" -replace '^v', ''
+          $toc = Get-Content -LiteralPath .\LootPathway_TBC.toc -Raw
+          $match = [regex]::Match($toc, '(?m)^## Version:\s*([^\r\n]+)')
+          if (-not $match.Success) { throw 'Missing Version field in LootPathway_TBC.toc.' }
+          $tocVersion = $match.Groups[1].Value.Trim()
+          if ($tocVersion -ne $version) {
+            throw "Tag version $version does not match TOC version $tocVersion."
+          }
+          "RELEASE_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Build addon ZIP
+        shell: pwsh
+        run: .\Build-Release.ps1
+
+      - name: Create GitHub release and changelog
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" `
+            "LootPathway-$env:RELEASE_VERSION.zip" `
+            --title "Loot Pathway $env:RELEASE_VERSION" `
+            --generate-notes
