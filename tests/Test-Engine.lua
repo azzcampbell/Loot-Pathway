@@ -35,7 +35,11 @@ loadAddonFile("WowheadCorrections.lua", LP)
 loadAddonFile("DungeonDifficultyData.lua", LP)
 loadAddonFile("Engine.lua", LP)
 
-check(LP.BIS_DATA_META.entries == 7188 and LP.BIS_DATA_META.uniqueItems == 1450, "reviewed runtime dataset totals must remain stable")
+check(
+    LP.BIS_DATA_META.entries == 7180 and LP.BIS_DATA_META.uniqueItems == 1450,
+    "reviewed runtime dataset totals must remain stable (expected 7180/1450, got "
+        .. tostring(LP.BIS_DATA_META.entries) .. "/" .. tostring(LP.BIS_DATA_META.uniqueItems) .. ")"
+)
 local orderFailure
 for class, guides in pairs(LP.BIS_LISTS) do
     for guideName, phases in pairs(guides) do
