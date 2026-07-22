@@ -2,7 +2,7 @@
 ## Title: Loot Pathway
 ## Notes: Makes level 70 BIS-list gearing simple, with ranked targets and clear sources from Pre-Raid to Phase 2.
 ## Author: Mozley
-## Version: 0.4.7
+## Version: 1.0.0
 ## X-License: All Rights Reserved
 ## SavedVariables: LootPathwayDB
 
