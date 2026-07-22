@@ -3,6 +3,7 @@ $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $dataPath = Join-Path $projectRoot "BisData.lua"
 $mappingPath = Join-Path $projectRoot "Data.lua"
+$correctionPath = Join-Path $projectRoot "WowheadCorrections.lua"
 $lines = Get-Content -LiteralPath $dataPath
 $raw = $lines -join "`n"
 $errors = [System.Collections.Generic.List[string]]::new()
@@ -70,6 +71,27 @@ foreach ($line in $lines) {
 
 if ($entries.Count -ne [int]$metaEntries) {
     Add-ValidationError "Metadata says $metaEntries entries but parsed $($entries.Count)."
+}
+
+if (-not (Test-Path -LiteralPath $correctionPath)) {
+    Add-ValidationError "WowheadCorrections.lua is missing."
+} else {
+    $correctionRaw = Get-Content -LiteralPath $correctionPath -Raw
+    $correctionItems = [regex]::Matches($correctionRaw, '(?m)^\s+\{(\d+),"([^"]+)","([^"]+)","([^"]*)","([^"]*)","([^"]*)","([^"]*)","([ABH])"\},$')
+    if ($correctionItems.Count -ne 29) { Add-ValidationError "Expected 29 reviewed Wowhead Phase 2 additions, found $($correctionItems.Count)." }
+    if ($correctionRaw -notmatch 'source="Wowhead TBC Anniversary"') { Add-ValidationError "Wowhead correction provenance metadata is missing." }
+    foreach ($item in $correctionItems) {
+        if ($item.Groups[2].Value -notin $validSlots) { Add-ValidationError "Correction item $($item.Groups[1].Value) uses unknown slot '$($item.Groups[2].Value)'." }
+        if ($item.Groups[3].Value -notmatch $validRank) { Add-ValidationError "Correction item $($item.Groups[1].Value) uses unknown rank '$($item.Groups[3].Value)'." }
+        if ([string]::IsNullOrWhiteSpace($item.Groups[4].Value)) { Add-ValidationError "Correction item $($item.Groups[1].Value) has no name." }
+    }
+    $slotCorrections = [regex]::Matches($correctionRaw, '\{class="([^"]+)",guide="([^"]+)",phase=(\d+),item=(\d+),from="([^"]+)",to="([^"]+)",source="(https://www\.wowhead\.com/tbc/guide/[^"]+)"\}')
+    if ($slotCorrections.Count -ne 9) { Add-ValidationError "Expected 9 reviewed Wowhead slot corrections, found $($slotCorrections.Count)." }
+    foreach ($slotCorrection in $slotCorrections) {
+        if ($slotCorrection.Groups[5].Value -notin $validSlots -or $slotCorrection.Groups[6].Value -notin $validSlots) {
+            Add-ValidationError "Slot correction for item $($slotCorrection.Groups[4].Value) uses an unknown slot."
+        }
+    }
 }
 $uniqueItems = @($entries.Id | Sort-Object -Unique).Count
 if ($uniqueItems -ne [int]$metaUnique) {

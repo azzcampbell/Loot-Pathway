@@ -15,13 +15,13 @@ This document records the evidence required before Loot Pathway can be called v1
 ## BIS provenance
 
 - [x] A repeatable item-ID audit exists for all 25 official Wowhead Phase 2 guides.
-- [ ] Review the Phase 2 audit differences: 29 current Wowhead items missing from the embedded snapshot, 22 addon-only entries and 123 slot-shape differences.
-- [ ] Record and apply reviewed Phase 2 additions, removals, ranks and faction equivalents with source URLs.
+- [x] Review the Phase 2 differences: add 29 current Wowhead items, retain 22 entries explicitly mentioned in guide text and correct nine guide-slot errors.
+- [x] Record Phase 2 additions, ranks, acquisition details and item-level source URLs in the separate correction layer.
 - [ ] Add and audit the official Wowhead Pre-Raid guide manifest.
 - [ ] Add and audit the official Wowhead Phase 1 guide manifest.
 - [ ] Make unresolved provenance differences fail the release-candidate gate.
 
-The Destruction Warlock Phase 2 pilot currently matches all 93 Wowhead-listed item IDs. This does not prove the remaining guides or phases.
+The strict Phase 2 audit covers all 25 guides and 2,412 linked Wowhead items with no missing items and no addon-only items absent from the relevant guide text. Remaining shape differences are two-handed weapons shown under Wowhead's generic weapon headings. Pre-Raid and Phase 1 remain unverified.
 
 ## Behaviour acceptance
 

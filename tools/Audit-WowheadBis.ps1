@@ -2,7 +2,8 @@ param(
     [string]$Class,
     [string]$Guide,
     [int]$Phase = 2,
-    [string]$Manifest = ".\tools\wowhead-phase2-guides.json"
+    [string]$Manifest = ".\tools\wowhead-phase2-guides.json",
+    [switch]$Strict
 )
 
 $ErrorActionPreference = "Stop"
@@ -23,9 +24,9 @@ function ConvertFrom-HtmlText([string]$Value) {
 function Get-SlotFromHeading([string]$Heading) {
     $patterns = [ordered]@{
         "Head"='\bHead\b|Helm'; "Shoulder"='Shoulder'; "Back"='\bBack\b|Cloak'; "Chest"='Chest';
-        "Wrist"='Wrist|Bracer'; "Hands"='\bHand\b|Glove'; "Waist"='Waist|Belt'; "Legs"='\bLeg\b|Pants';
+        "Wrist"='Wrist|Bracer'; "Hands"='\bHands? Armor\b|Glove|Gauntlet'; "Waist"='Waist|Belt'; "Legs"='\bLeg\b|Pants';
         "Feet"='Feet|Boot'; "Neck"='Neck'; "Ring"='Ring'; "Trinket"='Trinket';
-        "Off Hand"='Offhand|Off-hand|Shield'; "Ranged/Relic"='Wand|Relic|Idol|Totem|Libram|Ranged';
+        "Off Hand"='Offhand|Off-hand|Off Hand|Shield'; "Ranged/Relic"='Wand|Relic|Idol|Totem|Libram|Ranged|Bow|Gun|Crossbow|Thrown';
         "Two Hand"='Two-Handed'; "Main Hand"='One-Handed|Weapon'
     }
     foreach ($pair in $patterns.GetEnumerator()) {
@@ -47,6 +48,26 @@ function Read-AddonEntries([string]$ClassName, [string]$GuideName, [int]$PhaseNu
         if ($currentClass -eq $ClassName -and $currentGuide -eq $GuideName -and $currentPhase -eq $PhaseNumber -and
             $line -match '^                \{(\d+), "([^"]+)", "([^"]+)", "([^"]*)"') {
             $result[[int]$Matches[1]] = [pscustomobject]@{ id=[int]$Matches[1]; slot=$Matches[2]; rank=$Matches[3]; name=$Matches[4] }
+        }
+    }
+    $correctionClass = $null; $correctionGuide = $null; $correctionPhase = -1
+    foreach ($line in Get-Content -LiteralPath (Join-Path $projectRoot "WowheadCorrections.lua")) {
+        if ($line -match 'class="([^"]+)", guide="([^"]+)", phase=(\d+)') {
+            $correctionClass = $Matches[1]; $correctionGuide = $Matches[2]; $correctionPhase = [int]$Matches[3]
+            continue
+        }
+        if ($correctionClass -eq $ClassName -and $correctionGuide -eq $GuideName -and $correctionPhase -eq $PhaseNumber -and
+            $line -match '^\s+\{(\d+),"([^"]+)","([^"]+)","([^"]*)"') {
+            $result[[int]$Matches[1]] = [pscustomobject]@{ id=[int]$Matches[1]; slot=$Matches[2]; rank=$Matches[3]; name=$Matches[4] }
+        }
+    }
+    $correctionRaw = Get-Content -LiteralPath (Join-Path $projectRoot "WowheadCorrections.lua") -Raw
+    foreach ($slotFix in [regex]::Matches($correctionRaw, '\{class="([^"]+)",guide="([^"]+)",phase=(\d+),item=(\d+),from="([^"]+)",to="([^"]+)"')) {
+        if ($slotFix.Groups[1].Value -eq $ClassName -and $slotFix.Groups[2].Value -eq $GuideName -and [int]$slotFix.Groups[3].Value -eq $PhaseNumber) {
+            $itemId = [int]$slotFix.Groups[4].Value
+            if ($result.ContainsKey($itemId) -and $result[$itemId].slot -eq $slotFix.Groups[5].Value) {
+                $result[$itemId].slot = $slotFix.Groups[6].Value
+            }
         }
     }
     return $result
@@ -74,6 +95,7 @@ foreach ($guideRecord in $guides) {
             $wowheadItems[$itemId] = [pscustomobject]@{
                 id=$itemId; slot=$slot; rank=(ConvertFrom-HtmlText $cells[0].Groups[1].Value)
                 name=(ConvertFrom-HtmlText $itemMatch.Groups[2].Value); heading=$heading
+                source=if ($cells.Count -ge 3) { ConvertFrom-HtmlText $cells[2].Groups[1].Value } else { "" }
             }
         }
     }
@@ -81,11 +103,28 @@ foreach ($guideRecord in $guides) {
     $addonItems = Read-AddonEntries $guideRecord.class $guideRecord.guide $guideRecord.phase
     $missing = @($wowheadItems.Values | Where-Object { -not $addonItems.ContainsKey($_.id) } | Sort-Object slot,name)
     $extra = @($addonItems.Values | Where-Object { -not $wowheadItems.ContainsKey($_.id) } | Sort-Object slot,name)
+    foreach ($item in $extra) {
+        $item | Add-Member -NotePropertyName mentionedInGuide -NotePropertyValue (
+            $html.IndexOf($item.name, [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+            $html -match ('/tbc/item=' + $item.id + '(?:/|"|\?)')
+        )
+    }
     $slotDifferences = @($wowheadItems.Values | Where-Object { $addonItems.ContainsKey($_.id) -and $addonItems[$_.id].slot -ne $_.slot } | Sort-Object slot,name)
+    foreach ($item in $slotDifferences) {
+        $item | Add-Member -NotePropertyName addonSlot -NotePropertyValue $addonItems[$item.id].slot
+    }
     $reports += [pscustomobject]@{
         class=$guideRecord.class; guide=$guideRecord.guide; phase=$guideRecord.phase; title=$title; url=$guideRecord.url
         wowheadItems=$wowheadItems.Count; addonItems=$addonItems.Count; missingFromAddon=$missing
         addonOnly=$extra; slotDifferences=$slotDifferences
+    }
+}
+
+if ($Strict) {
+    $unresolvedMissing = @($reports | ForEach-Object { @($_.missingFromAddon) })
+    $unmentionedAddonOnly = @($reports | ForEach-Object { @($_.addonOnly) | Where-Object { -not $_.mentionedInGuide } })
+    if ($unresolvedMissing.Count -gt 0 -or $unmentionedAddonOnly.Count -gt 0) {
+        throw "Wowhead audit failed: $($unresolvedMissing.Count) missing items and $($unmentionedAddonOnly.Count) unmentioned addon-only items."
     }
 }
 

@@ -4,9 +4,10 @@ $projectRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Pa
 $core = Get-Content -LiteralPath (Join-Path $projectRoot "Core.lua") -Raw
 $data = Get-Content -LiteralPath (Join-Path $projectRoot "Data.lua") -Raw
 $engine = Get-Content -LiteralPath (Join-Path $projectRoot "Engine.lua") -Raw
+$corrections = Get-Content -LiteralPath (Join-Path $projectRoot "WowheadCorrections.lua") -Raw
 $ui = Get-Content -LiteralPath (Join-Path $projectRoot "UI.lua") -Raw
 $diagnostics = Get-Content -LiteralPath (Join-Path $projectRoot "Diagnostics.lua") -Raw
-$allRuntime = $core + "`n" + $data + "`n" + $engine + "`n" + $diagnostics + "`n" + $ui
+$allRuntime = $core + "`n" + $data + "`n" + $corrections + "`n" + $engine + "`n" + $diagnostics + "`n" + $ui
 $errors = [System.Collections.Generic.List[string]]::new()
 
 function Require-Match([string]$Text, [string]$Pattern, [string]$Message) {
@@ -32,6 +33,7 @@ Require-Match $ui 'CreateFrame\("DressUpModel"' "DressUpModel preview is missing
 Require-Match $ui 'playerModel\.TryOn' "Item preview dressing is missing."
 Require-Match $diagnostics 'function LP:RunSelfTests' "In-game runtime self-tests are missing."
 Require-Match $core 'input == "selftest"' "The /lpw selftest command is missing."
+Require-Match $corrections 'source="Wowhead TBC Anniversary"' "The reviewed Wowhead correction layer is missing provenance metadata."
 
 if ($errors.Count -gt 0) {
     throw "Runtime contract validation failed:`n - $($errors -join "`n - ")"

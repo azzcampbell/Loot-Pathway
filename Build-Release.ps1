@@ -27,6 +27,7 @@ $addonFiles = @(
     "Core.lua",
     "Data.lua",
     "BisData.lua",
+    "WowheadCorrections.lua",
     "Engine.lua",
     "Diagnostics.lua",
     "UI.lua",
