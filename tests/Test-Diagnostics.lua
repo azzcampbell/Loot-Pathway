@@ -47,7 +47,7 @@ loadAddonFile("Diagnostics.lua", LP)
 
 local ok, diagnosticFailures = LP:RunSelfTests()
 check(ok and diagnosticFailures == nil, "the healthy runtime self-test must pass")
-check(messages[#messages] == "Self-test passed: 120 checks across profiles, guides, sources and ownership.",
+check(messages[#messages] == "Self-test passed: 122 checks across profiles, guides, sources and ownership.",
     "the runtime self-test count or success message changed unexpectedly: " .. tostring(messages[#messages]))
 
 local previewKey = "WARLOCK:Destruction:2:MAINHAND"
@@ -69,4 +69,4 @@ check(not brokenOK and detectedAtiesh, "the runtime self-test must detect the At
 if #failures > 0 then
     error("Diagnostics tests failed (" .. #failures .. "/" .. checks .. "):\n - " .. table.concat(failures, "\n - "))
 end
-print("Runtime diagnostics valid: " .. checks .. " checks passed, including the 120-check in-game self-test.")
+print("Runtime diagnostics valid: " .. checks .. " checks passed, including the 122-check in-game self-test.")
