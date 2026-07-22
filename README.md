@@ -37,7 +37,7 @@ Loot Pathway is a lightweight, visual gear checklist for **World of Warcraft: Th
 - Talent detection remains automatic; specs with more than one role guide can switch guide from the character panel. Feral Combat supports both Cat and Bear.
 - `/lpw selftest` runs the bundled runtime checks for profiles, guides, sources and ownership.
 
-The bundled dataset began as a standalone snapshot generated from **Loon Best In Slot 1.0.9** and does not require Loon at runtime. Its 25 class/spec/role guides across Pre-Raid, Phase 1 and Phase 2 are now checked against the corresponding current [Wowhead TBC BIS guides](https://www.wowhead.com/tbc/guides/classes/best-in-slot-guides-burning-crusade-classic). Reviewed additions, removals and slot corrections live in `WowheadCorrections.lua`; the exact source manifests and repeatable auditor live under `tools/`.
+The bundled dataset began as a standalone snapshot generated from **Loon Best In Slot 1.0.9** and does not require Loon at runtime. Its 25 class/spec/role guides across Pre-Raid, Phase 1 and Phase 2 are now checked against the corresponding current [Wowhead TBC BIS guides](https://www.wowhead.com/tbc/guides/classes/best-in-slot-guides-burning-crusade-classic). The reviewed runtime dataset contains 7,228 entries and 1,462 unique items. Additions, removals and slot corrections live in `WowheadCorrections.lua`; the exact source manifests and repeatable auditor live under `tools/`.
 
 ## Install
 

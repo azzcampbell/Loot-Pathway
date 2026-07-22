@@ -170,15 +170,6 @@ local removals = {
 
 LP.BIS_CORRECTION_META = {source="Wowhead TBC Anniversary",phases="0,1,2",reviewed="2026-07-22",groups=#corrections,slotCorrections=#slotCorrections,removals=#removals}
 
-local knownItems = {}
-for _, classGuides in pairs(LP.BIS_LISTS or {}) do
-    for _, phases in pairs(classGuides) do
-        for _, entries in pairs(phases) do
-            for _, entry in ipairs(entries) do knownItems[entry[1]] = true end
-        end
-    end
-end
-
 LP.BIS_CORRECTION_SOURCES = {}
 for _, correction in ipairs(removals) do
     local phaseEntries = LP.BIS_LISTS[correction.class][correction.guide][correction.phase]
@@ -190,6 +181,21 @@ for _, correction in ipairs(removals) do
     end
     LP.BIS_CORRECTION_SOURCES[correction.class .. ":" .. correction.guide .. ":" .. correction.phase .. ":" .. correction.item] = correction.source
 end
+
+local knownItems, uniqueItems = {}, 0
+for _, classGuides in pairs(LP.BIS_LISTS or {}) do
+    for _, phases in pairs(classGuides) do
+        for _, entries in pairs(phases) do
+            for _, entry in ipairs(entries) do
+                if not knownItems[entry[1]] then
+                    knownItems[entry[1]] = true
+                    uniqueItems = uniqueItems + 1
+                end
+            end
+        end
+    end
+end
+LP.BIS_DATA_META.uniqueItems = uniqueItems
 
 for _, correction in ipairs(corrections) do
     local phaseEntries = LP.BIS_LISTS[correction.class][correction.guide][correction.phase]

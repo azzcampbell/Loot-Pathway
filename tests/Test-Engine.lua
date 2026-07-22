@@ -34,6 +34,7 @@ loadAddonFile("BisData.lua", LP)
 loadAddonFile("WowheadCorrections.lua", LP)
 loadAddonFile("Engine.lua", LP)
 
+check(LP.BIS_DATA_META.entries == 7228 and LP.BIS_DATA_META.uniqueItems == 1462, "reviewed runtime dataset totals must remain stable")
 local detectedClass, detectedSpec = LP:GetPlayerBuild()
 check(detectedClass == "WARRIOR" and detectedSpec == "Fury", "talent points must resolve the active specialization")
 local feralChoices = LP:GetGuideChoices("DRUID", "Feral Combat")
