@@ -29,8 +29,12 @@
       box-shadow: 0 16px 44px rgba(0,0,0,.35);
     }
     #loot-pathway-preview .lp-topbar { height: 68px; position: relative; border-top: 2px solid var(--lp-gold); }
-    #loot-pathway-preview .lp-title { text-align: center; padding-top: 10px; font-size: 20px; letter-spacing: .02em; }
-    #loot-pathway-preview .lp-subtitle { text-align: center; color: var(--lp-muted); font: 11px Arial, sans-serif; letter-spacing: .09em; margin-top: 1px; }
+    #loot-pathway-preview .lp-title-row { width: 330px; margin: 0 auto; padding-top: 9px; display: flex; align-items: center; gap: 14px; }
+    #loot-pathway-preview .lp-title-rule { height: 2px; flex: 1; background: rgba(214,171,92,.72); }
+    #loot-pathway-preview .lp-title { text-align: center; font-size: 20px; letter-spacing: .02em; white-space: nowrap; }
+    #loot-pathway-preview .lp-subtitle { text-align: center; color: var(--lp-muted); font: 11px Arial, sans-serif; letter-spacing: .055em; margin-top: 1px; }
+    #loot-pathway-preview .lp-header-divider { position: absolute; left: 18px; right: 18px; bottom: 8px; height: 1px; background: var(--lp-line); }
+    #loot-pathway-preview .lp-header-divider::after { content: ""; position: absolute; width: 72px; height: 2px; left: 50%; top: -1px; transform: translateX(-50%); background: var(--lp-gold); }
     #loot-pathway-preview .lp-close { position: absolute; right: 16px; top: 12px; width: 29px; height: 29px; background: var(--lp-panel); color: var(--lp-muted); border: 1px solid var(--lp-line); }
     #loot-pathway-preview .lp-layout { display: grid; grid-template-columns: 516px minmax(0,1fr); gap: 0; align-items: start; }
     #loot-pathway-preview .lp-character { margin: 0 16px 70px; height: 485px; border: 1px solid var(--lp-line); position: relative; background: var(--lp-panel); }
@@ -122,8 +126,9 @@
   <button type="button" class="btn lp-reopen">Open Loot Pathway preview</button>
   <section class="lp-shell" aria-label="Interactive Loot Pathway interface preview">
     <header class="lp-topbar">
-      <div class="lp-title">Loot Pathway</div>
-      <div class="lp-subtitle">Your BIS-List gear route</div>
+      <div class="lp-title-row"><span class="lp-title-rule"></span><div class="lp-title">Loot Pathway</div><span class="lp-title-rule"></span></div>
+      <div class="lp-subtitle">See what to chase next, and where it drops.</div>
+      <div class="lp-header-divider"></div>
       <button type="button" class="lp-close" aria-label="Close preview">╳</button>
     </header>
     <div class="lp-layout">

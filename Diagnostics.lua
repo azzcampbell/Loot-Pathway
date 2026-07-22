@@ -30,6 +30,34 @@ function LP:RunSelfTests()
     check(guideCount == 25, "expected 25 embedded guides, found " .. guideCount)
     check(CountKeys(self.BIS_LISTS) == 9, "expected BIS data for 9 classes")
 
+    for class, guides in pairs(self.BIS_LISTS or {}) do
+        local reachable = {}
+        for _, guideName in ipairs(self:GetClassGuideChoices(class)) do reachable[guideName] = true end
+        local missing = {}
+        for guideName in pairs(guides) do
+            if not reachable[guideName] then table.insert(missing, guideName) end
+        end
+        table.sort(missing)
+        check(#missing == 0, class .. " picker cannot reach: " .. table.concat(missing, ", "))
+    end
+
+    local playerClass, playerSpec = self:GetPlayerBuild()
+    local selectedGuide, playerGuide = self:GetEmbeddedSpec(playerClass, playerSpec)
+    check(selectedGuide and type(playerGuide) == "table", "current character does not resolve to a selectable BIS guide")
+
+    local phaseTwoPlan = self:GetModelPreviewPlan(self.BIS_DATA_META.currentPhase)
+    local planHasTwoHand, planHasOffHand = false, false
+    for _, item in ipairs(phaseTwoPlan.items or {}) do
+        if item.slot == "MAINHAND" and item.bisSlot == "Two Hand" then planHasTwoHand = true end
+        if item.slot == "OFFHAND" then planHasOffHand = true end
+    end
+    check(not (planHasTwoHand and planHasOffHand), "current Phase 2 preview combines a two-hander with an off hand")
+
+    local atieshByClass = {DRUID=22632, MAGE=22589, PRIEST=22631, WARLOCK=22630}
+    local phaseTwoMain = self:GetPhasePrimaryTargets("MAINHAND", self.BIS_DATA_META.currentPhase)[1]
+    check(not atieshByClass[playerClass] or not phaseTwoMain or phaseTwoMain.id ~= atieshByClass[playerClass],
+        "Atiesh is incorrectly selected as the current Phase 2 default weapon")
+
     local druidChoices = self:GetGuideChoices("DRUID", "Feral Combat")
     local hasCat, hasBear = false, false
     for _, guideName in ipairs(druidChoices) do

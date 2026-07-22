@@ -6,15 +6,20 @@ $readme = Get-Content -LiteralPath (Join-Path $projectRoot "README.md") -Raw
 $curseForge = Get-Content -LiteralPath (Join-Path $projectRoot "CURSEFORGE.md") -Raw
 $releaseGuide = Get-Content -LiteralPath (Join-Path $projectRoot "RELEASING.md") -Raw
 $publisher = Get-Content -LiteralPath (Join-Path $projectRoot "Publish-Release.ps1") -Raw
+$license = Get-Content -LiteralPath (Join-Path $projectRoot "LICENSE") -Raw
 $playerFiles = @("BisData.lua", "Data.lua", "WowheadCorrections.lua", "README.md", "CURSEFORGE.md")
 $errors = [System.Collections.Generic.List[string]]::new()
 
 if ($toc -notmatch '(?m)^## Interface:\s*20506\s*$') { $errors.Add("TOC does not target TBC Anniversary interface 20506.") }
 if ($toc -notmatch '(?m)^## Author:\s*Mozley\s*$') { $errors.Add("TOC author metadata is not Mozley.") }
 if ($toc -notmatch '(?m)^## Version:\s*\d+\.\d+\.\d+\s*$') { $errors.Add("TOC version is not semantic.") }
+if ($toc -notmatch '(?im)^## X-License:\s*All Rights Reserved\s*$') { $errors.Add("TOC licence is not All Rights Reserved.") }
 if ($toc -notmatch '(?im)^## Notes:.*level 70') { $errors.Add("TOC description does not state the level 70 scope.") }
 if ($readme -notmatch '(?is)max-level\s*\(level 70\).*not a levelling addon') { $errors.Add("README does not state the level 70-only scope.") }
 if ($curseForge -notmatch '(?is)max-level\s*\(level 70\).*not a levelling addon') { $errors.Add("CurseForge description does not state the level 70-only scope.") }
+if ($license -notmatch '(?i)Northern Stack Studios.*All rights reserved') { $errors.Add("LICENSE does not contain the approved All Rights Reserved notice.") }
+if ($readme -notmatch '(?is)Licence.*All Rights Reserved') { $errors.Add("README does not state the approved licence.") }
+if ($curseForge -notmatch '(?is)Licence.*All Rights Reserved') { $errors.Add("CurseForge description does not state the approved licence.") }
 foreach ($publicCopy in @(@{Name="README"; Text=$readme}, @{Name="CurseForge description"; Text=$curseForge})) {
     if ($publicCopy.Text -notmatch '(?is)what gear should I go for next.*where does it come from') {
         $errors.Add("$($publicCopy.Name) does not lead with the agreed player question.")

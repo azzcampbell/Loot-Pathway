@@ -4,23 +4,26 @@ Run this checklist against the exact release-candidate ZIP in TBC Anniversary wi
 
 ## Current pre-release package
 
-- Tested runtime source commit: `9182b35`; later documentation-only commits do not alter the package runtime.
+- Tested runtime source: current V1 corrective worktree; record the commit after in-game acceptance.
 - Addon version under test: `0.4.7` (the version will become `1.0.0` only after acceptance).
 - Package: `LootPathway-0.4.7.zip`.
-- Reproducible SHA-256: `C95A45DEED5868FE6C014F85281A8D17953D3C4D2571F0C83B10DB44F03EF74D`.
-- Package structure: one `LootPathway` root containing 12 approved files, byte-identical to source.
-- Installed copy: all 12 files byte-identical to this package on 22 July 2026.
-- Automated evidence: 7,188 BIS rows validated; GitHub/CurseForge file-manifest parity passed; 24 engine checks and 14 profile-migration checks passed with Lua 5.1.5.
+- Reproducible SHA-256: `97E71BD41A026454822236C2286C00B7E0D6338952BD7D531522D5A2CFDEEDFB`.
+- Package structure: one `LootPathway` root containing 13 approved files, byte-identical to source.
+- Installed copy: all 13 files byte-identical to this package on 22 July 2026; in-game verification remains pending.
+- Automated evidence: 7,188 BIS rows validated; GitHub/CurseForge file-manifest parity passed; 58 engine checks, 18 core/profile checks and three runtime-diagnostics checks passed with Lua 5.1.5. The engine matrix covers all 75 guide/phase model plans and all ten Phase 2 caster guides relevant to Atiesh; the diagnostics suite executes the same 108-check `/lpw selftest` used in-game.
+- Author acceptance: **passed on 22 July 2026**. Aaron ran `/lpw selftest`, received the expected 108-check pass and confirmed the Warlock weapon route and selected-slot border behaviour were good. He then accepted the installed header-only revision and explicitly authorised deployment. The self-test implementation and all other runtime behaviour were unchanged by that final visual revision.
+
+The author sign-off covers the currently installed live-client flow. Fresh legacy migration, dual-spec switching, Feral Cat/Bear persistence, opposite-faction filtering and the complete multi-resolution matrix were not separately rerun on this final hash; their automated checks remain green, and those manual cases are recorded as accepted release risks rather than falsely marked as individually passed.
 
 Any runtime-file change invalidates this evidence and requires a new package, hash and complete affected test rerun.
 
 ## Core smoke test
 
-- [ ] Start with Loot Pathway enabled and no Lua error on login.
-- [ ] Run `/lpw selftest` and record the complete pass/fail chat line.
+- [x] Start with Loot Pathway enabled and no blocking Lua error on login.
+- [x] Run `/lpw selftest` and record the complete pass/fail chat line. Result: `Self-test passed: 108 checks across profiles, guides, sources and ownership.`
 - [ ] Open and close the main window from `/lpw` and the minimap button.
 - [ ] Open `/lpw options`, hide the minimap button, restore it, then verify Ctrl-right-click hides it and the options panel recovers it.
-- [ ] `/reload` and confirm window position, scale, phase, collapsed sections and minimap preference persist.
+- [ ] `/reload` and confirm window position, scale, collapsed sections and minimap preference persist; opening the addon must return to Reset.
 
 ## Character and guide state
 
@@ -28,7 +31,7 @@ Any runtime-file change invalidates this evidence and requires a new package, ha
 - [ ] On an upgraded legacy profile, confirm previous ownership appears only on the first character loaded after migration.
 - [ ] Change talent tree without `/reload`; confirm the class/spec/guide line, phase targets, drawer and model refresh.
 - [ ] Change active talent group without `/reload`; confirm the same refresh and no stale preview label.
-- [ ] On a Feral Druid, click the guide line to switch Cat to Bear, `/reload`, confirm persistence, then switch back to automatic Cat.
+- [ ] On a Feral Druid, open the spec picker, switch Cat to Bear, `/reload`, confirm persistence, then select `Cat - Current`.
 
 ## Gear and model behaviour
 

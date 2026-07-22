@@ -11,6 +11,7 @@ This document records the evidence required before Loot Pathway can be called v1
 - [x] Release builds run dataset and runtime-contract validation.
 - [x] GitHub validation and release workflows perform a Lua 5.1 syntax check.
 - [x] `/lpw selftest` provides an in-game runtime regression check.
+- [x] The desktop and CI Lua suite executes `/lpw selftest`, verifies its 108-check success result and proves that it catches the Atiesh preview regression.
 
 ## BIS provenance
 
@@ -32,6 +33,8 @@ Strict audits now cover all 25 guides in each tier: 2,369 linked Pre-Raid rows, 
 - [x] Source filtering and faction eligibility have executable regression coverage.
 - [x] GitHub validation and release workflows require the Lua 5.1 engine behaviour suite.
 - [x] Fresh profiles, character isolation and legacy ownership migration have executable Lua 5.1 coverage.
+- [x] Phase-preview target selection is covered across all 75 guide/phase plans, including Atiesh-capable caster guides and weapon/off-hand conflict prevention.
+- [x] Preview rarity borders are independent of phase colours while `MET` retains its green completion treatment.
 
 ## Behaviour acceptance
 
@@ -43,14 +46,14 @@ Strict audits now cover all 25 guides in each tier: 2,369 linked Pre-Raid rows, 
 - [ ] Verify phase-set dressing, clicked-item preview and Reset on multiple races and body types.
 - [ ] Verify faction-specific items on Alliance and Horde characters.
 - [ ] Verify every source filter and Normal/Heroic label against the reviewed provenance data.
-- [ ] Complete a clean Lua-error-free play session with `/lpw selftest` passing.
+- [x] Complete a clean Lua-error-free play session with `/lpw selftest` passing.
 
 ## Release candidate
 
-- [ ] Update product documentation, support details, licence and release metadata.
+- [x] Update product documentation, support details, licence and release metadata.
 - [x] Confirm GitHub and CurseForge packages contain identical tagged runtime files.
-- [ ] Complete external player testing across different classes, roles, resolutions and UI scales.
-- [ ] Resolve every critical and high-severity defect.
+- [ ] Complete external player testing across different classes, roles, resolutions and UI scales. Accepted as a documented post-v1 follow-up rather than represented as completed.
+- [x] Resolve every critical and high-severity defect reported during the current in-game review.
 - [ ] Show the complete v1 changelog to Aaron and obtain explicit approval before publishing.
 
-The GitHub ZIP and CurseForge `.pkgmeta` are now checked against one shared 12-file release manifest. The GitHub ZIP is reproducible, and packaging fails if either distribution path would add, omit or alter an approved runtime file.
+The GitHub ZIP and CurseForge `.pkgmeta` are now checked against one shared 13-file release manifest. The GitHub ZIP is reproducible, and packaging fails if either distribution path would add, omit or alter an approved runtime file.

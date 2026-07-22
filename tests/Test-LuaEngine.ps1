@@ -17,3 +17,5 @@ $luaPath = if ($luaCommand.Source) { $luaCommand.Source } else { $luaCommand.Ful
 if ($LASTEXITCODE -ne 0) { throw "Lua engine behaviour tests failed." }
 & $luaPath (Join-Path $projectRoot "tests\Test-Core.lua") $projectRoot
 if ($LASTEXITCODE -ne 0) { throw "Lua core profile migration tests failed." }
+& $luaPath (Join-Path $projectRoot "tests\Test-Diagnostics.lua") $projectRoot
+if ($LASTEXITCODE -ne 0) { throw "Lua runtime diagnostics tests failed." }

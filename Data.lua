@@ -35,10 +35,29 @@ LP.BIS_GUIDE_CHOICES = {
 -- Wowhead Phase 2 treats Voidheart Gloves as a two-piece set option rather
 -- than the slot's Phase 2 BIS for Destruction.
 LP.BIS_RANK_OVERRIDES = {
+    ["HUNTER:Survival:2:29298"] = "BIS",
     ["WARLOCK:Destruction:2:28968"] = "2PC",
 }
+-- Wowhead ranks weapons inside separate one-hand and two-hand sections. These
+-- display overrides combine those sections into one honest personal-DPS route.
+-- Atiesh remains listed because its party aura gives it exceptional raid value,
+-- but the guide explicitly states that its personal stats trail the best 1H+OH.
+LP.BIS_DISPLAY_ORDER_OVERRIDES = {
+    ["WARLOCK:Affliction:2:22630"] = 4,
+    ["WARLOCK:Demonology:2:22630"] = 3,
+    ["WARLOCK:Destruction:2:22630"] = 3,
+}
+LP.BIS_PREVIEW_OVERRIDES = {
+    ["WARLOCK:Affliction:2:MAINHAND"] = 32053,
+    ["WARLOCK:Demonology:2:MAINHAND"] = 32053,
+    ["WARLOCK:Destruction:2:MAINHAND"] = 32053,
+}
 LP.BIS_OVERRIDE_SOURCES = {
+    ["HUNTER:Survival:2:29298"] = "https://www.wowhead.com/tbc/guide/classes/hunter/survival/dps-bis-gear-pve-phase-2",
     ["WARLOCK:Destruction:2:28968"] = "https://www.wowhead.com/tbc/guide/classes/warlock/destruction/dps-bis-gear-pve-phase-2",
+    ["WARLOCK:Affliction:2:22630"] = "https://www.wowhead.com/tbc/guide/classes/warlock/affliction/dps-bis-gear-pve-phase-2",
+    ["WARLOCK:Demonology:2:22630"] = "https://www.wowhead.com/tbc/guide/classes/warlock/demonology/dps-bis-gear-pve-phase-2",
+    ["WARLOCK:Destruction:2:22630"] = "https://www.wowhead.com/tbc/guide/classes/warlock/destruction/dps-bis-gear-pve-phase-2",
 }
 
 LP.SLOTS = {

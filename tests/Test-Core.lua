@@ -46,6 +46,21 @@ check(type(fresh.characterDB.completed) == "table", "fresh character completion 
 fresh:ToggleItemCompleted(100)
 check(fresh:IsItemCompleted(100), "fresh character ownership toggle did not persist")
 
+fresh.frame = {shown=false}
+function fresh.frame:IsShown() return self.shown end
+function fresh.frame:Show() self.shown=true end
+function fresh.frame:Hide() self.shown=false end
+fresh.db.displayPhase, fresh.previewItem = 0, {id=999}
+fresh.HideGuideMenu = function(self) self.guideMenuHidden=true end
+local openRefreshBefore, openModelBefore = fresh.refreshCount or 0, fresh.modelRefreshCount or 0
+fresh:Toggle()
+check(fresh.frame:IsShown() and fresh.db.displayPhase == -1, "opening the addon must always start on Reset")
+check(fresh.previewItem == nil and fresh.guideMenuHidden, "opening the addon must clear stale item and guide previews")
+check((fresh.refreshCount or 0) == openRefreshBefore + 1 and (fresh.modelRefreshCount or 0) == openModelBefore + 1,
+    "opening the addon must synchronise the equipped model and Reset gear display")
+fresh:Toggle()
+check(not fresh.frame:IsShown(), "toggling an open addon must close it")
+
 playerName = "Beta"
 fresh:ActivateCharacterProfile()
 check(not fresh:IsItemCompleted(100), "ownership leaked between characters")

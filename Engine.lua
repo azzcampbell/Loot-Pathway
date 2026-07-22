@@ -83,6 +83,31 @@ function LP:GetGuideChoices(class, talentSpec)
     return choices
 end
 
+function LP:GetClassGuideChoices(class)
+    local choices, seen = {}, {}
+    local function add(guideName)
+        if guideName and not seen[guideName] and self.BIS_LISTS[class] and self.BIS_LISTS[class][guideName] then
+            seen[guideName] = true
+            table.insert(choices, guideName)
+        end
+    end
+
+    for _, specData in ipairs(self.SPECS[class] or {}) do
+        local talentSpec = specData[1]
+        add(self.BIS_SPEC_MAP[class] and self.BIS_SPEC_MAP[class][talentSpec])
+        local configured = self.BIS_GUIDE_CHOICES and self.BIS_GUIDE_CHOICES[class] and self.BIS_GUIDE_CHOICES[class][talentSpec]
+        for _, guideName in ipairs(configured or {}) do add(guideName) end
+    end
+
+    local remaining = {}
+    for guideName in pairs(self.BIS_LISTS[class] or {}) do
+        if not seen[guideName] then table.insert(remaining, guideName) end
+    end
+    table.sort(remaining)
+    for _, guideName in ipairs(remaining) do add(guideName) end
+    return choices
+end
+
 function LP:GetEmbeddedSpec(class, talentSpec)
     local automatic = self.BIS_SPEC_MAP[class] and self.BIS_SPEC_MAP[class][talentSpec]
     local override = self:GetGuideOverride(talentSpec)
@@ -118,6 +143,13 @@ function LP:GetEffectiveRank(phase, itemID, rank)
     local embeddedSpec = self:GetEmbeddedSpec(class, talentSpec)
     local key = class .. ":" .. tostring(embeddedSpec or talentSpec) .. ":" .. tostring(phase) .. ":" .. tostring(itemID)
     return (self.BIS_RANK_OVERRIDES and self.BIS_RANK_OVERRIDES[key]) or rank or "Alt"
+end
+
+function LP:GetEffectiveDisplayOrder(phase, itemID, displayOrder)
+    local class, talentSpec = self:GetPlayerBuild()
+    local embeddedSpec = self:GetEmbeddedSpec(class, talentSpec)
+    local key = class .. ":" .. tostring(embeddedSpec or talentSpec) .. ":" .. tostring(phase) .. ":" .. tostring(itemID)
+    return (self.BIS_DISPLAY_ORDER_OVERRIDES and self.BIS_DISPLAY_ORDER_OVERRIDES[key]) or displayOrder
 end
 
 function LP:GetEquippedLevel(inventorySlot)
@@ -192,19 +224,19 @@ function LP:GetInventoryListPosition(inventory, slotKey, guide)
     local link = GetInventoryItemLink("player", inventory)
     local itemID = (GetInventoryItemID and GetInventoryItemID("player", inventory)) or ItemIDFromLink(link)
     if not itemID or not guide then return -1, nil end
-    local bestPhase, bestRank, bestIsBIS = -1, nil, false
+    local bestPhase, bestRank, bestOrder, bestIsBIS = -1, nil, nil, false
     for phase = 0, (self.BIS_DATA_META.currentPhase or 2) do
         for _, entry in ipairs(guide[phase] or {}) do
             if entry[1] == itemID and self:EntryFitsSlot(entry[2], slotKey) then
                 local rank = self:GetEffectiveRank(phase, entry[1], entry[3])
                 local isBIS = string.find(rank, "BIS", 1, true) ~= nil
                 if (isBIS and (not bestIsBIS or phase > bestPhase)) or (not bestIsBIS and phase > bestPhase) then
-                    bestPhase, bestRank, bestIsBIS = phase, rank, isBIS
+                    bestPhase, bestRank, bestOrder, bestIsBIS = phase, rank, entry[9], isBIS
                 end
             end
         end
     end
-    return bestPhase, bestRank
+    return bestPhase, bestRank, bestOrder
 end
 
 function LP:IsCurrentPhaseBIS(itemID, slotKey)
@@ -228,6 +260,7 @@ end
 function LP:GetBisItem(entry, phase, slot, equippedLevel)
     local itemID, bisSlot, rank, fallbackName, sourceType, source, location, _, displayOrder = unpack(entry)
     rank = self:GetEffectiveRank(phase, itemID, rank)
+    displayOrder = self:GetEffectiveDisplayOrder(phase, itemID, displayOrder)
     local name, link, quality, level, _, _, _, _, _, icon = GetItemInfo(itemID)
     local tier = self:ClassifySource(sourceType, source, location)
     return {
@@ -291,7 +324,64 @@ function LP:GetPhasePrimaryTargets(slotKey, phase)
         end
     end
     if #primary == 0 then primary = fallback end
+    local class, talentSpec = self:GetPlayerBuild()
+    local embeddedSpec = self:GetEmbeddedSpec(class, talentSpec)
+    local previewKey = class .. ":" .. tostring(embeddedSpec or talentSpec) .. ":" .. tostring(phase) .. ":" .. tostring(slotKey)
+    local preferredID = self.BIS_PREVIEW_OVERRIDES and self.BIS_PREVIEW_OVERRIDES[previewKey]
+    if preferredID then
+        for index, item in ipairs(primary) do
+            if item.id == preferredID then
+                table.remove(primary, index)
+                table.insert(primary, 1, item)
+                break
+            end
+        end
+    end
     return primary
+end
+
+function LP:GetPhaseTargetAssignments(slotKey, phase)
+    local slot = self:GetSlot(slotKey)
+    local targets = self:GetPhasePrimaryTargets(slotKey, phase)
+    if not slot then return {} end
+
+    local inventories = type(slot.inventory) == "table" and slot.inventory or {slot.inventory}
+    local assignments, used = {}, {}
+
+    -- Paired slots should keep an exact equipped target in its real inventory
+    -- position. This prevents one ring or trinket from satisfying both previews.
+    for ordinal, inventory in ipairs(inventories) do
+        local link = GetInventoryItemLink("player", inventory)
+        local equippedID = (GetInventoryItemID and GetInventoryItemID("player", inventory)) or ItemIDFromLink(link)
+        if equippedID then
+            for targetIndex, target in ipairs(targets) do
+                if not used[targetIndex] and target.id == equippedID then
+                    assignments[ordinal], used[targetIndex] = target, true
+                    break
+                end
+            end
+        end
+    end
+
+    local nextTarget = 1
+    for ordinal = 1, #inventories do
+        if not assignments[ordinal] then
+            while nextTarget <= #targets and used[nextTarget] do nextTarget = nextTarget + 1 end
+            if nextTarget <= #targets then
+                assignments[ordinal], used[nextTarget] = targets[nextTarget], true
+                nextTarget = nextTarget + 1
+            end
+        end
+    end
+    return assignments
+end
+
+function LP:GetPhaseDisplayTarget(slotKey, phase, ordinal)
+    if slotKey == "OFFHAND" then
+        local mainHandTarget = self:GetPhaseTargetAssignments("MAINHAND", phase)[1]
+        if mainHandTarget and mainHandTarget.bisSlot == "Two Hand" then return nil end
+    end
+    return self:GetPhaseTargetAssignments(slotKey, phase)[ordinal or 1]
 end
 
 function LP:GetModelPreviewPlan(phase, previewItem)
@@ -302,7 +392,7 @@ function LP:GetModelPreviewPlan(phase, previewItem)
     if phase >= 0 then
         for _, slot in ipairs(self.SLOTS or {}) do
             if slot.key ~= "OFFHAND" or not phaseUsesTwoHand then
-                local targets = self:GetPhasePrimaryTargets(slot.key, phase)
+                local targets = self:GetPhaseTargetAssignments(slot.key, phase)
                 local inventories = type(slot.inventory) == "table" and slot.inventory or {slot.inventory}
                 for ordinal = 1, #inventories do
                     local target = targets[ordinal]
@@ -346,11 +436,15 @@ function LP:IsTargetMet(target, phase, inventory)
     local equippedID = inventory and ((GetInventoryItemID and GetInventoryItemID("player", inventory)) or ItemIDFromLink(link))
     if equippedID == target.id then return true, "Same target equipped" end
 
-    local equippedPhase, equippedRank
-    if inventory then equippedPhase, equippedRank = self:GetInventoryListPosition(inventory, target.slot, guide)
+    local equippedPhase, equippedRank, equippedOrder
+    if inventory then equippedPhase, equippedRank, equippedOrder = self:GetInventoryListPosition(inventory, target.slot, guide)
     else equippedPhase, equippedRank = self:GetListPosition(target.slot, guide) end
     if equippedPhase > phase then return true, "Later BIS-list target equipped" end
-    if equippedPhase == phase and equippedRank and string.find(equippedRank, "BIS", 1, true) then return true, "Same-phase BIS target equipped" end
+    local targetOrder = target.displayOrder or target.listOrder
+    if equippedPhase == phase and equippedRank and string.find(equippedRank, "BIS", 1, true) and
+       equippedOrder and targetOrder and equippedOrder <= targetOrder then
+        return true, equippedOrder < targetOrder and "Higher-ranked same-phase target equipped" or "Same-ranked BIS target equipped"
+    end
 
     return false, nil
 end

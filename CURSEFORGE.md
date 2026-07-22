@@ -22,3 +22,5 @@ Click any equipment slot to see the relevant BIS and alternative items for your 
 The bundled lists are reviewed against the current Wowhead TBC BIS guides. Loot Pathway does not calculate upgrades from item level or guarantee that every listed item will improve your particular character; it gives you a clear, easy-to-follow route through the relevant BIS lists.
 
 Use `/lpw` to open it and `/lpw options` for minimap settings.
+
+**Licence:** All Rights Reserved.

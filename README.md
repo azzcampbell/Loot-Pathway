@@ -60,6 +60,10 @@ Run `tests/Test-All.ps1` before packaging. With Lua 5.1 available, it also exerc
 
 Report reproducible problems through [GitHub Issues](https://github.com/azzcampbell/Loot-Pathway/issues). Please include your class, talent tree, selected guide and phase, plus the item or source involved.
 
+## Licence
+
+Copyright (c) 2026 Northern Stack Studios. All Rights Reserved. See [LICENSE](LICENSE).
+
 ## Publishing a release
 
 Commit the addon changes first, then run:

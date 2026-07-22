@@ -11,6 +11,7 @@ function Get-LootPathwayReleaseFiles {
         "Assets\Brand\LootPathway-Minimap.tga",
         "Assets\Brand\NorthernStack-Mark.tga",
         "CHANGELOG.md",
+        "LICENSE",
         "README.md"
     )
 }

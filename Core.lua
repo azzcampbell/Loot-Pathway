@@ -101,7 +101,16 @@ end
 
 function LP:Toggle()
     if not self.frame then return end
-    if self.frame:IsShown() then self.frame:Hide() else self.frame:Show(); self:Refresh() end
+    if self.frame:IsShown() then
+        self.frame:Hide()
+    else
+        self.db.displayPhase = -1
+        self.previewItem = nil
+        if self.HideGuideMenu then self:HideGuideMenu() end
+        self.frame:Show()
+        self:RefreshModel()
+        self:Refresh()
+    end
 end
 
 function LP:ResetPosition()
