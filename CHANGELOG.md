@@ -1,8 +1,6 @@
-# Loot Pathway 0.4.6
+# Loot Pathway 0.4.7
 
-- Simplified the gear-list headings.
-- Made BIS rankings and filters clearer.
-- Fixed the close buttons.
-- Added a smaller Northern Stack Studios logo.
-- Corrected Normal and Heroic dungeon labels.
-- Improved automatic updates through GitHub and CurseForge.
+- Added BIS gear previews to the character model.
+- Clicking a replacement item now previews it on your character.
+- Reset returns the model to your currently equipped gear.
+- Gear previews now update when you change spec.

@@ -12,4 +12,6 @@ ignore:
   - Build-Release.ps1
   - Publish-Release.ps1
   - RELEASING.md
+  - tools
+  - loot-pathway-preview.html
   - LootPathway-0.4.5.zip

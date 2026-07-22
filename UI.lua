@@ -177,7 +177,12 @@ function LP:CreatePhaseButton(parent,phase,label,x,width)
     local button=CreateFrame("Button",nil,parent,"BackdropTemplate"); button:SetSize(width,28); button:SetPoint("TOPLEFT",x,-61)
     button.phase=phase; button.baseLabel=label; button.label=Text(button,9,C.muted,"CENTER",true); button.label:SetPoint("CENTER")
     button.rule=button:CreateTexture(nil,"OVERLAY"); button.rule:SetPoint("BOTTOMLEFT",1,1); button.rule:SetPoint("BOTTOMRIGHT",-1,1); button.rule:SetHeight(2)
-    button:SetScript("OnClick",function(self) LP.db.displayPhase=self.phase; LP:Refresh() end)
+    button:SetScript("OnClick",function(self)
+        LP.db.displayPhase=self.phase
+        LP.previewItem=nil
+        LP:RefreshModel()
+        LP:Refresh()
+    end)
     button:SetScript("OnEnter",function(self)
         self:SetBackdropBorderColor(1,1,1,1); GameTooltip:SetOwner(self,"ANCHOR_TOP")
         GameTooltip:SetText(self.phase<0 and "Show currently equipped items" or "Preview this phase's BIS-list targets")
@@ -322,11 +327,16 @@ function LP:CreateBrandFooter(frame)
     local studio=Text(brand,9,C.text,"LEFT",true); studio:SetPoint("LEFT",mark,"RIGHT",7,0); studio:SetPoint("RIGHT",-5,0); studio:SetText("Northern Stack Studios")
 end
 
+local function SetModelFacing(model,facing)
+    if model.SetFacing then pcall(model.SetFacing,model,facing)
+    elseif model.SetRotation then pcall(model.SetRotation,model,facing) end
+end
+
 function LP:EnableModelRotation(model,hint)
     model:EnableMouse(true); model:RegisterForDrag("LeftButton"); model:SetScript("OnDragStart",function(self) self.dragX=GetCursorPosition() end)
-    model:SetScript("OnUpdate",function(self) if not self.dragX then return end; local x=GetCursorPosition(); local scale=UIParent:GetEffectiveScale() or 1; LP.db.modelFacing=(LP.db.modelFacing or 0)+((x-self.dragX)/scale)*.012; self.dragX=x; pcall(self.SetFacing,self,LP.db.modelFacing) end)
+    model:SetScript("OnUpdate",function(self) if not self.dragX then return end; local x=GetCursorPosition(); local scale=UIParent:GetEffectiveScale() or 1; LP.db.modelFacing=(LP.db.modelFacing or 0)+((x-self.dragX)/scale)*.012; self.dragX=x; SetModelFacing(self,LP.db.modelFacing) end)
     model:SetScript("OnDragStop",function(self) self.dragX=nil end)
-    model:SetScript("OnMouseDown",function(self,button) if button=="RightButton" then LP.db.modelFacing=0; pcall(self.SetFacing,self,0); hint:SetText("Facing reset - Drag to rotate") end end)
+    model:SetScript("OnMouseDown",function(self,button) if button=="RightButton" then LP.db.modelFacing=0; SetModelFacing(self,0); hint:SetText("Facing reset - Drag to rotate") end end)
 end
 
 function LP:StartModelLoading()
@@ -350,8 +360,37 @@ function LP:RefreshModel()
     if not self.playerModel then return end
     self:StartModelLoading()
     local ok=pcall(self.playerModel.SetUnit,self.playerModel,"player")
-    if ok then pcall(self.playerModel.SetFacing,self.playerModel,self.db.modelFacing or 0)
+    if ok then
+        local phase=tonumber(self.db.displayPhase) or -1
+        if phase>=0 and self.playerModel.TryOn then
+            for _,button in ipairs(self.gearButtons or {}) do
+                local targets=self:GetPhasePrimaryTargets(button.slotKey,phase)
+                local target=targets[button.ordinal or 1]
+                if target and target.id then pcall(self.playerModel.TryOn,self.playerModel,"item:"..target.id) end
+            end
+        end
+        if self.previewItem and self.previewItem.id and self.playerModel.TryOn then
+            pcall(self.playerModel.TryOn,self.playerModel,"item:"..self.previewItem.id)
+        end
+        SetModelFacing(self.playerModel,self.db.modelFacing or 0)
+        if self.modelPreviewLabel then
+            if self.previewItem then
+                self.modelPreviewLabel:SetText("PREVIEW: "..string.upper(self.previewItem.name or "SELECTED ITEM"))
+                self.modelPreviewLabel:Show()
+            elseif phase>=0 then
+                self.modelPreviewLabel:SetText(PHASES[phase].label.." BIS PREVIEW")
+                self.modelPreviewLabel:Show()
+            else self.modelPreviewLabel:Hide() end
+        end
     else self.playerModel:Hide(); self.modelFallback:Show(); if self.modelLoading then self.modelLoading:Hide() end end
+end
+
+function LP:ToggleItemPreview(item)
+    if not item then return end
+    if self.previewItem and self.previewItem.id==item.id and self.previewItem.phase==item.phase then self.previewItem=nil
+    else self.previewItem={id=item.id,name=item.name,phase=item.phase,slot=item.slot} end
+    self:RefreshModel()
+    self:Refresh()
 end
 
 function LP:CreateUI()
@@ -374,13 +413,15 @@ function LP:CreateUI()
     self.modelFallback=modelBackdrop:CreateTexture(nil,"ARTWORK"); self.modelFallback:SetSize(150,150); self.modelFallback:SetPoint("CENTER"); SetPortraitTexture(self.modelFallback,"player"); self.modelFallback:Hide()
     self.modelHint=Text(character,8,C.muted,"CENTER"); self.modelHint:SetPoint("BOTTOM",-92,70); self.modelHint:SetText("Drag to rotate - Right-click to reset")
     self.metLegend=Text(character,8,C.green,"RIGHT",true); self.metLegend:SetPoint("BOTTOMRIGHT",-20,70); self.metLegend:SetText("MET = SAME OR BETTER EQUIPPED")
-    local modelOK=pcall(function() self.playerModel=CreateFrame("PlayerModel",nil,modelBackdrop); self.playerModel:SetAllPoints(); if self.playerModel.SetCamDistanceScale then self.playerModel:SetCamDistanceScale(.9) end; self:EnableModelRotation(self.playerModel,self.modelHint) end)
+    local modelOK=pcall(function() self.playerModel=CreateFrame("DressUpModel",nil,modelBackdrop); self.playerModel:SetAllPoints(); if self.playerModel.SetCamDistanceScale then self.playerModel:SetCamDistanceScale(.9) end; self:EnableModelRotation(self.playerModel,self.modelHint) end)
     if not modelOK then if self.playerModel then self.playerModel:Hide() end; self.modelFallback:Show(); self.modelHint:Hide() end
+    local previewLabelFrame=CreateFrame("Frame",nil,modelBackdrop); previewLabelFrame:SetPoint("TOPLEFT",8,-7); previewLabelFrame:SetPoint("TOPRIGHT",-8,-7); previewLabelFrame:SetHeight(20); previewLabelFrame:SetFrameLevel(modelBackdrop:GetFrameLevel()+4)
+    self.modelPreviewLabel=Text(previewLabelFrame,9,C.gold,"CENTER",true); self.modelPreviewLabel:SetAllPoints(); self.modelPreviewLabel:Hide()
     self.modelLoading=CreateFrame("Frame",nil,modelBackdrop); self.modelLoading:SetAllPoints(); self.modelLoading:SetFrameLevel(modelBackdrop:GetFrameLevel()+10)
     self.modelLoading.shade=self.modelLoading:CreateTexture(nil,"BACKGROUND"); self.modelLoading.shade:SetColorTexture(.01,.015,.022,.98); self.modelLoading.shade:SetAllPoints()
     self.modelLoading.text=Text(self.modelLoading,14,C.gold,"CENTER",true); self.modelLoading.text:SetPoint("CENTER"); self.modelLoading.text:SetText("Loading...")
-    if modelOK then self:RefreshModel() else self.modelLoading:Hide() end
     self.gearButtons={}; for _,slot in ipairs(DISPLAY_SLOTS) do self:CreateGearButton(character,slot[1],slot[2],slot[3],slot[4],slot[5],slot[6]) end
+    if modelOK then self:RefreshModel() else self.modelLoading:Hide() end
 
     local right=CreateFrame("Frame",nil,frame,"BackdropTemplate"); right:SetPoint("TOPLEFT",518,-68); right:SetSize(DRAWER_WIDTH,490); Backdrop(right,C.panel,C.line); self.pathPane=right
     self.pathLabel=Text(right,10,C.gold); self.pathLabel:SetPoint("TOPLEFT",14,-18); self.pathLabel:SetText("REPLACEMENT DRAWER")
@@ -411,7 +452,7 @@ end
 
 function LP:AcquireRow(index)
     if self.rows[index] then return self.rows[index] end
-    local row=CreateFrame("Frame",nil,self.content,"BackdropTemplate"); row:SetSize(402,82); row:EnableMouse(true); Backdrop(row,C.raised,C.line)
+    local row=CreateFrame("Button",nil,self.content,"BackdropTemplate"); row:SetSize(402,82); row:RegisterForClicks("LeftButtonUp"); Backdrop(row,C.raised,C.line)
     row.rule=row:CreateTexture(nil,"ARTWORK"); row.rule:SetPoint("LEFT"); row.rule:SetSize(3,82)
     row.icon=row:CreateTexture(nil,"ARTWORK"); row.icon:SetSize(42,42); row.icon:SetPoint("LEFT",10,0); row.icon:SetTexCoord(.08,.92,.08,.92)
     row.number=Text(row,11,C.gold,"LEFT",true); row.number:SetPoint("TOPLEFT",60,-10); row.number:SetWidth(28)
@@ -422,15 +463,22 @@ function LP:AcquireRow(index)
     row.check=CreateFrame("Button",nil,row,"BackdropTemplate"); row.check:SetSize(26,26); row.check:SetPoint("RIGHT",-9,0); Backdrop(row.check,{.03,.04,.05,1},C.line)
     row.tick=row.check:CreateTexture(nil,"OVERLAY"); row.tick:SetTexture("Interface\\Buttons\\UI-CheckBox-Check"); row.tick:SetAllPoints()
     row.check:SetScript("OnClick",function() if row.item then local key=tostring(row.item.id); LP.db.completed[key]=not LP.db.completed[key]; LP:Refresh() end end)
-    row:SetScript("OnEnter",function(self) self:SetBackdropBorderColor(unpack(C.gold)); if self.item and self.item.link then GameTooltip:SetOwner(self,"ANCHOR_RIGHT"); GameTooltip:SetHyperlink(self.item.link); GameTooltip:Show() end end)
-    row:SetScript("OnLeave",function(self) self:SetBackdropBorderColor(unpack(C.line)); GameTooltip:Hide() end); self.rows[index]=row; return row
+    row:SetScript("OnClick",function(self) if self.item then LP:ToggleItemPreview(self.item) end end)
+    row:SetScript("OnEnter",function(self)
+        self:SetBackdropBorderColor(unpack(C.gold))
+        if self.item and self.item.link then GameTooltip:SetOwner(self,"ANCHOR_RIGHT"); GameTooltip:SetHyperlink(self.item.link); GameTooltip:AddLine("Click to preview on your character",C.gold[1],C.gold[2],C.gold[3]); GameTooltip:Show() end
+    end)
+    row:SetScript("OnLeave",function(self)
+        local selected=self.item and LP.previewItem and self.item.id==LP.previewItem.id and self.item.phase==LP.previewItem.phase
+        self:SetBackdropBorderColor(unpack(selected and C.gold or C.line)); GameTooltip:Hide()
+    end); self.rows[index]=row; return row
 end
 
 function LP:Refresh()
     if not self.frame or not self.db then return end
     local className=UnitClass("player") or "Adventurer"; local _,spec=self:GetPlayerBuild(); local embeddedSpec=self:GetEmbeddedSpec(select(2,UnitClass("player")),spec)
     self.characterName:SetText(UnitName("player") or "Your character"); self.characterBuild:SetText(className.." / "..spec..(embeddedSpec and (" - "..embeddedSpec.." list") or ""))
-    local previewPhase=tonumber(self.db.displayPhase) or -1; if self.modelHint then self.modelHint:SetShown(previewPhase<0 and self.playerModel~=nil) end
+    local previewPhase=tonumber(self.db.displayPhase) or -1; if self.modelHint then self.modelHint:SetShown(self.playerModel~=nil) end
     self:UpdatePhaseButtons(); self:UpdateSourceFilters()
     for _,button in ipairs(self.gearButtons) do self:UpdateGearButton(button) end
     if not self.drawerOpen then return end
@@ -470,6 +518,7 @@ function LP:Refresh()
                     row.sourceChip.label:SetText(item.sourceKind); row.sourceChip:SetBackdropBorderColor(unpack(tier.colour)); row.sourceChip.label:SetTextColor(unpack(tier.colour)); row.level:SetText(item.level>0 and ("i"..item.level) or "")
                     row.name:SetText(item.name); local qc=ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[item.quality]; if item.completed then row.name:SetTextColor(unpack(C.muted)) elseif qc then row.name:SetTextColor(qc.r,qc.g,qc.b) else row.name:SetTextColor(unpack(C.text)) end
                     local place=item.place~="" and item.place or item.sourceType; local source=item.boss~="" and item.boss or item.sourceType; local difficulty=item.difficulty~="" and (" "..item.difficulty) or ""; row.source:SetText(place.." - "..source..difficulty); row.tick:SetShown(item.completed); row:SetAlpha(item.completed and .68 or 1); row:Show(); y=y+89
+                    local selected=self.previewItem and item.id==self.previewItem.id and item.phase==self.previewItem.phase; row:SetBackdropBorderColor(unpack(selected and C.gold or C.line))
                 end
             end
             y=y+7

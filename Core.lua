@@ -108,6 +108,10 @@ events:SetScript("OnEvent", function(_, event, arg1)
     elseif event == "PLAYER_EQUIPMENT_CHANGED" then
         LP:RefreshModel()
         LP:Refresh()
+    elseif event == "PLAYER_TALENT_UPDATE" or event == "ACTIVE_TALENT_GROUP_CHANGED" then
+        LP.previewItem = nil
+        LP:RefreshModel()
+        LP:Refresh()
     elseif event == "GET_ITEM_INFO_RECEIVED" then
         if LP.frame and LP.frame:IsShown() then LP:Refresh() end
     elseif LP.frame then

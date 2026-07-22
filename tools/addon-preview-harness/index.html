@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Addon Preview Harness</title>
+  <style>
+    :root { color-scheme: dark; --bg:#101319; --panel:#181d25; --line:#303744; --text:#edf0f5; --muted:#929cab; --accent:#d6ab5c; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; border-bottom:1px solid var(--line); background:var(--panel); }
+    h1 { font-size:16px; font-weight:600; margin:0; }
+    .controls { display:flex; align-items:center; justify-content:flex-end; gap:10px; flex-wrap:wrap; }
+    button, select, input[type="file"]::file-selector-button { border:1px solid var(--line); background:#202631; color:var(--text); padding:7px 10px; border-radius:4px; cursor:pointer; }
+    button:hover, select:hover, input[type="file"]::file-selector-button:hover { border-color:var(--accent); }
+    label { color:var(--muted); display:flex; align-items:center; gap:7px; }
+    input[type="range"] { accent-color:var(--accent); }
+    main { padding:18px; }
+    .note { color:var(--muted); margin:0 0 12px; }
+    .viewport { position:relative; width:100%; min-height:700px; overflow:auto; border:1px solid var(--line); background:#070a0f; box-shadow:0 18px 50px rgba(0,0,0,.3) inset; }
+    .viewport.checker { background-color:#0c1016; background-image:linear-gradient(45deg,#151b24 25%,transparent 25%),linear-gradient(-45deg,#151b24 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#151b24 75%),linear-gradient(-45deg,transparent 75%,#151b24 75%); background-size:32px 32px; background-position:0 0,0 16px,16px -16px,-16px 0; }
+    .canvas { width:1100px; height:700px; transform-origin:top left; margin:24px; }
+    iframe { width:1100px; height:700px; border:0; background:#070a0f; display:block; }
+    .status { color:var(--muted); margin-top:10px; font-size:12px; }
+    @media (max-width:760px) { header { align-items:flex-start; flex-direction:column; } .controls { justify-content:flex-start; } main { padding:10px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Addon Preview Harness</h1>
+    <div class="controls">
+      <label>Load preview <input id="previewFile" type="file" accept=".html,text/html"></label>
+      <button id="resetPreview" type="button">Reset sample</button>
+      <label>Backdrop
+        <select id="backdrop">
+          <option value="dark">Dark</option>
+          <option value="checker">Checker</option>
+        </select>
+      </label>
+      <label>Zoom <input id="zoom" type="range" min="50" max="125" value="90" step="5"> <span id="zoomValue">90%</span></label>
+    </div>
+  </header>
+  <main>
+    <p class="note">Load any self-contained addon preview HTML file. The bundled Loot Pathway screen is only an example.</p>
+    <div id="viewport" class="viewport">
+      <div id="canvas" class="canvas">
+        <iframe id="previewFrame" src="../../loot-pathway-preview.html" title="Addon interface preview"></iframe>
+      </div>
+    </div>
+    <div id="status" class="status">Example loaded: Loot Pathway</div>
+  </main>
+  <script>
+    (() => {
+      const frame = document.getElementById('previewFrame');
+      const canvas = document.getElementById('canvas');
+      const viewport = document.getElementById('viewport');
+      const zoom = document.getElementById('zoom');
+      const zoomValue = document.getElementById('zoomValue');
+      const status = document.getElementById('status');
+      const defaultSource = '../../loot-pathway-preview.html';
+
+      function applyZoom() {
+        const scale = Number(zoom.value) / 100;
+        canvas.style.transform = `scale(${scale})`;
+        canvas.style.marginRight = `${24 - 1100 * (1 - scale)}px`;
+        canvas.style.marginBottom = `${24 - 700 * (1 - scale)}px`;
+        zoomValue.textContent = `${zoom.value}%`;
+      }
+      zoom.addEventListener('input', applyZoom);
+      document.getElementById('backdrop').addEventListener('change', event => viewport.classList.toggle('checker', event.target.value === 'checker'));
+      document.getElementById('previewFile').addEventListener('change', event => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          frame.removeAttribute('src');
+          frame.srcdoc = String(reader.result || '');
+          status.textContent = `Loaded locally: ${file.name}`;
+        };
+        reader.readAsText(file);
+      });
+      document.getElementById('resetPreview').addEventListener('click', () => {
+        frame.removeAttribute('srcdoc');
+        frame.src = defaultSource;
+        document.getElementById('previewFile').value = '';
+        status.textContent = 'Example loaded: Loot Pathway';
+      });
+      applyZoom();
+    })();
+  </script>
+</body>
+</html>

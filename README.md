@@ -17,6 +17,7 @@ Loot Pathway is a lightweight, visual gear checklist for **World of Warcraft: Th
 - Small Northern Stack Studios footer using the supplied white-and-blue NS mark.
 - Blocky Loot Pathway minimap icon at 3 o'clock by default. Left-click toggles the addon, drag moves it and right-click resets its position.
 - Paper-doll preview modes for Pre-Raid, Phase 1 and Phase 2; Reset returns to the character's equipped gear.
+- Phase buttons dress the character model in that phase's primary BIS set; clicking a replacement item previews it on the model.
 - Phase previews replace the slot icons with primary BIS-list targets. Exact or later listed gear is darkened and marked `MET` with a green tick.
 - Phase previews show compact recommended gem and enchant indicators beside applicable item slots, with full details on hover.
 - Trinkets appear in the right-hand equipment column beneath the rings; the bottom row is reserved for weapons and ranged/relic gear.
