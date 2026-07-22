@@ -38,6 +38,7 @@ function Get-SlotFromHeading([string]$Heading) {
 
 function Read-AddonEntries([string]$ClassName, [string]$GuideName, [int]$PhaseNumber) {
     $result = @{}
+    $sequence = 0
     $inLists = $false; $currentClass = $null; $currentGuide = $null; $currentPhase = -1
     foreach ($line in Get-Content -LiteralPath (Join-Path $projectRoot "BisData.lua")) {
         if ($line -match '^LP\.BIS_LISTS\s*=') { $inLists = $true; continue }
@@ -47,8 +48,9 @@ function Read-AddonEntries([string]$ClassName, [string]$GuideName, [int]$PhaseNu
         if ($line -match '^        \["([^"]+)"\] = \{$') { $currentGuide = $Matches[1]; continue }
         if ($line -match '^            \[([012])\] = \{$') { $currentPhase = [int]$Matches[1]; continue }
         if ($currentClass -eq $ClassName -and $currentGuide -eq $GuideName -and $currentPhase -eq $PhaseNumber -and
-            $line -match '^                \{(\d+), "([^"]+)", "([^"]+)", "([^"]*)"') {
-            $result[[int]$Matches[1]] = [pscustomobject]@{ id=[int]$Matches[1]; slot=$Matches[2]; rank=$Matches[3]; name=$Matches[4] }
+            $line -match '^                \{(\d+), "([^"]+)", "([^"]+)", "([^"]*)", "[^"]*", "[^"]*", "[^"]*", "[ABH]", (\d+)\},$') {
+            $sequence++
+            $result[[int]$Matches[1]] = [pscustomobject]@{ id=[int]$Matches[1]; slot=$Matches[2]; rank=$Matches[3]; name=$Matches[4]; sequence=$sequence; displayOrder=[int]$Matches[5] }
         }
     }
     $correctionClass = $null; $correctionGuide = $null; $correctionPhase = -1
@@ -58,8 +60,12 @@ function Read-AddonEntries([string]$ClassName, [string]$GuideName, [int]$PhaseNu
             continue
         }
         if ($correctionClass -eq $ClassName -and $correctionGuide -eq $GuideName -and $correctionPhase -eq $PhaseNumber -and
-            $line -match '^\s+\{(\d+),"([^"]+)","([^"]+)","([^"]*)"') {
-            $result[[int]$Matches[1]] = [pscustomobject]@{ id=[int]$Matches[1]; slot=$Matches[2]; rank=$Matches[3]; name=$Matches[4] }
+            $line -match '^\s+\{(\d+),"([^"]+)","([^"]+)","([^"]*)","[^"]*","[^"]*","[^"]*","[ABH]",(\d+)\},$') {
+            $itemId = [int]$Matches[1]
+            if (-not $result.ContainsKey($itemId)) {
+                $sequence++
+                $result[$itemId] = [pscustomobject]@{ id=$itemId; slot=$Matches[2]; rank=$Matches[3]; name=$Matches[4]; sequence=$sequence; displayOrder=[int]$Matches[5] }
+            }
         }
     }
     $correctionRaw = Get-Content -LiteralPath (Join-Path $projectRoot "WowheadCorrections.lua") -Raw
@@ -76,6 +82,12 @@ function Read-AddonEntries([string]$ClassName, [string]$GuideName, [int]$PhaseNu
             [void]$result.Remove([int]$removal.Groups[4].Value)
         }
     }
+    $slotOrders = @{}
+    foreach ($item in @($result.Values | Sort-Object sequence)) {
+        if (-not $slotOrders.ContainsKey($item.slot)) { $slotOrders[$item.slot] = 0 }
+        $slotOrders[$item.slot]++
+        $item | Add-Member -NotePropertyName order -NotePropertyValue $slotOrders[$item.slot]
+    }
     return $result
 }
 
@@ -87,6 +99,7 @@ foreach ($guideRecord in $guides) {
     if ($title -notmatch '(TBC|Burning Crusade) Classic') { throw "$($guideRecord.class)/$($guideRecord.guide) resolved to a non-TBC guide: $title" }
 
     $wowheadItems = @{}
+    $wowheadSlotOrders = @{}
     $sections = [regex]::Matches($html, '<h3[^>]*>(.*?)</h3>(.*?)(?=<h3[^>]*>|<h2[^>]*>|$)', 'IgnoreCase,Singleline')
     foreach ($section in $sections) {
         $heading = ConvertFrom-HtmlText $section.Groups[1].Value
@@ -103,10 +116,12 @@ foreach ($guideRecord in $guides) {
             # Some guides nest their gem table beneath the final gear h3. Those
             # coloured gem rows are recommendations, but not equippable gear slots.
             if (-not $source -and $rank -match '^(Meta|Red|Blue|Yellow|Orange|Purple|Green)$') { continue }
+            if (-not $wowheadSlotOrders.ContainsKey($slot)) { $wowheadSlotOrders[$slot] = 0 }
+            $wowheadSlotOrders[$slot]++
             $wowheadItems[$itemId] = [pscustomobject]@{
                 id=$itemId; slot=$slot; rank=$rank
                 name=(ConvertFrom-HtmlText $itemMatch.Groups[2].Value); heading=$heading
-                source=$source
+                source=$source; order=$wowheadSlotOrders[$slot]
             }
         }
     }
@@ -124,18 +139,50 @@ foreach ($guideRecord in $guides) {
     foreach ($item in $slotDifferences) {
         $item | Add-Member -NotePropertyName addonSlot -NotePropertyValue $addonItems[$item.id].slot
     }
+    $orderDifferences = @()
+    foreach ($slot in @($wowheadItems.Values.slot | Sort-Object -Unique)) {
+        $wowheadSequence = @($wowheadItems.Values | Where-Object {
+            $_.slot -eq $slot -and $addonItems.ContainsKey($_.id) -and $addonItems[$_.id].slot -eq $slot
+        } | Sort-Object order | ForEach-Object { $_.id })
+        $addonSequence = @($addonItems.Values | Where-Object {
+            $_.slot -eq $slot -and $wowheadItems.ContainsKey($_.id) -and $wowheadItems[$_.id].slot -eq $slot
+        } | Sort-Object order | ForEach-Object { $_.id })
+        if (($wowheadSequence -join ',') -ne ($addonSequence -join ',')) {
+            $orderDifferences += [pscustomobject]@{ slot=$slot; wowhead=$wowheadSequence; addon=$addonSequence }
+        }
+    }
+    $displayOrders = @()
+    foreach ($slot in @($addonItems.Values.slot | Sort-Object -Unique)) {
+        $linked = @($wowheadItems.Values | Where-Object {
+            $_.slot -eq $slot -and $addonItems.ContainsKey($_.id) -and $addonItems[$_.id].slot -eq $slot
+        } | Sort-Object order)
+        $linkedIds = @{}
+        $ordered = [System.Collections.Generic.List[object]]::new()
+        foreach ($item in $linked) { $linkedIds[$item.id] = $true; $ordered.Add($addonItems[$item.id]) }
+        foreach ($item in @($addonItems.Values | Where-Object { $_.slot -eq $slot -and -not $linkedIds.ContainsKey($_.id) } | Sort-Object order)) {
+            $ordered.Add($item)
+        }
+        for ($index = 0; $index -lt $ordered.Count; $index++) {
+            $displayOrders += [pscustomobject]@{ id=$ordered[$index].id; slot=$slot; order=($index + 1); linkedToWowhead=$linkedIds.ContainsKey($ordered[$index].id) }
+        }
+    }
+    $displayOrderDifferences = @($displayOrders | Where-Object {
+        -not $addonItems.ContainsKey($_.id) -or $addonItems[$_.id].displayOrder -ne $_.order
+    })
     $reports += [pscustomobject]@{
         class=$guideRecord.class; guide=$guideRecord.guide; phase=$guideRecord.phase; title=$title; url=$guideRecord.url
         wowheadItems=$wowheadItems.Count; addonItems=$addonItems.Count; missingFromAddon=$missing
-        addonOnly=$extra; slotDifferences=$slotDifferences
+        addonOnly=$extra; slotDifferences=$slotDifferences; orderDifferences=$orderDifferences
+        displayOrders=$displayOrders; displayOrderDifferences=$displayOrderDifferences
     }
 }
 
 if ($Strict) {
     $unresolvedMissing = @($reports | ForEach-Object { @($_.missingFromAddon) })
     $unmentionedAddonOnly = @($reports | ForEach-Object { @($_.addonOnly) | Where-Object { -not $_.mentionedInGuide } })
-    if ($unresolvedMissing.Count -gt 0 -or $unmentionedAddonOnly.Count -gt 0) {
-        throw "Wowhead audit failed: $($unresolvedMissing.Count) missing items and $($unmentionedAddonOnly.Count) unmentioned addon-only items."
+    $displayOrderDifferences = @($reports | ForEach-Object { @($_.displayOrderDifferences) })
+    if ($unresolvedMissing.Count -gt 0 -or $unmentionedAddonOnly.Count -gt 0 -or $displayOrderDifferences.Count -gt 0) {
+        throw "Wowhead audit failed: $($unresolvedMissing.Count) missing items, $($unmentionedAddonOnly.Count) unmentioned addon-only items and $($displayOrderDifferences.Count) display-order differences."
     }
 }
 

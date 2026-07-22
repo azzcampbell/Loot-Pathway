@@ -4,13 +4,15 @@ Audit date: 22 July 2026
 
 Loot Pathway's 25 selectable class/spec/role guides were compared by item ID with the corresponding current Wowhead TBC Anniversary lists. The checked runtime dataset contains 7,228 entries and 1,462 unique items after the reviewed correction layer is applied.
 
-| Tier | Official guides | Linked Wowhead rows | Missing after review | Unexplained addon-only |
-|---|---:|---:|---:|---:|
-| Pre-Raid | 25 | 2,369 | 0 | 0 |
-| Phase 1 | 25 | 2,343 | 0 | 0 |
-| Phase 2 | 25 | 2,412 | 0 | 0 |
+| Tier | Official guides | Linked Wowhead rows | Missing after review | Unexplained addon-only | Display-order differences |
+|---|---:|---:|---:|---:|---:|
+| Pre-Raid | 25 | 2,369 | 0 | 0 | 0 |
+| Phase 1 | 25 | 2,343 | 0 | 0 | 0 |
+| Phase 2 | 25 | 2,412 | 0 | 0 | 0 |
 
 The correction layer records 48 additions, eight narrowly scoped removals and nine slot corrections, each with its exact Wowhead guide URL. Addon-only entries are accepted only when the same item ID or name is explicitly present elsewhere in the relevant guide text, which covers inline alternatives and faction counterparts not linked in the main tables.
+
+Every one of the 7,228 runtime entries also carries an explicit display order. Linked table items follow their order in the corresponding Wowhead slot table; alternatives mentioned only in guide prose follow the linked table items in their existing reviewed order. The strict audit fails on a missing item, an unsupported addon-only item or a display-order difference.
 
 Remaining slot-shape reports are retained as audit information rather than treated as unresolved provenance errors. They largely reflect two-handed or ranged weapons listed beneath a generic Wowhead “Weapons” heading, plus one-hand weapons deliberately eligible for both hands inside Loot Pathway.
 

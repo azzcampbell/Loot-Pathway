@@ -49,10 +49,11 @@ foreach ($line in $lines) {
         continue
     }
     if ($line -match '^            \[([012])\] = \{$') { $phase = [int]$Matches[1]; continue }
-    if ($line -match '^                \{(\d+), "([^"]+)", "([^"]+)", "([^"]*)", "([^"]*)", "([^"]*)", "([^"]*)", "([ABH])"\},$') {
+    if ($line -match '^                \{(\d+), "([^"]+)", "([^"]+)", "([^"]*)", "([^"]*)", "([^"]*)", "([^"]*)", "([ABH])", (\d+)\},$') {
         $entry = [pscustomobject]@{
             Id = [int]$Matches[1]; Slot = $Matches[2]; Rank = $Matches[3]; Name = $Matches[4]
             SourceType = $Matches[5]; Source = $Matches[6]; Location = $Matches[7]; Faction = $Matches[8]
+            DisplayOrder = [int]$Matches[9]
             Class = $class; Spec = $spec; Phase = $phase
         }
         $entries.Add($entry)
@@ -62,6 +63,7 @@ foreach ($line in $lines) {
         if ($entry.Id -le 0) { Add-ValidationError "$bucketKey contains invalid item ID $($entry.Id)." }
         if ($entry.Slot -notin $validSlots) { Add-ValidationError "$bucketKey item $($entry.Id) uses unknown slot '$($entry.Slot)'." }
         if ($entry.Rank -notmatch $validRank) { Add-ValidationError "$bucketKey item $($entry.Id) uses unknown rank '$($entry.Rank)'." }
+        if ($entry.DisplayOrder -le 0) { Add-ValidationError "$bucketKey item $($entry.Id) has invalid display order $($entry.DisplayOrder)." }
         if ([string]::IsNullOrWhiteSpace($entry.Name)) { Add-ValidationError "$bucketKey item $($entry.Id) has no name." }
         if ($entry.SourceType -in @('', 'Unknown') -or $entry.Source -eq 'Unknown' -or $entry.Location -eq 'Unknown') {
             Add-ValidationError "$bucketKey item $($entry.Id) has incomplete source data."
@@ -77,12 +79,13 @@ if (-not (Test-Path -LiteralPath $correctionPath)) {
     Add-ValidationError "WowheadCorrections.lua is missing."
 } else {
     $correctionRaw = Get-Content -LiteralPath $correctionPath -Raw
-    $correctionItems = [regex]::Matches($correctionRaw, '(?m)^\s+\{(\d+),"([^"]+)","([^"]+)","([^"]*)","([^"]*)","([^"]*)","([^"]*)","([ABH])"\},$')
+    $correctionItems = [regex]::Matches($correctionRaw, '(?m)^\s+\{(\d+),"([^"]+)","([^"]+)","([^"]*)","([^"]*)","([^"]*)","([^"]*)","([ABH])",(\d+)\},\r?$')
     if ($correctionItems.Count -ne 48) { Add-ValidationError "Expected 48 reviewed Wowhead additions, found $($correctionItems.Count)." }
     if ($correctionRaw -notmatch 'source="Wowhead TBC Anniversary"') { Add-ValidationError "Wowhead correction provenance metadata is missing." }
     foreach ($item in $correctionItems) {
         if ($item.Groups[2].Value -notin $validSlots) { Add-ValidationError "Correction item $($item.Groups[1].Value) uses unknown slot '$($item.Groups[2].Value)'." }
         if ($item.Groups[3].Value -notmatch $validRank) { Add-ValidationError "Correction item $($item.Groups[1].Value) uses unknown rank '$($item.Groups[3].Value)'." }
+        if ([int]$item.Groups[9].Value -le 0) { Add-ValidationError "Correction item $($item.Groups[1].Value) has invalid display order." }
         if ([string]::IsNullOrWhiteSpace($item.Groups[4].Value)) { Add-ValidationError "Correction item $($item.Groups[1].Value) has no name." }
     }
     $slotCorrections = [regex]::Matches($correctionRaw, '\{class="([^"]+)",guide="([^"]+)",phase=(\d+),item=(\d+),from="([^"]+)",to="([^"]+)",source="(https://www\.wowhead\.com/tbc/guide/[^"]+)"\}')

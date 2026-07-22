@@ -17,7 +17,7 @@ It uses a character-screen layout to show your equipped gear and the best-in-slo
 - Automatic talent-tree updates and manual role selection where needed
 - Normal and Heroic dungeon labels
 - Source filters, collapsible phases and minimap controls
-- Standalone operation: Loon Best In Slot is not required
+- Standalone operation: no other BIS addon is required
 
 The bundled lists are reviewed against the current Wowhead TBC BIS guides. Loot Pathway does not calculate upgrades from item level; it only displays items present in the relevant BIS lists.
 

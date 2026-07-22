@@ -2,145 +2,145 @@ local _, LP = ...
 
 -- Reviewed additions and narrow removals from the current TBC Anniversary
 -- Pre-Raid, Phase 1 and Phase 2 Wowhead guides.
--- These remain separate from generated BisData.lua so every post-Loon change
+-- These remain separate from generated BisData.lua so every reviewed change
 -- has an explicit source and can be re-audited when a guide is updated.
 local corrections = {
     {
         class="DRUID", guide="Cat", phase=1,
         source="https://www.wowhead.com/tbc/guide/feral-druid-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow",
         items={
-            {30676,"Waist","BIS","Lurker's Grasp","Drop","Hyakiss the Lurker","Karazhan","B"},
-            {30685,"Wrist","Alt","Ravager's Wrist-Wraps","Drop","Rokad the Ravager","Karazhan","B"},
+            {30676,"Waist","BIS","Lurker's Grasp","Drop","Hyakiss the Lurker","Karazhan","B",2},
+            {30685,"Wrist","Alt","Ravager's Wrist-Wraps","Drop","Rokad the Ravager","Karazhan","B",2},
         },
     },
     {
         class="HUNTER", guide="Survival", phase=1,
         source="https://www.wowhead.com/tbc/guide/survival-hunter-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow",
         items={
-            {30682,"Feet","BIS","Glider's Sabatons","Drop","Shadikith the Glider","Karazhan","B"},
-            {30677,"Waist","BIS","Lurker's Belt","Drop","Hyakiss the Lurker","Karazhan","B"},
-            {30686,"Wrist","BIS","Ravager's Bands","Drop","Rokad the Ravager","Karazhan","B"},
+            {30682,"Feet","BIS","Glider's Sabatons","Drop","Shadikith the Glider","Karazhan","B",1},
+            {30677,"Waist","BIS","Lurker's Belt","Drop","Hyakiss the Lurker","Karazhan","B",1},
+            {30686,"Wrist","BIS","Ravager's Bands","Drop","Rokad the Ravager","Karazhan","B",1},
         },
     },
     {
         class="MAGE", guide="Arcane", phase=1,
         source="https://www.wowhead.com/tbc/guide/arcane-mage-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow",
         items={
-            {29333,"Neck","Alt","Torc of the Sethekk Prophet","Quest","Brother Against Brother","Sethekk Halls","B"},
+            {29333,"Neck","Alt","Torc of the Sethekk Prophet","Quest","Brother Against Brother","Sethekk Halls","B",6},
         },
     },
     {
         class="WARLOCK", guide="Affliction", phase=1,
         source="https://www.wowhead.com/tbc/guide/affliction-warlock-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow",
         items={
-            {24692,"Wrist","Alt","Elementalist Bracelets","Drop","World Drop","","B"},
+            {24692,"Wrist","Alt","Elementalist Bracelets","Drop","World Drop","","B",2},
         },
     },
     {
         class="WARLOCK", guide="Demonology", phase=1,
         source="https://www.wowhead.com/tbc/guide/demonology-warlock-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow",
         items={
-            {24692,"Wrist","Alt","Elementalist Bracelets","Drop","World Drop","","B"},
+            {24692,"Wrist","Alt","Elementalist Bracelets","Drop","World Drop","","B",2},
         },
     },
     {
         class="WARRIOR", guide="Fury", phase=1,
         source="https://www.wowhead.com/tbc/guide/fury-warrior-dps-karazhan-best-in-slot-gear-burning-crusade-classic-wow",
         items={
-            {24544,"Chest","Alt","Gladiator's Plate Chestpiece","PvP","Arena Points","Arena Vendor","B"},
-            {29020,"Hands","Alt","Warbringer Gauntlets","Tier Token","The Curator","Karazhan","B"},
-            {30538,"Legs","Alt","Midnight Legguards","Drop","Quagmirran","The Slave Pens (H)","B"},
-            {28584,"Main Hand","Alt","Big Bad Wolf's Paw","Drop","Opera Event (Wolf)","Karazhan","B"},
-            {28657,"Main Hand","Alt","Fool's Bane","Drop","Terestian Illhoof","Karazhan","B"},
-            {29348,"Main Hand","Alt","The Bladefist","Drop","Warchief Kargath Bladefist","The Shattered Halls (H)","B"},
-            {28767,"Main Hand","Alt","The Decapitator","Drop","Prince Malchezaar","Karazhan","B"},
-            {23542,"Off Hand","Alt","Fel Edged Battleaxe","Profession","Blacksmithing (365)","29694","B"},
-            {28649,"Ring","Alt","Garona's Signet Ring","Drop","The Curator","Karazhan","B"},
+            {24544,"Chest","Alt","Gladiator's Plate Chestpiece","PvP","Arena Points","Arena Vendor","B",3},
+            {29020,"Hands","Alt","Warbringer Gauntlets","Tier Token","The Curator","Karazhan","B",3},
+            {30538,"Legs","Alt","Midnight Legguards","Drop","Quagmirran","The Slave Pens (H)","B",4},
+            {28584,"Main Hand","Alt","Big Bad Wolf's Paw","Drop","Opera Event (Wolf)","Karazhan","B",5},
+            {28657,"Main Hand","Alt","Fool's Bane","Drop","Terestian Illhoof","Karazhan","B",3},
+            {29348,"Main Hand","Alt","The Bladefist","Drop","Warchief Kargath Bladefist","The Shattered Halls (H)","B",2},
+            {28767,"Main Hand","Alt","The Decapitator","Drop","Prince Malchezaar","Karazhan","B",4},
+            {23542,"Off Hand","Alt","Fel Edged Battleaxe","Profession","Blacksmithing (365)","29694","B",1},
+            {28649,"Ring","Alt","Garona's Signet Ring","Drop","The Curator","Karazhan","B",6},
         },
     },
     {
         class="MAGE", guide="Arcane", phase=0,
         source="https://www.wowhead.com/tbc/guide/classes/mage/arcane/dps-bis-gear-pve-pre-raid",
         items={
-            {27540,"Ranged/Relic","Alt","Nexus Torch","Drop","Warchief Kargath Bladefist","The Shattered Halls","B"},
+            {27540,"Ranged/Relic","Alt","Nexus Torch","Drop","Warchief Kargath Bladefist","The Shattered Halls","B",4},
         },
     },
     {
         class="SHAMAN", guide="Elemental", phase=0,
         source="https://www.wowhead.com/tbc/guide/classes/shaman/elemental/dps-bis-gear-pve-pre-raid",
         items={
-            {31201,"Back","Alt","Illidari Cloak","Drop","World Drop","","B"},
+            {31201,"Back","Alt","Illidari Cloak","Drop","World Drop","","B",2},
         },
     },
     {
         class="DRUID", guide="Cat", phase=2,
         source="https://www.wowhead.com/tbc/guide/classes/druid/feral/dps-bis-gear-pve-phase-2",
         items={
-            {30681,"Feet","Alt","Glider's Boots","Drop","Shadikith the Glider","Karazhan","B"},
-            {30676,"Waist","Alt","Lurker's Grasp","Drop","Hyakiss the Lurker","Karazhan","B"},
-            {30685,"Wrist","Alt","Ravager's Wrist-Wraps","Drop","Rokad the Ravager","Karazhan","B"},
+            {30681,"Feet","Alt","Glider's Boots","Drop","Shadikith the Glider","Karazhan","B",5},
+            {30676,"Waist","Alt","Lurker's Grasp","Drop","Hyakiss the Lurker","Karazhan","B",4},
+            {30685,"Wrist","Alt","Ravager's Wrist-Wraps","Drop","Rokad the Ravager","Karazhan","B",2},
         },
     },
     {
         class="HUNTER", guide="Survival", phase=2,
         source="https://www.wowhead.com/tbc/guide/classes/hunter/survival/dps-bis-gear-pve-phase-2",
         items={
-            {30682,"Feet","BIS","Glider's Sabatons","Drop","Shadikith the Glider","Karazhan","B"},
-            {30677,"Waist","BIS","Lurker's Belt","Drop","Hyakiss the Lurker","Karazhan","B"},
-            {30686,"Wrist","BIS","Ravager's Bands","Drop","Rokad the Ravager","Karazhan","B"},
+            {30682,"Feet","BIS","Glider's Sabatons","Drop","Shadikith the Glider","Karazhan","B",3},
+            {30677,"Waist","BIS","Lurker's Belt","Drop","Hyakiss the Lurker","Karazhan","B",2},
+            {30686,"Wrist","BIS","Ravager's Bands","Drop","Rokad the Ravager","Karazhan","B",2},
         },
     },
     {
         class="PRIEST", guide="Holy", phase=2,
         source="https://www.wowhead.com/tbc/guide/classes/priest/healer-bis-gear-pve-phase-2",
         items={
-            {30680,"Feet","Alt","Glider's Foot-Wraps","Drop","Shadikith the Glider","Karazhan","B"},
-            {25295,"Ranged/Relic","BIS","Flawless Wand","Drop","World Drop","","B"},
-            {30684,"Wrist","BIS","Ravager's Cuffs","Drop","Rokad the Ravager","Karazhan","B"},
+            {30680,"Feet","Alt","Glider's Foot-Wraps","Drop","Shadikith the Glider","Karazhan","B",5},
+            {25295,"Ranged/Relic","BIS","Flawless Wand","Drop","World Drop","","B",3},
+            {30684,"Wrist","BIS","Ravager's Cuffs","Drop","Rokad the Ravager","Karazhan","B",5},
         },
     },
     {
         class="PRIEST", guide="Shadow", phase=2,
         source="https://www.wowhead.com/tbc/guide/classes/priest/shadow/dps-bis-gear-pve-phase-2",
         items={
-            {25043,"Back","Alt","Amber Cape","Drop","World Drop","","B"},
-            {31201,"Back","BIS","Illidari Cloak","Drop","Chief Engineer Lorthander","Netherstorm","B"},
-            {30680,"Feet","BIS","Glider's Foot-Wraps","Drop","Shadikith the Glider","Karazhan","B"},
-            {31166,"Hands","BIS","Nethersteel-Lined Handwraps","Drop","Speaker Mar'grom","Blade's Edge Mountains","B"},
-            {25294,"Ranged/Relic","Alt","Dragonscale Wand","Drop","World Drop","","B"},
-            {25295,"Ranged/Relic","Alt","Flawless Wand","Drop","World Drop","","B"},
-            {30675,"Waist","BIS","Lurker's Cord","Drop","Hyakiss the Lurker","Karazhan","B"},
-            {24692,"Wrist","Alt","Elementalist Bracelets","Drop","World Drop","","B"},
-            {31225,"Wrist","BIS","Illidari Bindings","Drop","Ambassador Jerrikar","Shadowmoon Valley","B"},
-            {30684,"Wrist","BIS","Ravager's Cuffs","Drop","Rokad the Ravager","Karazhan","B"},
+            {25043,"Back","Alt","Amber Cape","Drop","World Drop","","B",3},
+            {31201,"Back","BIS","Illidari Cloak","Drop","Chief Engineer Lorthander","Netherstorm","B",1},
+            {30680,"Feet","BIS","Glider's Foot-Wraps","Drop","Shadikith the Glider","Karazhan","B",1},
+            {31166,"Hands","BIS","Nethersteel-Lined Handwraps","Drop","Speaker Mar'grom","Blade's Edge Mountains","B",1},
+            {25294,"Ranged/Relic","Alt","Dragonscale Wand","Drop","World Drop","","B",4},
+            {25295,"Ranged/Relic","Alt","Flawless Wand","Drop","World Drop","","B",3},
+            {30675,"Waist","BIS","Lurker's Cord","Drop","Hyakiss the Lurker","Karazhan","B",1},
+            {24692,"Wrist","Alt","Elementalist Bracelets","Drop","World Drop","","B",3},
+            {31225,"Wrist","BIS","Illidari Bindings","Drop","Ambassador Jerrikar","Shadowmoon Valley","B",2},
+            {30684,"Wrist","BIS","Ravager's Cuffs","Drop","Rokad the Ravager","Karazhan","B",1},
         },
     },
     {
         class="SHAMAN", guide="Enhancement", phase=2,
         source="https://www.wowhead.com/tbc/guide/classes/shaman/enhancement/dps-bis-gear-pve-phase-2",
         items={
-            {29947,"Hands","Alt","Gloves of the Searing Grip","Drop","Al'ar","Tempest Keep","B"},
-            {30040,"Waist","BIS","Belt of Deep Shadow","Profession","Leatherworking (375)","36351","B"},
+            {29947,"Hands","Alt","Gloves of the Searing Grip","Drop","Al'ar","Tempest Keep","B",2},
+            {30040,"Waist","BIS","Belt of Deep Shadow","Profession","Leatherworking (375)","36351","B",2},
         },
     },
     {
         class="WARLOCK", guide="Affliction", phase=2,
         source="https://www.wowhead.com/tbc/guide/classes/warlock/affliction/dps-bis-gear-pve-phase-2",
         items={
-            {30680,"Feet","Alt","Glider's Foot-Wraps","Drop","Shadikith the Glider","Karazhan","B"},
-            {30675,"Waist","Alt","Lurker's Cord","Drop","Hyakiss the Lurker","Karazhan","B"},
-            {24692,"Wrist","Alt","Elementalist Bracelets","Drop","World Drop","","B"},
-            {30684,"Wrist","BIS","Ravager's Cuffs","Drop","Rokad the Ravager","Karazhan","B"},
+            {30680,"Feet","Alt","Glider's Foot-Wraps","Drop","Shadikith the Glider","Karazhan","B",3},
+            {30675,"Waist","Alt","Lurker's Cord","Drop","Hyakiss the Lurker","Karazhan","B",4},
+            {24692,"Wrist","Alt","Elementalist Bracelets","Drop","World Drop","","B",5},
+            {30684,"Wrist","BIS","Ravager's Cuffs","Drop","Rokad the Ravager","Karazhan","B",2},
         },
     },
     {
         class="WARLOCK", guide="Demonology", phase=2,
         source="https://www.wowhead.com/tbc/guide/classes/warlock/demonology/dps-bis-gear-pve-phase-2",
         items={
-            {30680,"Feet","BIS","Glider's Foot-Wraps","Drop","Shadikith the Glider","Karazhan","B"},
-            {30675,"Waist","Alt","Lurker's Cord","Drop","Hyakiss the Lurker","Karazhan","B"},
-            {24692,"Wrist","Alt","Elementalist Bracelets","Drop","World Drop","","B"},
-            {30684,"Wrist","BIS","Ravager's Cuffs","Drop","Rokad the Ravager","Karazhan","B"},
+            {30680,"Feet","BIS","Glider's Foot-Wraps","Drop","Shadikith the Glider","Karazhan","B",2},
+            {30675,"Waist","Alt","Lurker's Cord","Drop","Hyakiss the Lurker","Karazhan","B",3},
+            {24692,"Wrist","Alt","Elementalist Bracelets","Drop","World Drop","","B",3},
+            {30684,"Wrist","BIS","Ravager's Cuffs","Drop","Rokad the Ravager","Karazhan","B",1},
         },
     },
 }

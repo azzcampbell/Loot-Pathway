@@ -35,6 +35,32 @@ loadAddonFile("WowheadCorrections.lua", LP)
 loadAddonFile("Engine.lua", LP)
 
 check(LP.BIS_DATA_META.entries == 7228 and LP.BIS_DATA_META.uniqueItems == 1462, "reviewed runtime dataset totals must remain stable")
+local orderFailure
+for class, guides in pairs(LP.BIS_LISTS) do
+    for guideName, phases in pairs(guides) do
+        for phase, entries in pairs(phases) do
+            local ordersBySlot, countsBySlot = {}, {}
+            for _, entry in ipairs(entries) do
+                local slot, displayOrder = entry[2], entry[9]
+                ordersBySlot[slot], countsBySlot[slot] = ordersBySlot[slot] or {}, (countsBySlot[slot] or 0) + 1
+                if type(displayOrder) ~= "number" or displayOrder < 1 or ordersBySlot[slot][displayOrder] then
+                    orderFailure = class .. "/" .. guideName .. "/" .. phase .. "/" .. slot
+                    break
+                end
+                ordersBySlot[slot][displayOrder] = true
+            end
+            for slot, count in pairs(countsBySlot) do
+                for displayOrder = 1, count do
+                    if not ordersBySlot[slot][displayOrder] then
+                        orderFailure = class .. "/" .. guideName .. "/" .. phase .. "/" .. slot
+                        break
+                    end
+                end
+            end
+        end
+    end
+end
+check(not orderFailure, "runtime display orders must be unique and contiguous per guide/phase/slot: " .. tostring(orderFailure))
 local detectedClass, detectedSpec = LP:GetPlayerBuild()
 check(detectedClass == "WARRIOR" and detectedSpec == "Fury", "talent points must resolve the active specialization")
 local feralChoices = LP:GetGuideChoices("DRUID", "Feral Combat")
@@ -77,9 +103,9 @@ LP.GetPhasePrimaryTargets, LP.SLOTS = originalPrimaryTargets, originalSlots
 
 local testGuide = {
     [0] = {
-        {9001,"Main Hand~Off Hand","BIS","Flexible Blade","Drop","Pathaleon","The Mechanar","B"},
-        {9002,"Off Hand","Alt","Owned Shield","Quest","A Test Quest","Netherstorm","B"},
-        {9003,"Off Hand","Alt","Alliance Shield","Drop","Pathaleon","The Mechanar","A"},
+        {9001,"Main Hand~Off Hand","BIS","Flexible Blade","Drop","Pathaleon","The Mechanar","B",2},
+        {9002,"Off Hand","Alt","Owned Shield","Quest","A Test Quest","Netherstorm","B",1},
+        {9003,"Off Hand","Alt","Alliance Shield","Drop","Pathaleon","The Mechanar","A",3},
     },
     [1] = {}, [2] = {},
 }
@@ -91,6 +117,7 @@ LP.characterDB.completed["9002"] = true
 names[9001], names[9002], names[9003] = "Flexible Blade", "Owned Shield", "Alliance Shield"
 local offhandItems = LP:GetPhaseSlotItems("OFFHAND", 0, false)
 check(#offhandItems == 2, "off-hand list must include flexible weapons and exclude wrong-faction items")
+check(offhandItems[1].id == 9002 and offhandItems[2].id == 9001, "reviewed display order must override storage order")
 LP.db.selectedSlot, LP.db.selectedSource = "OFFHAND", "ALL"
 local recommendations = LP:GetRecommendations()
 check(#recommendations == 2, "recommendations must include both eligible off-hand targets")

@@ -524,8 +524,6 @@ function LP:Refresh()
     local ranked={}; for _,item in ipairs(items or {}) do table.insert(ranked,item) end
     table.sort(ranked,function(a,b)
         if a.phase~=b.phase then return a.phase>b.phase end
-        local aBIS=string.find(a.listRank,"BIS",1,true) and 0 or 1; local bBIS=string.find(b.listRank,"BIS",1,true) and 0 or 1
-        if aBIS~=bBIS then return aBIS<bBIS end
         if (a.listOrder or 999)~=(b.listOrder or 999) then return (a.listOrder or 999)<(b.listOrder or 999) end
         return a.name<b.name
     end)

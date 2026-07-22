@@ -34,12 +34,12 @@ Loot Pathway is a lightweight, visual gear checklist for **World of Warcraft: Th
 - The Destruction Phase 2 rank for Voidheart Gloves is corrected to a two-piece option; its BIS phase remains Phase 1.
 - The footer follows the actual Northern Stack logo composition: wordmark on the left and stepped colour blocks on the right.
 - The centred `Loot Pathway` title and subtitle use the native game interface fonts.
-- Standalone operation: **Loon Best In Slot is not required or queried at runtime**.
+- Standalone operation: **no other BIS addon is required or queried at runtime**.
 - Checked-item progress is stored per character. Existing account-wide progress is migrated safely to the first character loaded after the schema upgrade.
 - Talent detection remains automatic; specs with more than one role guide can switch guide from the character panel. Feral Combat supports both Cat and Bear.
 - `/lpw selftest` runs the bundled runtime checks for profiles, guides, sources and ownership.
 
-The bundled dataset began as a standalone snapshot generated from **Loon Best In Slot 1.0.9** and does not require Loon at runtime. Its 25 class/spec/role guides across Pre-Raid, Phase 1 and Phase 2 are now checked against the corresponding current [Wowhead TBC BIS guides](https://www.wowhead.com/tbc/guides/classes/best-in-slot-guides-burning-crusade-classic). The reviewed runtime dataset contains 7,228 entries and 1,462 unique items. Additions, removals and slot corrections live in `WowheadCorrections.lua`; the exact source manifests and repeatable auditor live under `tools/`.
+The 25 embedded class/spec/role guides across Pre-Raid, Phase 1 and Phase 2 are checked against the corresponding current [Wowhead TBC BIS guides](https://www.wowhead.com/tbc/guides/classes/best-in-slot-guides-burning-crusade-classic). The reviewed runtime dataset contains 7,228 entries and 1,462 unique items. Reviewed additions, removals and slot corrections live in `WowheadCorrections.lua`; the exact source manifests and repeatable auditor live under `tools/`.
 
 ## Install
 
@@ -59,7 +59,7 @@ The folder must directly contain `LootPathway_TBC.toc`. Restart the game or type
 
 ## Data maintenance
 
-`BisData.lua` is generated and bundled with the addon. The development helper at `tools/generate_bis_data.py` rebuilds the standalone snapshot from a local Loon installation; Loot Pathway itself never loads or depends on Loon.
+`BisData.lua` is generated and bundled with the addon. The source manifests under `tools/` identify the exact Wowhead guide used for every supported class/spec/role and phase.
 
 Run `tests/Test-All.ps1` before packaging. With Lua 5.1 available, it also exercises spec resolution, guide selection, ownership ordering, source and faction filters, flexible weapon slots, model-preview conflicts, fresh profiles and legacy SavedVariables migration. `/lpw selftest` provides the final runtime check inside TBC Anniversary.
 
@@ -75,4 +75,10 @@ Commit the addon changes first, then run:
 powershell -ExecutionPolicy Bypass -File .\Publish-Release.ps1 -Version 1.0.0
 ```
 
-The script updates the single version field, builds the matching ZIP, commits the version bump, and pushes the new tag. GitHub Actions creates the GitHub release and generated notes, then securely triggers CurseForge to package the same tagged commit with its automatic changelog.
+Before publishing, replace `CHANGELOG.md` with the complete player-facing notes for that version and show the entire file to Aaron. Only after he explicitly approves the exact wording should the command be rerun with `-ChangelogApproved`:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\Publish-Release.ps1 -Version 1.0.0 -ChangelogApproved
+```
+
+The script updates the single version field, builds the matching ZIP, commits the version bump, and pushes the new tag. GitHub Actions uses the approved `CHANGELOG.md` verbatim for the GitHub release and passes the same file to CurseForge packaging.

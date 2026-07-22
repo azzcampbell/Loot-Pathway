@@ -9,7 +9,7 @@ LP.TIERS = {
     RAID={label="Raid",short="RAID",colour={0.72,0.45,0.92},order=6},
 }
 
--- Talent trees are mapped to the closest embedded Loon guide. Some Loon guides
+-- Talent trees are mapped to the closest embedded BIS guide. Some role guides
 -- combine trees (Rogue DPS and Priest healing); Feral defaults to Cat.
 LP.BIS_SPEC_MAP = {
     WARRIOR={Arms="Arms",Fury="Fury",Protection="Protection"},

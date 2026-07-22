@@ -44,4 +44,5 @@ foreach ($file in $addonFiles) {
 }
 
 Compress-Archive -LiteralPath $addonRoot -DestinationPath $zipPath -CompressionLevel Optimal -Force
+& (Join-Path $projectRoot "tests\Test-Package.ps1") -ZipPath $zipPath -ExpectedVersion $version
 Write-Output "Built $zipPath"

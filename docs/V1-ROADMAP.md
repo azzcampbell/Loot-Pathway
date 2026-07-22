@@ -20,8 +20,9 @@ This document records the evidence required before Loot Pathway can be called v1
 - [x] Add and audit the official Wowhead Pre-Raid guide manifest.
 - [x] Add and audit the official Wowhead Phase 1 guide manifest.
 - [x] Make unresolved provenance differences fail the release-candidate gate.
+- [x] Make the numbered drawer follow the reviewed Wowhead table order and fail strict audits on any display-order difference.
 
-Strict audits now cover all 25 guides in each tier: 2,369 linked Pre-Raid rows, 2,343 Phase 1 rows and 2,412 Phase 2 rows. Each tier has no missing items and no addon-only items absent from the relevant guide text. Remaining slot-shape reports are predominantly two-handed or ranged weapons shown beneath Wowhead's generic weapon headings.
+Strict audits now cover all 25 guides in each tier: 2,369 linked Pre-Raid rows, 2,343 Phase 1 rows and 2,412 Phase 2 rows. Each tier has no missing items, no addon-only items absent from the relevant guide text and no display-order differences. Remaining slot-shape reports are predominantly two-handed or ranged weapons shown beneath Wowhead's generic weapon headings.
 
 ## Automated behaviour
 

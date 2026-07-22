@@ -226,7 +226,7 @@ function LP:GetItemBISPhase(itemID, slotKey)
 end
 
 function LP:GetBisItem(entry, phase, slot, equippedLevel)
-    local itemID, bisSlot, rank, fallbackName, sourceType, source, location = unpack(entry)
+    local itemID, bisSlot, rank, fallbackName, sourceType, source, location, _, displayOrder = unpack(entry)
     rank = self:GetEffectiveRank(phase, itemID, rank)
     local name, link, quality, level, _, _, _, _, _, icon = GetItemInfo(itemID)
     local tier = self:ClassifySource(sourceType, source, location)
@@ -239,6 +239,7 @@ function LP:GetBisItem(entry, phase, slot, equippedLevel)
         sourceType = sourceType or "Other", boss = source or "", place = location or "",
         difficulty = self:GetDifficultySuffix(sourceType, source, location),
         listRank = rank or "Alt", phase = phase, phaseLabel = PHASE_LABELS[phase],
+        displayOrder = displayOrder,
         equippedLevel = equippedLevel or 0,
         completed = self:IsItemCompleted(itemID),
     }
@@ -264,17 +265,17 @@ function LP:GetPhaseSlotItems(slotKey, phase, applySourceFilter)
     for listOrder, entry in ipairs(guide[phase] or {}) do
         if self:EntryFitsSlot(entry[2], slotKey) and IsFactionMatch(entry[8], playerFaction) then
             local item = self:GetBisItem(entry, phase, slot, equippedLevel)
-            item.listOrder = listOrder
+            item.listOrder = item.displayOrder or listOrder
             if not applySourceFilter or sourceFilter == "ALL" or item.tier == sourceFilter then
                 table.insert(results, item)
             end
         end
     end
     table.sort(results, function(a, b)
-        local aBIS = string.find(a.listRank, "BIS", 1, true) and 0 or 1
-        local bBIS = string.find(b.listRank, "BIS", 1, true) and 0 or 1
-        if aBIS ~= bBIS then return aBIS < bBIS end
-        return (a.listOrder or 0) < (b.listOrder or 0)
+        if (a.listOrder or 9999) ~= (b.listOrder or 9999) then
+            return (a.listOrder or 9999) < (b.listOrder or 9999)
+        end
+        return a.name < b.name
     end)
     return results, talentSpec, embeddedSpec
 end
@@ -381,7 +382,7 @@ function LP:GetRecommendations()
                             local isBIS = string.find(effectiveRank, "BIS", 1, true) ~= nil
                             if not onlyBIS or isBIS then
                                 local item = self:GetBisItem(entry, phase, slot, equippedLevel)
-                                item.listOrder = listOrder
+                                item.listOrder = item.displayOrder or listOrder
                                 if selectedSource == "ALL" or item.tier == selectedSource then
                                     table.insert(results, item)
                                 end
@@ -397,11 +398,9 @@ function LP:GetRecommendations()
         if a.phase ~= b.phase then return a.phase < b.phase end
         if a.slotOrder ~= b.slotOrder then return a.slotOrder < b.slotOrder end
         if a.completed ~= b.completed then return not a.completed end
-        local aBIS = string.find(a.listRank, "BIS", 1, true) and 0 or 1
-        local bBIS = string.find(b.listRank, "BIS", 1, true) and 0 or 1
-        if aBIS ~= bBIS then return aBIS < bBIS end
-        local at, bt = self.TIERS[a.tier].order, self.TIERS[b.tier].order
-        if at ~= bt then return at < bt end
+        if (a.listOrder or 9999) ~= (b.listOrder or 9999) then
+            return (a.listOrder or 9999) < (b.listOrder or 9999)
+        end
         return a.name < b.name
     end)
 
