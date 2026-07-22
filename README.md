@@ -1,45 +1,38 @@
 # Loot Pathway
 
-Loot Pathway is a lightweight, visual gear checklist for **World of Warcraft: The Burning Crusade Classic Anniversary Edition**. It presents your equipment like a character sheet, then lays out the BIS-list targets for your active talent tree from Pre-Raid through Phase 1 and the current Phase 2.
+I made Loot Pathway to answer one simple question: **what gear should I go for next, and where does it come from?**
 
 > **Loot Pathway is intended for max-level (level 70) characters only. It is not a levelling addon.**
 
-## Road to v1 development line
+Loot Pathway turns your BIS lists into a clear route through Pre-Raid, Phase 1 and Phase 2. Open it, click an equipment slot and see the relevant items for your class, talent tree and selected role. They are ranked best first and show exactly where to get them, whether that means a quest, a Normal or Heroic dungeon, a raid or a profession.
 
-- Live character model with left-drag rotation and right-click reset.
-- Clickable equipment slots with full Pre-Raid, Phase 1 and Phase 2 pathways.
-- Only items present in the embedded spec BIS/alternative lists can appear.
-- Quest, Dungeon, Heroic, Raid and Craftable source filters; uncategorised items remain available through All.
-- The replacement drawer uses a clear six-button filter row ending in Raid and Craftable; Other items remain available through All.
-- Phase section headers can be clicked to collapse or expand them, with the state remembered between sessions.
-- The default interface scale and drawer typography are slightly larger, with wider rows to prevent chips and labels clipping each other.
-- Equipped BIS-list position controls which later targets remain visible. Item level is display information only and never determines list membership.
-- Checkbox progress, saved position and source/slot filters.
-- Checked items remain visible, move beneath unowned items within their phase, and can be unticked at any time.
-- Small Northern Stack Studios footer using the supplied white-and-blue NS mark.
-- Blocky Loot Pathway minimap icon at 3 o'clock by default. Left-click toggles the addon, drag moves it and right-click resets its position.
-- Paper-doll preview modes for Pre-Raid, Phase 1 and Phase 2; Reset returns to the character's equipped gear.
-- Phase buttons dress the character model in that phase's primary BIS set; clicking a replacement item previews it on the model.
-- Phase previews replace the slot icons with primary BIS-list targets. Exact or later listed gear is darkened and marked `MET` with a green tick.
-- Phase previews show compact recommended gem and enchant indicators beside applicable item slots, with full details on hover.
-- Trinkets appear in the right-hand equipment column beneath the rings; the bottom row is reserved for weapons and ranged/relic gear.
-- Clicking an equipment slot opens a compact replacement drawer containing that phase's BIS and alternative items. In Reset mode it shows the forward pathway.
-- `/lpw options` opens a lightweight options panel with a persistent minimap-button checkbox.
-- Ctrl-right-clicking the minimap button hides it immediately; `/lpw options` is the recovery route.
-- Replacement drawers are ranked best-first as `#1`, `#2`, and so on.
-- Dungeon sources display `(N)`, `(H)`, or `(N) (H)` after their location and encounter.
-- The character model uses a guarded animated loading state and is no longer reloaded when browsing slots or phases.
-- Equipped current-phase BIS items receive the green `MET` treatment in the Reset view too.
-- Earlier-phase BIS equipment uses a bold item-quality border and phase label rather than being mislabelled as current-phase `MET`.
-- The Destruction Phase 2 rank for Voidheart Gloves is corrected to a two-piece option; its BIS phase remains Phase 1.
-- The footer follows the actual Northern Stack logo composition: wordmark on the left and stepped colour blocks on the right.
-- The centred `Loot Pathway` title and subtitle use the native game interface fonts.
-- Standalone operation: **no other BIS addon is required or queried at runtime**.
-- Checked-item progress is stored per character. Existing account-wide progress is migrated safely to the first character loaded after the schema upgrade.
-- Talent detection remains automatic; specs with more than one role guide can switch guide from the character panel. Feral Combat supports both Cat and Bear.
-- `/lpw selftest` runs the bundled runtime checks for profiles, guides, sources and ownership.
+The familiar character-screen layout lets you compare your equipped gear with each phase, preview items on your character and tick off anything you already own. Checked items stay visible at the bottom of the list, so you can always undo a mistake.
 
-The 25 embedded class/spec/role guides across Pre-Raid, Phase 1 and Phase 2 are checked against the corresponding current [Wowhead TBC BIS guides](https://www.wowhead.com/tbc/guides/classes/best-in-slot-guides-burning-crusade-classic). The reviewed runtime dataset contains 7,228 entries and 1,462 unique items. Reviewed additions, removals and slot corrections live in `WowheadCorrections.lua`; the exact source manifests and repeatable auditor live under `tools/`.
+Loot Pathway does not guess upgrades from item level or promise that every listed item will improve your particular character. It gives you an easy-to-follow route through the BIS and alternative items in the relevant guide, so you can quickly decide what to work towards next.
+
+## Features
+
+- Pre-Raid, Phase 1 and Phase 2 BIS-list routes
+- Ranked BIS and alternative items, with the best choices shown first
+- Clear sources for quests, dungeons, Heroics, raids and crafted items
+- Normal and Heroic dungeon labels
+- Character-sheet layout with item and phase previews
+- Recommended gems and enchants in phase previews
+- Per-character owned-item checklists
+- Automatic talent-tree detection and manual role selection where needed
+- Feral Combat guides for both Cat and Bear
+- Source filters, collapsible phases and minimap controls
+- Standalone operation; no other BIS addon is needed
+
+The 25 bundled class, spec and role guides are reviewed against the corresponding current [Wowhead TBC BIS guides](https://www.wowhead.com/tbc/guides/classes/best-in-slot-guides-burning-crusade-classic). Item level is shown for reference, but it does not decide which items appear or how they are ranked. The reviewed runtime dataset contains 7,228 entries and 1,462 unique items.
+
+## Screenshots
+
+![Crafted hands route](https://raw.githubusercontent.com/azzcampbell/Loot-Pathway/main/Assets/Screenshots/loot-pathway-crafting.png)
+
+![Main-hand route](https://raw.githubusercontent.com/azzcampbell/Loot-Pathway/main/Assets/Screenshots/loot-pathway-main-hand.png)
+
+![Trinket route](https://raw.githubusercontent.com/azzcampbell/Loot-Pathway/main/Assets/Screenshots/loot-pathway-trinkets.png)
 
 ## Install
 

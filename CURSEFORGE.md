@@ -1,24 +1,24 @@
 # Loot Pathway
 
-> **Designed for max-level (level 70) characters only. Loot Pathway is not a levelling addon.**
+> **Made for max-level (level 70) characters. Loot Pathway is not a levelling addon.**
 
-Loot Pathway is a lightweight, visual BIS-list checklist for WoW: The Burning Crusade Classic Anniversary Edition.
+I made Loot Pathway to answer one simple question: **what gear should I go for next, and where does it come from?**
 
-It uses a character-screen layout to show your equipped gear and the best-in-slot targets for your class, talent tree and selected role across Pre-Raid, Phase 1 and Phase 2. Click a slot to see its ranked alternatives and where each item comes from.
+Click any equipment slot to see the relevant BIS and alternative items for your class, talent tree and selected role. Choices are ranked best first and grouped across Pre-Raid, Phase 1 and Phase 2, with a clear source shown for each item.
 
-## Features
+## What it includes
 
-- Pre-Raid, Phase 1 and Phase 2 BIS lists
-- All 25 supported class, spec and role guides, including Feral Cat and Bear
-- Ranked BIS and alternative items from quests, dungeons, heroics, raids and professions
-- Character-model phase and item previews
-- Gems and enchants shown with phase previews
+- Pre-Raid, Phase 1 and Phase 2 BIS-list routes
+- Ranked alternatives from quests, dungeons, Heroics, raids and professions
+- Clear Normal and Heroic dungeon labels
+- Character-model item and phase previews
+- Recommended gems and enchants
 - Per-character owned-item checklists
 - Automatic talent-tree updates and manual role selection where needed
-- Normal and Heroic dungeon labels
+- Feral Combat guides for both Cat and Bear
 - Source filters, collapsible phases and minimap controls
-- Standalone operation: no other BIS addon is required
+- No other BIS addon required
 
-The bundled lists are reviewed against the current Wowhead TBC BIS guides. Loot Pathway does not calculate upgrades from item level; it only displays items present in the relevant BIS lists.
+The bundled lists are reviewed against the current Wowhead TBC BIS guides. Loot Pathway does not calculate upgrades from item level or guarantee that every listed item will improve your particular character; it gives you a clear, easy-to-follow route through the relevant BIS lists.
 
-Use `/lpw` to open the addon, `/lpw options` for minimap settings and `/lpw selftest` for the built-in runtime check.
+Use `/lpw` to open it and `/lpw options` for minimap settings.

@@ -15,7 +15,18 @@ if ($toc -notmatch '(?m)^## Version:\s*\d+\.\d+\.\d+\s*$') { $errors.Add("TOC ve
 if ($toc -notmatch '(?im)^## Notes:.*level 70') { $errors.Add("TOC description does not state the level 70 scope.") }
 if ($readme -notmatch '(?is)max-level\s*\(level 70\).*not a levelling addon') { $errors.Add("README does not state the level 70-only scope.") }
 if ($curseForge -notmatch '(?is)max-level\s*\(level 70\).*not a levelling addon') { $errors.Add("CurseForge description does not state the level 70-only scope.") }
+foreach ($publicCopy in @(@{Name="README"; Text=$readme}, @{Name="CurseForge description"; Text=$curseForge})) {
+    if ($publicCopy.Text -notmatch '(?is)what gear should I go for next.*where does it come from') {
+        $errors.Add("$($publicCopy.Name) does not lead with the agreed player question.")
+    }
+    if ($publicCopy.Text -notmatch '(?is)ranked best first.*(where|source)') {
+        $errors.Add("$($publicCopy.Name) does not clearly connect ranked targets to acquisition sources.")
+    }
+}
 if ($releaseGuide -notmatch 'Show the complete changelog to Aaron') { $errors.Add("Release guide does not require Aaron's changelog approval.") }
+if ($releaseGuide -notmatch 'live GitHub README' -or $releaseGuide -notmatch 'repository summary' -or $releaseGuide -notmatch 'live CurseForge description') {
+    $errors.Add("Release guide does not require all public GitHub and CurseForge copy to be reconciled.")
+}
 if ($readme -notmatch 'Publish-Release\.ps1 -Version 1\.0\.0 -ChangelogApproved') { $errors.Add("README publish instructions omit the changelog approval switch.") }
 if ($readme -notmatch 'uses the approved `CHANGELOG\.md` verbatim') { $errors.Add("README does not describe the approved changelog as the release notes source.") }
 foreach ($playerFile in $playerFiles) {

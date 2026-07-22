@@ -1,6 +1,6 @@
 ## Interface: 20506
 ## Title: Loot Pathway
-## Notes: A visual Pre-Raid to Phase 2 BIS-list pathway for level 70 Burning Crusade Anniversary players.
+## Notes: Makes level 70 BIS-list gearing simple, with ranked targets and clear sources from Pre-Raid to Phase 2.
 ## Author: Mozley
 ## Version: 0.4.7
 ## SavedVariables: LootPathwayDB
