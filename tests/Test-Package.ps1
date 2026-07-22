@@ -10,20 +10,8 @@ param(
 $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $resolvedZip = (Resolve-Path -LiteralPath $ZipPath).Path
-$expectedFiles = @(
-    "Assets\Brand\LootPathway-Minimap.tga",
-    "Assets\Brand\NorthernStack-Mark.tga",
-    "BisData.lua",
-    "CHANGELOG.md",
-    "Core.lua",
-    "Data.lua",
-    "Diagnostics.lua",
-    "Engine.lua",
-    "LootPathway_TBC.toc",
-    "README.md",
-    "UI.lua",
-    "WowheadCorrections.lua"
-) | Sort-Object
+. (Join-Path $PSScriptRoot "ReleaseFiles.ps1")
+$expectedFiles = @(Get-LootPathwayReleaseFiles | Sort-Object)
 
 $verificationRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("LootPathway-Package-" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $verificationRoot | Out-Null

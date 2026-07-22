@@ -7,10 +7,10 @@ Run this checklist against the exact release-candidate ZIP in TBC Anniversary wi
 - Tested runtime source commit: `9182b35`; later documentation-only commits do not alter the package runtime.
 - Addon version under test: `0.4.7` (the version will become `1.0.0` only after acceptance).
 - Package: `LootPathway-0.4.7.zip`.
-- SHA-256: `1D79254944859780E04F439B4FC846EE81AB5B2B79E6EDBA99E934B32B4FA070`.
+- Reproducible SHA-256: `C95A45DEED5868FE6C014F85281A8D17953D3C4D2571F0C83B10DB44F03EF74D`.
 - Package structure: one `LootPathway` root containing 12 approved files, byte-identical to source.
 - Installed copy: all 12 files byte-identical to this package on 22 July 2026.
-- Automated evidence: 7,188 BIS rows validated; 24 engine checks and 14 profile-migration checks passed with Lua 5.1.5.
+- Automated evidence: 7,188 BIS rows validated; GitHub/CurseForge file-manifest parity passed; 24 engine checks and 14 profile-migration checks passed with Lua 5.1.5.
 
 Any runtime-file change invalidates this evidence and requires a new package, hash and complete affected test rerun.
 

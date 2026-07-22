@@ -14,6 +14,7 @@ if ($version -notmatch '^\d+\.\d+\.\d+$') {
     throw "Invalid addon version '$version'. Expected a semantic version such as 0.4.6."
 }
 $zipPath = Join-Path $projectRoot "LootPathway-$version.zip"
+. (Join-Path $projectRoot "tests\ReleaseFiles.ps1")
 
 & (Join-Path $projectRoot "tests\Test-All.ps1")
 
@@ -22,20 +23,7 @@ if (Test-Path -LiteralPath $addonRoot) {
 }
 New-Item -ItemType Directory -Path $addonRoot -Force | Out-Null
 
-$addonFiles = @(
-    "LootPathway_TBC.toc",
-    "Core.lua",
-    "Data.lua",
-    "BisData.lua",
-    "WowheadCorrections.lua",
-    "Engine.lua",
-    "Diagnostics.lua",
-    "UI.lua",
-    "Assets\Brand\LootPathway-Minimap.tga",
-    "Assets\Brand\NorthernStack-Mark.tga",
-    "CHANGELOG.md",
-    "README.md"
-)
+$addonFiles = @(Get-LootPathwayReleaseFiles)
 
 foreach ($file in $addonFiles) {
     $destination = Join-Path $addonRoot $file
@@ -43,6 +31,35 @@ foreach ($file in $addonFiles) {
     Copy-Item -LiteralPath (Join-Path $projectRoot $file) -Destination $destination -Force
 }
 
-Compress-Archive -LiteralPath $addonRoot -DestinationPath $zipPath -CompressionLevel Optimal -Force
+Add-Type -AssemblyName System.IO.Compression
+$zipStream = [System.IO.File]::Open($zipPath, [System.IO.FileMode]::Create)
+$archive = $null
+try {
+    $archive = [System.IO.Compression.ZipArchive]::new(
+        $zipStream,
+        [System.IO.Compression.ZipArchiveMode]::Create,
+        $false
+    )
+    $fixedTimestamp = [System.DateTimeOffset]::new(2000, 1, 1, 0, 0, 0, [System.TimeSpan]::Zero)
+    foreach ($file in ($addonFiles | Sort-Object)) {
+        $entryName = "LootPathway/" + ($file -replace '\\', '/')
+        $entry = $archive.CreateEntry($entryName, [System.IO.Compression.CompressionLevel]::Optimal)
+        $entry.LastWriteTime = $fixedTimestamp
+        $sourceStream = [System.IO.File]::OpenRead((Join-Path $projectRoot $file))
+        $entryStream = $null
+        try {
+            $entryStream = $entry.Open()
+            $sourceStream.CopyTo($entryStream)
+        }
+        finally {
+            if ($entryStream) { $entryStream.Dispose() }
+            $sourceStream.Dispose()
+        }
+    }
+}
+finally {
+    if ($archive) { $archive.Dispose() }
+    else { $zipStream.Dispose() }
+}
 & (Join-Path $projectRoot "tests\Test-Package.ps1") -ZipPath $zipPath -ExpectedVersion $version
 Write-Output "Built $zipPath"

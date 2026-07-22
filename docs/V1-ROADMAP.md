@@ -48,7 +48,9 @@ Strict audits now cover all 25 guides in each tier: 2,369 linked Pre-Raid rows, 
 ## Release candidate
 
 - [ ] Update product documentation, support details, licence and release metadata.
-- [ ] Confirm GitHub and CurseForge packages contain identical tagged runtime files.
+- [x] Confirm GitHub and CurseForge packages contain identical tagged runtime files.
 - [ ] Complete external player testing across different classes, roles, resolutions and UI scales.
 - [ ] Resolve every critical and high-severity defect.
 - [ ] Show the complete v1 changelog to Aaron and obtain explicit approval before publishing.
+
+The GitHub ZIP and CurseForge `.pkgmeta` are now checked against one shared 12-file release manifest. The GitHub ZIP is reproducible, and packaging fails if either distribution path would add, omit or alter an approved runtime file.
