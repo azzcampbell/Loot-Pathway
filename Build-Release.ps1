@@ -26,9 +26,10 @@ New-Item -ItemType Directory -Path $addonRoot -Force | Out-Null
 $addonFiles = @(Get-LootPathwayReleaseFiles)
 
 foreach ($file in $addonFiles) {
-    $destination = Join-Path $addonRoot $file
+    $nativeFile = $file -replace '[\\/]', [System.IO.Path]::DirectorySeparatorChar
+    $destination = Join-Path $addonRoot $nativeFile
     New-Item -ItemType Directory -Path (Split-Path -Parent $destination) -Force | Out-Null
-    Copy-Item -LiteralPath (Join-Path $projectRoot $file) -Destination $destination -Force
+    Copy-Item -LiteralPath (Join-Path $projectRoot $nativeFile) -Destination $destination -Force
 }
 
 Add-Type -AssemblyName System.IO.Compression
@@ -45,7 +46,8 @@ try {
         $entryName = "LootPathway/" + ($file -replace '\\', '/')
         $entry = $archive.CreateEntry($entryName, [System.IO.Compression.CompressionLevel]::Optimal)
         $entry.LastWriteTime = $fixedTimestamp
-        $sourceStream = [System.IO.File]::OpenRead((Join-Path $projectRoot $file))
+        $nativeFile = $file -replace '[\\/]', [System.IO.Path]::DirectorySeparatorChar
+        $sourceStream = [System.IO.File]::OpenRead((Join-Path $projectRoot $nativeFile))
         $entryStream = $null
         try {
             $entryStream = $entry.Open()

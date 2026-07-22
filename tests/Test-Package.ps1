@@ -11,7 +11,7 @@ $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $resolvedZip = (Resolve-Path -LiteralPath $ZipPath).Path
 . (Join-Path $PSScriptRoot "ReleaseFiles.ps1")
-$expectedFiles = @(Get-LootPathwayReleaseFiles | Sort-Object)
+$expectedFiles = @(Get-LootPathwayReleaseFiles | ForEach-Object { $_ -replace '\\', '/' } | Sort-Object)
 
 $verificationRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("LootPathway-Package-" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $verificationRoot | Out-Null
@@ -29,7 +29,7 @@ try {
     }
 
     $actualFiles = @(Get-ChildItem -LiteralPath $addonRoot -File -Recurse | ForEach-Object {
-        $_.FullName.Substring($addonRoot.Length + 1)
+        $_.FullName.Substring($addonRoot.Length + 1) -replace '\\', '/'
     } | Sort-Object)
     $difference = @(Compare-Object -ReferenceObject $expectedFiles -DifferenceObject $actualFiles)
     if ($difference.Count -gt 0) {
@@ -37,8 +37,9 @@ try {
     }
 
     foreach ($relativePath in $expectedFiles) {
-        $sourcePath = Join-Path $projectRoot $relativePath
-        $packagedPath = Join-Path $addonRoot $relativePath
+        $nativePath = $relativePath -replace '[\\/]', [System.IO.Path]::DirectorySeparatorChar
+        $sourcePath = Join-Path $projectRoot $nativePath
+        $packagedPath = Join-Path $addonRoot $nativePath
         $sourceHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $sourcePath).Hash
         $packagedHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $packagedPath).Hash
         if ($sourceHash -ne $packagedHash) {
