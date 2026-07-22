@@ -29,6 +29,7 @@ $addonFiles = @(
     "UI.lua",
     "Assets\Brand\LootPathway-Minimap.tga",
     "Assets\Brand\NorthernStack-Mark.tga",
+    "CHANGELOG.md",
     "README.md"
 )
 

@@ -1,10 +1,15 @@
 package-as: LootPathway
 enable-nolib-creation: no
 
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+
 ignore:
   - Assets/Brand/LootPathway-CurseForge.png
   - Assets/Brand/LootPathway-CurseForge-Blocky.png
   - Assets/Screenshots
   - Build-Release.ps1
   - Publish-Release.ps1
+  - RELEASING.md
   - LootPathway-0.4.5.zip

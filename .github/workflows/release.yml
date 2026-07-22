@@ -26,6 +26,10 @@ jobs:
           if ($tocVersion -ne $version) {
             throw "Tag version $version does not match TOC version $tocVersion."
           }
+          $changelog = Get-Content -LiteralPath .\CHANGELOG.md -Raw
+          if ($changelog -notmatch "(?m)^# Loot Pathway $([regex]::Escape($version))\s*$") {
+            throw "CHANGELOG.md is not approved for Loot Pathway $version."
+          }
           "RELEASE_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Build addon ZIP
@@ -40,7 +44,7 @@ jobs:
           gh release create "${{ github.ref_name }}" `
             "LootPathway-$env:RELEASE_VERSION.zip" `
             --title "Loot Pathway $env:RELEASE_VERSION" `
-            --generate-notes
+            --notes-file "CHANGELOG.md"
 
       - name: Trigger CurseForge packaging
         shell: pwsh
