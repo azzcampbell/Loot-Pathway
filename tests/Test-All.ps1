@@ -1,0 +1,6 @@
+$ErrorActionPreference = "Stop"
+
+$testRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+& (Join-Path $testRoot "Validate-BisData.ps1")
+& (Join-Path $testRoot "Test-SourceContracts.ps1")
+Write-Output "All Loot Pathway validation checks passed."

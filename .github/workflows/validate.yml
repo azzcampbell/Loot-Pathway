@@ -1,0 +1,26 @@
+name: Validate addon
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Lua 5.1
+        uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: "5.1.5"
+
+      - name: Check Lua syntax
+        run: luac -p Core.lua Data.lua BisData.lua Engine.lua Diagnostics.lua UI.lua
+
+      - name: Validate data and runtime contracts
+        shell: pwsh
+        run: ./tests/Test-All.ps1

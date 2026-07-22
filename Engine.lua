@@ -51,14 +51,41 @@ function LP:GetPlayerBuild()
     return class, tabs[bestIndex][1], tabs[bestIndex][2]
 end
 
+function LP:GetGuideOverride(talentSpec)
+    local overrides = self.characterDB and self.characterDB.guideOverrides
+    return overrides and overrides[talentSpec] or nil
+end
+
+function LP:SetGuideOverride(talentSpec, guideName)
+    if not self.characterDB then self:ActivateCharacterProfile() end
+    self.characterDB.guideOverrides[talentSpec] = guideName
+    self.previewItem = nil
+end
+
+function LP:GetGuideChoices(class, talentSpec)
+    local choices, seen = {}, {}
+    local function add(guideName)
+        if guideName and not seen[guideName] and self.BIS_LISTS[class] and self.BIS_LISTS[class][guideName] then
+            seen[guideName] = true
+            table.insert(choices, guideName)
+        end
+    end
+    add(self.BIS_SPEC_MAP[class] and self.BIS_SPEC_MAP[class][talentSpec])
+    local configured = self.BIS_GUIDE_CHOICES and self.BIS_GUIDE_CHOICES[class] and self.BIS_GUIDE_CHOICES[class][talentSpec]
+    for _, guideName in ipairs(configured or {}) do add(guideName) end
+    return choices
+end
+
 function LP:GetEmbeddedSpec(class, talentSpec)
-    local mapped = self.BIS_SPEC_MAP[class] and self.BIS_SPEC_MAP[class][talentSpec]
-    return mapped, mapped and self.BIS_LISTS[class] and self.BIS_LISTS[class][mapped]
+    local automatic = self.BIS_SPEC_MAP[class] and self.BIS_SPEC_MAP[class][talentSpec]
+    local override = self:GetGuideOverride(talentSpec)
+    local selected = override and self.BIS_LISTS[class] and self.BIS_LISTS[class][override] and override or automatic
+    return selected, selected and self.BIS_LISTS[class] and self.BIS_LISTS[class][selected], override and selected == override and "MANUAL" or "AUTO"
 end
 
 function LP:GetPhaseAugments(slotKey, phase)
     local class, talentSpec = self:GetPlayerBuild()
-    local embeddedSpec = self.BIS_SPEC_MAP[class] and self.BIS_SPEC_MAP[class][talentSpec]
+    local embeddedSpec = self:GetEmbeddedSpec(class, talentSpec)
     local specData = embeddedSpec and self.BIS_AUGMENTS and self.BIS_AUGMENTS[class] and self.BIS_AUGMENTS[class][embeddedSpec]
     if not specData then return {}, nil end
 
@@ -81,7 +108,7 @@ end
 
 function LP:GetEffectiveRank(phase, itemID, rank)
     local class, talentSpec = self:GetPlayerBuild()
-    local embeddedSpec = self.BIS_SPEC_MAP[class] and self.BIS_SPEC_MAP[class][talentSpec]
+    local embeddedSpec = self:GetEmbeddedSpec(class, talentSpec)
     local key = class .. ":" .. tostring(embeddedSpec or talentSpec) .. ":" .. tostring(phase) .. ":" .. tostring(itemID)
     return (self.BIS_RANK_OVERRIDES and self.BIS_RANK_OVERRIDES[key]) or rank or "Alt"
 end
@@ -206,7 +233,7 @@ function LP:GetBisItem(entry, phase, slot, equippedLevel)
         difficulty = self:GetDifficultySuffix(sourceType, source, location),
         listRank = rank or "Alt", phase = phase, phaseLabel = PHASE_LABELS[phase],
         equippedLevel = equippedLevel or 0,
-        completed = self.db.completed[tostring(itemID)] == true,
+        completed = self:IsItemCompleted(itemID),
     }
 end
 

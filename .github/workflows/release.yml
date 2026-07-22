@@ -15,6 +15,14 @@ jobs:
       - name: Check out tagged source
         uses: actions/checkout@v4
 
+      - name: Install Lua 5.1
+        uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: "5.1.5"
+
+      - name: Check Lua syntax
+        run: luac -p Core.lua Data.lua BisData.lua Engine.lua Diagnostics.lua UI.lua
+
       - name: Verify tag and addon version
         shell: pwsh
         run: |

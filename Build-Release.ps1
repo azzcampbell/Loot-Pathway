@@ -15,6 +15,8 @@ if ($version -notmatch '^\d+\.\d+\.\d+$') {
 }
 $zipPath = Join-Path $projectRoot "LootPathway-$version.zip"
 
+& (Join-Path $projectRoot "tests\Test-All.ps1")
+
 if (Test-Path -LiteralPath $addonRoot) {
     Remove-Item -LiteralPath $addonRoot -Recurse -Force
 }
@@ -26,6 +28,7 @@ $addonFiles = @(
     "Data.lua",
     "BisData.lua",
     "Engine.lua",
+    "Diagnostics.lua",
     "UI.lua",
     "Assets\Brand\LootPathway-Minimap.tga",
     "Assets\Brand\NorthernStack-Mark.tga",

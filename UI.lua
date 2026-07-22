@@ -173,6 +173,30 @@ function LP:SetDrawerOpen(open)
     if self.pathPane then self.pathPane:SetShown(self.drawerOpen) end
 end
 
+function LP:CycleGuideSelection()
+    local class, talentSpec = self:GetPlayerBuild()
+    local automatic = self.BIS_SPEC_MAP[class] and self.BIS_SPEC_MAP[class][talentSpec]
+    local alternatives = {}
+    for _, guideName in ipairs(self:GetGuideChoices(class, talentSpec)) do
+        if guideName ~= automatic then table.insert(alternatives, guideName) end
+    end
+    if #alternatives == 0 then
+        self:Print("The " .. tostring(talentSpec) .. " talent tree has one BIS guide.")
+        return
+    end
+
+    local current = self:GetGuideOverride(talentSpec)
+    local nextGuide = alternatives[1]
+    for index, guideName in ipairs(alternatives) do
+        if current == guideName then nextGuide = alternatives[index + 1]; break end
+    end
+    self:SetGuideOverride(talentSpec, nextGuide)
+    self:RefreshModel()
+    self:Refresh()
+    local selected, _, mode = self:GetEmbeddedSpec(class, talentSpec)
+    self:Print((mode == "MANUAL" and "Selected " or "Restored automatic ") .. tostring(selected) .. " BIS guide.")
+end
+
 function LP:CreatePhaseButton(parent,phase,label,x,width)
     local button=CreateFrame("Button",nil,parent,"BackdropTemplate"); button:SetSize(width,28); button:SetPoint("TOPLEFT",x,-61)
     button.phase=phase; button.baseLabel=label; button.label=Text(button,9,C.muted,"CENTER",true); button.label:SetPoint("CENTER")
@@ -405,7 +429,13 @@ function LP:CreateUI()
 
     local character=CreateFrame("Frame",nil,frame,"BackdropTemplate"); character:SetPoint("TOPLEFT",18,-68); character:SetSize(484,490); Backdrop(character,C.panel,C.line); self.characterPane=character
     self.characterName=Text(character,14,C.text,"CENTER"); self.characterName:SetPoint("TOP",0,-12)
-    self.characterBuild=Text(character,10,C.gold,"CENTER"); self.characterBuild:SetPoint("TOP",self.characterName,"BOTTOM",0,-4)
+    self.guideButton=Button(character,"",310,20); self.guideButton:SetPoint("TOP",self.characterName,"BOTTOM",0,-2); self.characterBuild=self.guideButton.label
+    self.guideButton:SetScript("OnClick",function() LP:CycleGuideSelection() end)
+    self.guideButton:HookScript("OnEnter",function(self)
+        GameTooltip:SetOwner(self,"ANCHOR_TOP"); GameTooltip:SetText("BIS guide",unpack(C.gold)); GameTooltip:AddLine("Automatically follows your talent tree.",1,1,1)
+        GameTooltip:AddLine("Click to switch role when another guide is available.",unpack(C.muted)); GameTooltip:Show()
+    end)
+    self.guideButton:HookScript("OnLeave",function() GameTooltip:Hide() end)
     self.phaseButtons={}; self:CreatePhaseButton(character,-1,"RESET",20,76); self:CreatePhaseButton(character,0,"PRE-RAID",102,106); self:CreatePhaseButton(character,1,"PHASE 1",214,106); self:CreatePhaseButton(character,2,"PHASE 2",326,138)
 
     local modelBackdrop=CreateFrame("Frame",nil,character,"BackdropTemplate"); modelBackdrop:SetPoint("TOPLEFT",84,-96); modelBackdrop:SetPoint("BOTTOMRIGHT",-84,88); Backdrop(modelBackdrop,{.018,.023,.030,1},C.bronze)
@@ -462,7 +492,7 @@ function LP:AcquireRow(index)
     row.source=Text(row,9,C.muted); row.source:SetPoint("BOTTOMLEFT",60,10); row.source:SetPoint("RIGHT",-45,0)
     row.check=CreateFrame("Button",nil,row,"BackdropTemplate"); row.check:SetSize(26,26); row.check:SetPoint("RIGHT",-9,0); Backdrop(row.check,{.03,.04,.05,1},C.line)
     row.tick=row.check:CreateTexture(nil,"OVERLAY"); row.tick:SetTexture("Interface\\Buttons\\UI-CheckBox-Check"); row.tick:SetAllPoints()
-    row.check:SetScript("OnClick",function() if row.item then local key=tostring(row.item.id); LP.db.completed[key]=not LP.db.completed[key]; LP:Refresh() end end)
+    row.check:SetScript("OnClick",function() if row.item then LP:ToggleItemCompleted(row.item.id); LP:Refresh() end end)
     row:SetScript("OnClick",function(self) if self.item then LP:ToggleItemPreview(self.item) end end)
     row:SetScript("OnEnter",function(self)
         self:SetBackdropBorderColor(unpack(C.gold))
@@ -476,8 +506,8 @@ end
 
 function LP:Refresh()
     if not self.frame or not self.db then return end
-    local className=UnitClass("player") or "Adventurer"; local _,spec=self:GetPlayerBuild(); local embeddedSpec=self:GetEmbeddedSpec(select(2,UnitClass("player")),spec)
-    self.characterName:SetText(UnitName("player") or "Your character"); self.characterBuild:SetText(className.." / "..spec..(embeddedSpec and (" - "..embeddedSpec.." list") or ""))
+    local className,classToken=UnitClass("player"); className=className or "Adventurer"; local _,spec=self:GetPlayerBuild(); local embeddedSpec,_,guideMode=self:GetEmbeddedSpec(classToken,spec)
+    self.characterName:SetText(UnitName("player") or "Your character"); self.characterBuild:SetText(className.." / "..spec..(embeddedSpec and (" - "..embeddedSpec.." list · "..guideMode) or ""))
     local previewPhase=tonumber(self.db.displayPhase) or -1; if self.modelHint then self.modelHint:SetShown(self.playerModel~=nil) end
     self:UpdatePhaseButtons(); self:UpdateSourceFilters()
     for _,button in ipairs(self.gearButtons) do self:UpdateGearButton(button) end

@@ -23,6 +23,14 @@ LP.BIS_SPEC_MAP = {
     DRUID={Balance="Balance",["Feral Combat"]="Cat",Restoration="Restoration"},
 }
 
+-- Talent trees do not always identify the player's role. Feral Combat can use
+-- either the Cat or Bear guide, so both are exposed through the guide selector.
+LP.BIS_GUIDE_CHOICES = {
+    DRUID={
+        ["Feral Combat"]={"Cat","Bear"},
+    },
+}
+
 -- Reviewed guide corrections applied on top of the bundled list snapshot.
 -- Wowhead Phase 2 treats Voidheart Gloves as a two-piece set option rather
 -- than the slot's Phase 2 BIS for Destruction.

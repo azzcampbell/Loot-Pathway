@@ -2,7 +2,7 @@
 
 Loot Pathway is a lightweight, visual gear checklist for **World of Warcraft: The Burning Crusade Classic Anniversary Edition**. It presents your equipment like a character sheet, then lays out the BIS-list targets for your active talent tree from Pre-Raid through Phase 1 and the current Phase 2.
 
-## Version 0.4.5
+## Version 0.4.7 development line
 
 - Live character model with left-drag rotation and right-click reset.
 - Clickable equipment slots with full Pre-Raid, Phase 1 and Phase 2 pathways.
@@ -33,6 +33,9 @@ Loot Pathway is a lightweight, visual gear checklist for **World of Warcraft: Th
 - The footer follows the actual Northern Stack logo composition: wordmark on the left and stepped colour blocks on the right.
 - The centred `Loot Pathway` title and subtitle use the native game interface fonts.
 - Standalone operation: **Loon Best In Slot is not required or queried at runtime**.
+- Checked-item progress is stored per character. Existing account-wide progress is migrated safely to the first character loaded after the schema upgrade.
+- Talent detection remains automatic; specs with more than one role guide can switch guide from the character panel. Feral Combat supports both Cat and Bear.
+- `/lpw selftest` runs the bundled runtime checks for profiles, guides, sources and ownership.
 
 The bundled dataset is a standalone snapshot generated from **Loon Best In Slot 1.0.9**, containing 7,188 list entries and 1,450 unique items across Pre-Raid, Phase 1 and Phase 2. It preserves BIS and alternative ranks. It should be treated as a Loon-sourced list snapshot, not as independent confirmation that every entry matches Wowhead. For provenance checks, compare against [Wowhead's TBC BIS guide hub](https://www.wowhead.com/tbc/guides/classes/best-in-slot-guides-burning-crusade-classic).
 
@@ -49,6 +52,7 @@ The folder must directly contain `LootPathway_TBC.toc`. Restart the game or type
 - `/lpw` toggles the window.
 - `/lpw options` opens the minimap-button settings.
 - `/lpw refresh` refreshes equipment and cached item information.
+- `/lpw selftest` validates the active profile, embedded guides, source classification and ownership behaviour.
 - `/lpw reset` restores the window position.
 
 ## Data maintenance

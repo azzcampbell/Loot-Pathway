@@ -9,4 +9,5 @@ Core.lua
 Data.lua
 BisData.lua
 Engine.lua
+Diagnostics.lua
 UI.lua

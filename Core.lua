@@ -5,6 +5,8 @@ LP.name = ADDON_NAME
 LP.version = (GetAddOnMetadata and GetAddOnMetadata(ADDON_NAME, "Version")) or "dev"
 
 local defaults = {
+    schemaVersion = 2,
+    characters = {},
     minimised = false,
     locked = false,
     scale = 1.08,
@@ -19,8 +21,12 @@ local defaults = {
     displayPhase = -1,
     minimapHidden = false,
     showOwned = false,
-    completed = {},
     collapsedPhases = {},
+}
+
+local characterDefaults = {
+    completed = {},
+    guideOverrides = {},
 }
 
 local function CopyDefaults(source, target)
@@ -32,6 +38,55 @@ local function CopyDefaults(source, target)
             target[key] = value
         end
     end
+end
+
+local function CopyTable(source)
+    local result = {}
+    for key, value in pairs(source or {}) do
+        result[key] = type(value) == "table" and CopyTable(value) or value
+    end
+    return result
+end
+
+function LP:GetCharacterKey()
+    local name, realm
+    if UnitFullName then name, realm = UnitFullName("player") end
+    name = name or (UnitName and UnitName("player")) or "Unknown"
+    realm = realm or (GetRealmName and GetRealmName()) or "UnknownRealm"
+    realm = tostring(realm):gsub("%s+", "")
+    return tostring(name) .. "-" .. realm
+end
+
+function LP:ActivateCharacterProfile()
+    local key = self:GetCharacterKey()
+    self.db.characters = self.db.characters or {}
+    self.db.characters[key] = self.db.characters[key] or {}
+    CopyDefaults(characterDefaults, self.db.characters[key])
+    self.characterKey = key
+    self.characterDB = self.db.characters[key]
+
+    if self.pendingLegacyCompleted then
+        if not next(self.characterDB.completed) then
+            self.characterDB.completed = CopyTable(self.pendingLegacyCompleted)
+        end
+        self.db.legacyCompletedMigratedTo = key
+        self.pendingLegacyCompleted = nil
+    end
+end
+
+function LP:GetCompletedItems()
+    return (self.characterDB and self.characterDB.completed) or {}
+end
+
+function LP:IsItemCompleted(itemID)
+    return self:GetCompletedItems()[tostring(itemID)] == true
+end
+
+function LP:ToggleItemCompleted(itemID)
+    if not self.characterDB then self:ActivateCharacterProfile() end
+    local key = tostring(itemID)
+    self.characterDB.completed[key] = not self.characterDB.completed[key]
+    return self.characterDB.completed[key]
 end
 
 function LP:Print(message)
@@ -69,8 +124,10 @@ SlashCmdList.LOOTPATHWAY = function(input)
     elseif input == "refresh" then
         LP:Refresh(true)
         LP:Print("Gear and recommendations refreshed.")
+    elseif input == "selftest" then
+        LP:RunSelfTests()
     elseif input == "help" then
-        LP:Print("/lpw - toggle  |  /lpw options  |  /lpw refresh  |  /lpw reset")
+        LP:Print("/lpw - toggle  |  /lpw options  |  /lpw refresh  |  /lpw selftest  |  /lpw reset")
     else
         LP:Toggle()
     end
@@ -87,8 +144,15 @@ events:RegisterEvent("GET_ITEM_INFO_RECEIVED")
 events:SetScript("OnEvent", function(_, event, arg1)
     if event == "ADDON_LOADED" and arg1 == ADDON_NAME then
         LootPathwayDB = LootPathwayDB or {}
+        local previousSchemaVersion = tonumber(LootPathwayDB.schemaVersion) or 1
+        local legacyCompleted = type(LootPathwayDB.completed) == "table" and CopyTable(LootPathwayDB.completed) or nil
         local previousScaleRevision = LootPathwayDB.uiScaleRevision
         CopyDefaults(defaults, LootPathwayDB)
+        if previousSchemaVersion < 2 and legacyCompleted and next(legacyCompleted) then
+            LP.pendingLegacyCompleted = legacyCompleted
+        end
+        LootPathwayDB.completed = nil
+        LootPathwayDB.schemaVersion = 2
         if not previousScaleRevision then
             LootPathwayDB.scale = math.max(tonumber(LootPathwayDB.scale) or 1, 1.08)
             LootPathwayDB.uiScaleRevision = 1
@@ -96,6 +160,7 @@ events:SetScript("OnEvent", function(_, event, arg1)
         if LootPathwayDB.selectedSource == "OTHER" then LootPathwayDB.selectedSource = "ALL" end
         LP.db = LootPathwayDB
     elseif event == "PLAYER_LOGIN" then
+        LP:ActivateCharacterProfile()
         LP:CreateUI()
         LP:Refresh()
     elseif event == "PLAYER_ENTERING_WORLD" then
