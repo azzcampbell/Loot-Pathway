@@ -62,4 +62,4 @@ Commit the addon changes first, then run:
 powershell -ExecutionPolicy Bypass -File .\Publish-Release.ps1 -Version 0.4.6
 ```
 
-The script updates the single version field, builds the matching ZIP, commits the version bump, and pushes the new tag. GitHub Actions creates the GitHub release and CurseForge packages the same tagged commit with an automatic changelog.
+The script updates the single version field, builds the matching ZIP, commits the version bump, and pushes the new tag. GitHub Actions creates the GitHub release and generated notes, then securely triggers CurseForge to package the same tagged commit with its automatic changelog.
