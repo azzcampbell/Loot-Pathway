@@ -53,6 +53,17 @@ local function Button(parent,label,width,height)
     return button
 end
 
+local function CloseButton(parent,size)
+    local button=Button(parent,"",size,size); button.closeLines={}
+    for index,glyph in ipairs({"/","\\"}) do
+        local line=Text(button,15,C.muted,"CENTER",true); line:SetPoint("CENTER",0,0); line:SetText(glyph)
+        button.closeLines[index]=line
+    end
+    button:HookScript("OnEnter",function(self) for _,line in ipairs(self.closeLines) do line:SetTextColor(unpack(C.text)) end end)
+    button:HookScript("OnLeave",function(self) for _,line in ipairs(self.closeLines) do line:SetTextColor(unpack(C.muted)) end end)
+    return button
+end
+
 local function ItemIDFromLink(link)
     return link and tonumber(string.match(link,"item:(%d+)")) or nil
 end
@@ -130,7 +141,7 @@ function LP:CreateOptionsUI()
     frame:SetScript("OnDragStart",function(self) self:StartMoving() end); frame:SetScript("OnDragStop",function(self) self:StopMovingOrSizing() end); Backdrop(frame,C.bg,C.bronze)
     local top=frame:CreateTexture(nil,"ARTWORK"); top:SetColorTexture(unpack(C.gold)); top:SetPoint("TOPLEFT"); top:SetPoint("TOPRIGHT"); top:SetHeight(3)
     local title=Text(frame,16,C.text); title:SetPoint("TOPLEFT",18,-17); title:SetText("LOOT PATHWAY OPTIONS")
-    local close=Button(frame,"X",26,26); close:SetPoint("TOPRIGHT",-13,-13); close:SetScript("OnClick",function() frame:Hide() end)
+    local close=CloseButton(frame,26); close:SetPoint("TOPRIGHT",-13,-13); close:SetScript("OnClick",function() frame:Hide() end)
     local description=Text(frame,9,C.muted); description:SetPoint("TOPLEFT",18,-48); description:SetWidth(300); description:SetText("Choose whether Loot Pathway keeps a button around the minimap.")
     local check=CreateFrame("Button",nil,frame,"BackdropTemplate"); check:SetSize(26,26); check:SetPoint("TOPLEFT",18,-80); Backdrop(check,{.03,.04,.05,1},C.gold)
     self.optionsTick=check:CreateTexture(nil,"OVERLAY"); self.optionsTick:SetTexture("Interface\\Buttons\\UI-CheckBox-Check"); self.optionsTick:SetVertexColor(unpack(C.green)); self.optionsTick:SetAllPoints()
@@ -306,14 +317,9 @@ end
 
 function LP:CreateBrandFooter(frame)
     local line=frame:CreateTexture(nil,"ARTWORK"); line:SetColorTexture(unpack(C.line)); line:SetPoint("BOTTOMLEFT",18,62); line:SetPoint("BOTTOMRIGHT",-18,62); line:SetHeight(1)
-    local brand=CreateFrame("Frame",nil,frame); brand:SetSize(240,48); brand:SetPoint("BOTTOM",0,8)
-    local mark=CreateFrame("Frame",nil,brand); mark:SetSize(190,32); mark:SetPoint("TOP",0,0)
-    local colours={{0,.29,.68,1},{.65,.65,.65,1},{.85,.85,.85,1},{1,1,1,1}}
-    local northern=Text(mark,10,C.text,"LEFT",true); northern:SetPoint("TOPLEFT",0,0); northern:SetText("NORTHERN")
-    local stack=Text(mark,14,C.text,"LEFT",true); stack:SetPoint("TOPLEFT",34,-12); stack:SetText("STACK")
-    local studios=Text(mark,8,C.gold,"LEFT",true); studios:SetPoint("LEFT",stack,"RIGHT",7,0); studios:SetText("STUDIOS")
-    for column=1,4 do for row=1,5-column do local block=mark:CreateTexture(nil,"ARTWORK"); block:SetColorTexture(unpack(colours[column])); block:SetSize(6,6); block:SetPoint("BOTTOMLEFT",158+(column-1)*8,1+(row-1)*8) end end
-    local credit=Text(brand,8,C.muted,"CENTER"); credit:SetPoint("BOTTOM",0,1); credit:SetWidth(240); credit:SetText("Created by Mozley from Earthstrike, EU")
+    local brand=CreateFrame("Frame",nil,frame); brand:SetSize(170,34); brand:SetPoint("BOTTOM",0,14)
+    local mark=brand:CreateTexture(nil,"ARTWORK"); mark:SetTexture("Interface\\AddOns\\LootPathway\\Assets\\Brand\\NorthernStack-Mark"); mark:SetSize(24,24); mark:SetPoint("LEFT",5,0); mark:SetTexCoord(0,1,0,1)
+    local studio=Text(brand,9,C.text,"LEFT",true); studio:SetPoint("LEFT",mark,"RIGHT",7,0); studio:SetPoint("RIGHT",-5,0); studio:SetText("Northern Stack Studios")
 end
 
 function LP:EnableModelRotation(model,hint)
@@ -356,7 +362,7 @@ function LP:CreateUI()
     local top=frame:CreateTexture(nil,"ARTWORK"); top:SetColorTexture(unpack(C.gold)); top:SetPoint("TOPLEFT"); top:SetPoint("TOPRIGHT"); top:SetHeight(3)
     local title=Text(frame,19,C.text,"CENTER",true); title:SetPoint("TOP",0,-13); title:SetWidth(420); title:SetText("Loot Pathway")
     local subtitle=Text(frame,9,C.muted,"CENTER"); subtitle:SetPoint("TOP",title,"BOTTOM",0,-1); subtitle:SetWidth(420); subtitle:SetText("Your BIS-List gear route")
-    local close=Button(frame,"X",28,28); close:SetPoint("TOPRIGHT",-16,-16); close:SetScript("OnClick",function() frame:Hide() end)
+    local close=CloseButton(frame,28); close:SetPoint("TOPRIGHT",-16,-16); close:SetScript("OnClick",function() frame:Hide() end)
 
     local character=CreateFrame("Frame",nil,frame,"BackdropTemplate"); character:SetPoint("TOPLEFT",18,-68); character:SetSize(484,490); Backdrop(character,C.panel,C.line); self.characterPane=character
     self.characterName=Text(character,14,C.text,"CENTER"); self.characterName:SetPoint("TOP",0,-12)
@@ -429,12 +435,13 @@ function LP:Refresh()
     for _,button in ipairs(self.gearButtons) do self:UpdateGearButton(button) end
     if not self.drawerOpen then return end
 
-    local selected=self:GetSlot(self.db.selectedSlot); local phase=tonumber(self.db.displayPhase) or -1; local items,positions
-    if selected and phase>=0 then items=self:GetPhaseSlotItems(selected.key,phase,true); self.pathTitle:SetText(selected.label.." replacements"); self.pathSummary:SetText(PHASES[phase].label.." BIS and alternative list items - click a source to filter")
+    local selected=self:GetSlot(self.db.selectedSlot); local phase=tonumber(self.db.displayPhase) or -1; local items
+    if selected and phase>=0 then items=self:GetPhaseSlotItems(selected.key,phase,true)
     else
-        local recs,_,_,pos=self:GetRecommendations(); items,positions=recs,pos; self.pathTitle:SetText(selected and (selected.label.." pathway") or "Replacement items")
-        local position=selected and positions and positions[selected.key]; self.pathSummary:SetText(position and position.phase>=0 and ("Current list position: "..PHASES[position.phase].label.." / "..(position.rank or "listed")) or "Later BIS-list targets for currently equipped gear")
+        items=self:GetRecommendations()
     end
+    self.pathTitle:SetText(selected and selected.label or "Replacement items")
+    self.pathSummary:SetText("Best-in-slot items are ranked best first. Click a source below to filter.")
 
     local ranked={}; for _,item in ipairs(items or {}) do table.insert(ranked,item) end
     table.sort(ranked,function(a,b)

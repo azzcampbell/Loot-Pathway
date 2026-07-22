@@ -14,7 +14,7 @@ Loot Pathway is a lightweight, visual gear checklist for **World of Warcraft: Th
 - Equipped BIS-list position controls which later targets remain visible. Item level is display information only and never determines list membership.
 - Checkbox progress, saved position and source/slot filters.
 - Checked items remain visible, move beneath unowned items within their phase, and can be unticked at any time.
-- Native, block-built Northern Stack Studios footer; no extra texture assets or libraries.
+- Small Northern Stack Studios footer using the supplied white-and-blue NS mark.
 - Blocky Loot Pathway minimap icon at 3 o'clock by default. Left-click toggles the addon, drag moves it and right-click resets its position.
 - Paper-doll preview modes for Pre-Raid, Phase 1 and Phase 2; Reset returns to the character's equipped gear.
 - Phase previews replace the slot icons with primary BIS-list targets. Exact or later listed gear is darkened and marked `MET` with a green tick.

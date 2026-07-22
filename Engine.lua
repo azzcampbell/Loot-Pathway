@@ -131,7 +131,8 @@ function LP:GetDifficultySuffix(sourceType, source, location)
     local multiple = string.find(combined, "~", 1, true) ~= nil
     if heroic and multiple then return "(N) (H)" end
     if heroic then return "(H)" end
-    return "(N)"
+    -- Normal dungeon loot remains on the boss's loot table in Heroic mode.
+    return "(N) (H)"
 end
 
 function LP:GetListPosition(slotKey, guide)
