@@ -2,7 +2,7 @@
 ## Title: Loot Pathway
 ## Notes: Makes level 70 gearing guides simple, with ranked choices and clear sources from Pre-Raid to Phase 2.
 ## Author: Mozley
-## Version: 1.0.1
+## Version: 1.0.2
 ## X-License: All Rights Reserved
 ## SavedVariables: LootPathwayDB
 
