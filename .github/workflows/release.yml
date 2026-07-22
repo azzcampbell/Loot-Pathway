@@ -23,7 +23,7 @@ jobs:
       - name: Check Lua syntax
         run: luac -p Core.lua Data.lua BisData.lua WowheadCorrections.lua Engine.lua Diagnostics.lua UI.lua
 
-      - name: Require engine behaviour tests
+      - name: Require Lua behaviour tests
         shell: pwsh
         run: ./tests/Test-LuaEngine.ps1 -RequireLua
 

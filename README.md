@@ -2,7 +2,7 @@
 
 Loot Pathway is a lightweight, visual gear checklist for **World of Warcraft: The Burning Crusade Classic Anniversary Edition**. It presents your equipment like a character sheet, then lays out the BIS-list targets for your active talent tree from Pre-Raid through Phase 1 and the current Phase 2.
 
-## Version 0.4.7 development line
+## Road to v1 development line
 
 - Live character model with left-drag rotation and right-click reset.
 - Clickable equipment slots with full Pre-Raid, Phase 1 and Phase 2 pathways.
@@ -37,7 +37,7 @@ Loot Pathway is a lightweight, visual gear checklist for **World of Warcraft: Th
 - Talent detection remains automatic; specs with more than one role guide can switch guide from the character panel. Feral Combat supports both Cat and Bear.
 - `/lpw selftest` runs the bundled runtime checks for profiles, guides, sources and ownership.
 
-The bundled dataset is a standalone snapshot generated from **Loon Best In Slot 1.0.9**, containing 7,188 list entries and 1,450 unique items across Pre-Raid, Phase 1 and Phase 2. It preserves BIS and alternative ranks. It should be treated as a Loon-sourced list snapshot, not as independent confirmation that every entry matches Wowhead. For provenance checks, compare against [Wowhead's TBC BIS guide hub](https://www.wowhead.com/tbc/guides/classes/best-in-slot-guides-burning-crusade-classic).
+The bundled dataset began as a standalone snapshot generated from **Loon Best In Slot 1.0.9** and does not require Loon at runtime. Its 25 class/spec/role guides across Pre-Raid, Phase 1 and Phase 2 are now checked against the corresponding current [Wowhead TBC BIS guides](https://www.wowhead.com/tbc/guides/classes/best-in-slot-guides-burning-crusade-classic). Reviewed additions, removals and slot corrections live in `WowheadCorrections.lua`; the exact source manifests and repeatable auditor live under `tools/`.
 
 ## Install
 
@@ -59,12 +59,18 @@ The folder must directly contain `LootPathway_TBC.toc`. Restart the game or type
 
 `BisData.lua` is generated and bundled with the addon. The development helper at `tools/generate_bis_data.py` rebuilds the standalone snapshot from a local Loon installation; Loot Pathway itself never loads or depends on Loon.
 
+Run `tests/Test-All.ps1` before packaging. With Lua 5.1 available, it also exercises spec resolution, guide selection, ownership ordering, source and faction filters, flexible weapon slots, model-preview conflicts, fresh profiles and legacy SavedVariables migration. `/lpw selftest` provides the final runtime check inside TBC Anniversary.
+
+## Support
+
+Report reproducible problems through [GitHub Issues](https://github.com/azzcampbell/Loot-Pathway/issues). Please include your class, talent tree, selected guide and phase, plus the item or source involved.
+
 ## Publishing a release
 
 Commit the addon changes first, then run:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\Publish-Release.ps1 -Version 0.4.6
+powershell -ExecutionPolicy Bypass -File .\Publish-Release.ps1 -Version 1.0.0
 ```
 
 The script updates the single version field, builds the matching ZIP, commits the version bump, and pushes the new tag. GitHub Actions creates the GitHub release and generated notes, then securely triggers CurseForge to package the same tagged commit with its automatic changelog.

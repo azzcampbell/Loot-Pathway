@@ -30,6 +30,7 @@ Strict audits now cover all 25 guides in each tier: 2,369 linked Pre-Raid rows, 
 - [x] Owned recommendations remain visible, sort below unowned items and can be unticked.
 - [x] Source filtering and faction eligibility have executable regression coverage.
 - [x] GitHub validation and release workflows require the Lua 5.1 engine behaviour suite.
+- [x] Fresh profiles, character isolation and legacy ownership migration have executable Lua 5.1 coverage.
 
 ## Behaviour acceptance
 
