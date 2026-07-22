@@ -276,9 +276,7 @@ function LP:GetListPosition(slotKey, guide)
     return bestPhase, bestRank
 end
 
-function LP:GetInventoryListPosition(inventory, slotKey, guide)
-    local link = GetInventoryItemLink("player", inventory)
-    local itemID = (GetInventoryItemID and GetInventoryItemID("player", inventory)) or ItemIDFromLink(link)
+function LP:GetItemGuidePosition(itemID, slotKey, guide)
     if not itemID or not guide then return -1, nil end
     local bestPhase, bestRank, bestOrder, bestIsBIS = -1, nil, nil, false
     for phase = 0, (self.BIS_DATA_META.currentPhase or 2) do
@@ -293,6 +291,12 @@ function LP:GetInventoryListPosition(inventory, slotKey, guide)
         end
     end
     return bestPhase, bestRank, bestOrder
+end
+
+function LP:GetInventoryListPosition(inventory, slotKey, guide)
+    local link = GetInventoryItemLink("player", inventory)
+    local itemID = (GetInventoryItemID and GetInventoryItemID("player", inventory)) or ItemIDFromLink(link)
+    return self:GetItemGuidePosition(itemID, slotKey, guide)
 end
 
 function LP:IsCurrentPhaseBIS(itemID, slotKey)
@@ -351,6 +355,7 @@ function LP:GetPhaseSlotItems(slotKey, phase, applySourceFilter)
     if not guide or not slot then return results, talentSpec, embeddedSpec end
 
     local equippedLevel = self:GetEquippedLevel(slot.inventory)
+    local equippedIDs = self:GetEquippedIDs(slot)
     local playerFaction = UnitFactionGroup and UnitFactionGroup("player") or nil
     local sourceFilter = self.db.selectedSource or "ALL"
     for listOrder, entry in ipairs(guide[phase] or {}) do
@@ -358,6 +363,8 @@ function LP:GetPhaseSlotItems(slotKey, phase, applySourceFilter)
         if self:EntryFitsSlot(entry[2], slotKey, effectiveRank) and IsFactionMatch(entry[8], playerFaction) then
             local item = self:GetBisItem(entry, phase, slot, equippedLevel)
             item.listOrder = item.displayOrder or listOrder
+            item.equipped = equippedIDs[item.id] == true
+            item.completed = item.completed or item.equipped
             if not applySourceFilter or sourceFilter == "ALL" or item.tier == sourceFilter then
                 table.insert(results, item)
             end
@@ -512,21 +519,27 @@ function LP:GetRecommendations()
             local equippedIDs = self:GetEquippedIDs(slot)
             local positionPhase, positionRank = self:GetListPosition(slot.key, guide)
             positions[slot.key] = { phase = positionPhase, rank = positionRank }
+            local equippedPositions = {}
+            for equippedID in pairs(equippedIDs) do
+                local equippedPhase = self:GetItemGuidePosition(equippedID, slot.key, guide)
+                if equippedPhase >= 0 then equippedPositions[equippedID] = equippedPhase end
+            end
             for phase = 0, currentPhase do
                 local samePhase = phase == positionPhase
                 local includePhase = positionPhase < 0 or phase > positionPhase or samePhase
                 local onlyBIS = samePhase
-                if includePhase then
-                    for listOrder, entry in ipairs(guide[phase] or {}) do
-                        local effectiveRank = self:GetEffectiveRank(phase, entry[1], entry[3])
-                        if self:EntryFitsSlot(entry[2], slot.key, effectiveRank) and not equippedIDs[entry[1]] and IsFactionMatch(entry[8], playerFaction) then
-                            local isBIS = self:IsBestRank(effectiveRank)
-                            if not onlyBIS or isBIS then
-                                local item = self:GetBisItem(entry, phase, slot, equippedLevel)
-                                item.listOrder = item.displayOrder or listOrder
-                                if selectedSource == "ALL" or item.tier == selectedSource then
-                                    table.insert(results, item)
-                                end
+                for listOrder, entry in ipairs(guide[phase] or {}) do
+                    local effectiveRank = self:GetEffectiveRank(phase, entry[1], entry[3])
+                    local isEquipped = equippedPositions[entry[1]] == phase
+                    if (includePhase or isEquipped) and self:EntryFitsSlot(entry[2], slot.key, effectiveRank) and IsFactionMatch(entry[8], playerFaction) then
+                        local isBIS = self:IsBestRank(effectiveRank)
+                        if isEquipped or (not equippedIDs[entry[1]] and (not onlyBIS or isBIS)) then
+                            local item = self:GetBisItem(entry, phase, slot, equippedLevel)
+                            item.listOrder = item.displayOrder or listOrder
+                            item.equipped = isEquipped
+                            item.completed = item.completed or isEquipped
+                            if selectedSource == "ALL" or item.tier == selectedSource then
+                                table.insert(results, item)
                             end
                         end
                     end

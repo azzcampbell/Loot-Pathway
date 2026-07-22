@@ -112,6 +112,26 @@ check(LP:GetRankDisplayLabel("Best Until Tier 5") == "UNTIL T5", "Best Until ran
 check(LP:GetRankContextLabel("Best Mitigation") == "MITIGATION", "mitigation context must remain visible")
 check(LP:GetRankContextLabel("Best OH - Personal DPS") == "PERSONAL", "personal-DPS context must remain visible")
 
+local originalGetPlayerBuild = LP.GetPlayerBuild
+LP.GetPlayerBuild = function() return "WARLOCK", "Destruction", nil end
+local _, destructionGuide = LP:GetEmbeddedSpec("WARLOCK", "Destruction")
+local equippedGuideOptions = {
+    {slot="WAIST", inventory=6, id=27795, name="Sash of Serpentra"},
+    {slot="LEGS", inventory=7, id=27948, name="Trousers of Oblivion"},
+    {slot="CHEST", inventory=5, id=31297, name="Robe of the Crimson Order"},
+}
+for _, expected in ipairs(equippedGuideOptions) do
+    equipped[expected.inventory] = expected.id
+    LP.db.selectedSlot, LP.db.selectedSource = expected.slot, "ALL"
+    local phase, rank = LP:GetItemGuidePosition(expected.id, expected.slot, destructionGuide)
+    check(phase == 0 and LP:GetRankTier(rank) == "OPTION", expected.name .. " must remain a Pre-Raid Option in the Destruction guide")
+    local found
+    for _, item in ipairs(LP:GetRecommendations()) do if item.id == expected.id then found = item; break end end
+    check(found and found.equipped and found.completed, expected.name .. " must remain visible, ticked and owned while equipped")
+    equipped[expected.inventory] = nil
+end
+LP.GetPlayerBuild = originalGetPlayerBuild
+
 local fury = LP.BIS_LISTS.WARRIOR.Fury[1]
 local furyIDs = {}
 for _, entry in ipairs(fury) do furyIDs[entry[1]] = entry end
@@ -164,6 +184,14 @@ check(LP:GetItemBISPhase(29298, "RING") == 2,
 check(LP:IsTargetMet(survivalRingAssignments[1], 2, 11),
     "equipped Band of Eternity must report its Phase 2 target as met")
 equipped[11], equipped[12] = nil, nil
+equipped[7], equipped[18] = 30142, 30105
+local survivalOwnedChecks = {{slot="LEGS",id=30142,name="Rift Stalker Leggings"},{slot="RANGED",id=30105,name="Serpent Spine Longbow"}}
+for _, expected in ipairs(survivalOwnedChecks) do
+    local found
+    for _, item in ipairs(LP:GetPhaseSlotItems(expected.slot, 2, true)) do if item.id == expected.id then found = item; break end end
+    check(found and found.equipped and found.completed, expected.name .. " must be ticked as owned in the Phase 2 drawer while equipped")
+end
+equipped[7], equipped[18] = nil, nil
 LP.GetPlayerBuild = originalGetPlayerBuild
 
 local warlockAtieshOrders = {Affliction=4, Demonology=3, Destruction=3}

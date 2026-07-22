@@ -22,7 +22,7 @@
     #loot-pathway-preview .lp-shell {
       position: relative;
       width: 100%;
-      max-width: 1000px;
+      max-width: 988px;
       margin: 0 auto;
       background: rgba(7,10,14,.985);
       border: 1px solid var(--lp-gold);
@@ -62,18 +62,22 @@
     }
     #loot-pathway-preview .lp-slot:hover, #loot-pathway-preview .lp-slot.is-selected { border-color: var(--lp-gold); box-shadow: 0 0 0 1px rgba(214,171,92,.35); }
     #loot-pathway-preview .lp-slot::after { content: attr(data-rank); position: absolute; left: 1px; top: 0; color: var(--lp-gold); font: 8px Arial, sans-serif; text-shadow: 0 1px 1px #000; }
-    #loot-pathway-preview .lp-slot-head { left: 0; top: 23px; background-position: -40px -187px; }
-    #loot-pathway-preview .lp-slot-neck { left: 0; top: 75px; background-position: -40px -239px; }
-    #loot-pathway-preview .lp-slot-shoulder { left: 0; top: 127px; background-position: -40px -291px; }
-    #loot-pathway-preview .lp-slot-back { left: 0; top: 179px; background-position: -40px -343px; }
-    #loot-pathway-preview .lp-slot-chest { left: 0; top: 231px; background-position: -40px -395px; }
-    #loot-pathway-preview .lp-slot-wrist { left: 0; top: 283px; background-position: -40px -447px; }
+    #loot-pathway-preview .lp-slot-head { left: 0; top: 7px; background-position: -40px -187px; }
+    #loot-pathway-preview .lp-slot-neck { left: 0; top: 55px; background-position: -40px -239px; }
+    #loot-pathway-preview .lp-slot-shoulder { left: 0; top: 103px; background-position: -40px -291px; }
+    #loot-pathway-preview .lp-slot-back { left: 0; top: 151px; background-position: -40px -343px; }
+    #loot-pathway-preview .lp-slot-chest { left: 0; top: 199px; background-position: -40px -395px; }
+    #loot-pathway-preview .lp-slot-wrist { left: 0; top: 343px; background-position: -40px -447px; }
     #loot-pathway-preview .lp-slot-hands { right: 0; top: 7px; background-position: -432px -171px; }
     #loot-pathway-preview .lp-slot-waist { right: 0; top: 55px; background-position: -432px -219px; }
     #loot-pathway-preview .lp-slot-legs { right: 0; top: 103px; background-position: -432px -267px; }
     #loot-pathway-preview .lp-slot-feet { right: 0; top: 151px; background-position: -432px -315px; }
     #loot-pathway-preview .lp-slot-ring { right: 0; top: 199px; background-position: -432px -363px; }
     #loot-pathway-preview .lp-slot-trinket { right: 0; top: 295px; background-position: -432px -459px; }
+    #loot-pathway-preview .lp-cosmetic-slot { position: absolute; left: 0; width: 46px; height: 46px; border: 2px solid var(--lp-line); background: #080a0d; opacity: .48; filter: grayscale(1); pointer-events: none; }
+    #loot-pathway-preview .lp-cosmetic-slot::before { content: ''; position: absolute; inset: 5px; border: 1px solid #30343c; background: linear-gradient(135deg,#252a33,#0d1015); }
+    #loot-pathway-preview .lp-slot-shirt { top: 247px; }
+    #loot-pathway-preview .lp-slot-tabard { top: 295px; }
     #loot-pathway-preview .lp-slot-main { left: 143px; bottom: 0; background-position: -181px -488px; }
     #loot-pathway-preview .lp-slot-off { left: 199px; bottom: 0; background-position: -237px -488px; }
     #loot-pathway-preview .lp-slot-ranged { left: 255px; bottom: 0; background-position: -293px -488px; }
@@ -83,22 +87,22 @@
     #loot-pathway-preview .lp-drawer-kicker { color: var(--lp-gold); font: 10px Arial, sans-serif; letter-spacing: .09em; }
     #loot-pathway-preview .lp-drawer-title { font-size: 17px; margin-top: 19px; }
     #loot-pathway-preview .lp-drawer-copy { color: var(--lp-muted); font: 11px Arial, sans-serif; margin-top: 5px; }
-    #loot-pathway-preview .lp-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 30px; }
-    #loot-pathway-preview .lp-filter { padding: 0 11px; min-height: 29px; border-color: var(--lp-gold); color: var(--lp-gold); }
+    #loot-pathway-preview .lp-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 26px; }
+    #loot-pathway-preview .lp-filter { padding: 0 11px; min-height: 27px; border-color: var(--lp-gold); color: var(--lp-gold); }
     #loot-pathway-preview .lp-filter[data-filter="Quest"] { border-color: var(--lp-green); color: var(--lp-green); }
     #loot-pathway-preview .lp-filter[data-filter="Dungeon / Heroic"] { border-color: var(--lp-blue); color: var(--lp-blue); }
     #loot-pathway-preview .lp-filter[data-filter="Raid"] { border-color: var(--lp-purple); color: var(--lp-purple); }
     #loot-pathway-preview .lp-filter[data-filter="Craftable"] { border-color: var(--lp-orange); color: var(--lp-orange); }
     #loot-pathway-preview .lp-filter.is-active { color: var(--lp-text); background: rgba(214,171,92,.16); }
-    #loot-pathway-preview .lp-stage-header { width: 100%; min-height: 30px; margin-top: 12px; background: rgba(184,115,235,.09); border: 1px solid var(--lp-purple); color: var(--lp-purple); display: flex; align-items: center; justify-content: space-between; padding: 0 9px; cursor: pointer; text-transform: uppercase; font: 10px Arial, sans-serif; letter-spacing: .06em; }
-    #loot-pathway-preview .lp-rows { display: grid; gap: 10px; margin-top: 9px; }
-    #loot-pathway-preview .lp-row { position: relative; min-height: 86px; border: 1px solid var(--lp-line); background: var(--lp-raised); display: grid; grid-template-columns: 48px 1fr 28px; gap: 11px; padding: 11px; text-align: left; color: var(--lp-text); cursor: pointer; }
+    #loot-pathway-preview .lp-stage-header { width: 100%; min-height: 29px; margin-top: 8px; background: rgba(184,115,235,.09); border: 2px solid var(--lp-purple); color: var(--lp-purple); display: flex; align-items: center; justify-content: space-between; padding: 0 8px; cursor: pointer; text-transform: uppercase; font: 10px Arial, sans-serif; letter-spacing: .06em; }
+    #loot-pathway-preview .lp-rows { display: grid; gap: 8px; margin-top: 7px; }
+    #loot-pathway-preview .lp-row { position: relative; min-height: 82px; border: 1px solid var(--lp-line); background: var(--lp-raised); display: grid; grid-template-columns: 46px 1fr 28px; gap: 9px; padding: 10px; text-align: left; color: var(--lp-text); cursor: pointer; }
     #loot-pathway-preview .lp-row.is-preview { border-color: var(--lp-gold); }
     #loot-pathway-preview .lp-item-icon { width: 42px; height: 42px; background: #080b10; border-left: 3px solid var(--lp-purple); display: grid; place-items: center; color: var(--lp-gold); font: 16px Arial, sans-serif; }
     #loot-pathway-preview .lp-row-top { display: flex; align-items: center; gap: 7px; font: 10px Arial, sans-serif; color: var(--lp-gold); }
-    #loot-pathway-preview .lp-chip { border: 1px solid currentColor; padding: 2px 8px; font-size: 9px; text-transform: uppercase; }
-    #loot-pathway-preview .lp-item-name { display:block; margin-top: 7px; color: var(--lp-purple); font-size: 14px; }
-    #loot-pathway-preview .lp-source { display:block; margin-top: 8px; color: var(--lp-muted); font: 10px Arial, sans-serif; }
+    #loot-pathway-preview .lp-chip { border: 2px solid currentColor; padding: 1px 8px; font-size: 9px; text-transform: uppercase; }
+    #loot-pathway-preview .lp-item-name { display:block; margin-top: 5px; color: var(--lp-purple); font-size: 14px; }
+    #loot-pathway-preview .lp-source { display:block; margin-top: 6px; color: var(--lp-muted); font: 10px Arial, sans-serif; }
     #loot-pathway-preview .lp-check { width: 25px; height: 25px; align-self: center; border: 1px solid var(--lp-line); background: #080b0f; }
     #loot-pathway-preview .lp-empty { color: var(--lp-muted); text-align: center; padding: 48px 12px; font: 12px Arial, sans-serif; }
     #loot-pathway-preview .lp-reopen { display: none; margin: 20px auto; }
@@ -148,6 +152,8 @@
             <button type="button" class="lp-slot lp-slot-back" data-slot="Back" data-rank=""></button>
             <button type="button" class="lp-slot lp-slot-chest" data-slot="Chest" data-rank=""></button>
             <button type="button" class="lp-slot lp-slot-wrist" data-slot="Wrists" data-rank=""></button>
+            <span class="lp-cosmetic-slot lp-slot-shirt" aria-label="Equipped shirt (decorative)"></span>
+            <span class="lp-cosmetic-slot lp-slot-tabard" aria-label="Equipped tabard (decorative)"></span>
             <button type="button" class="lp-slot lp-slot-hands is-selected" data-slot="Hands" data-rank=""></button>
             <button type="button" class="lp-slot lp-slot-waist" data-slot="Waist" data-rank=""></button>
             <button type="button" class="lp-slot lp-slot-legs" data-slot="Legs" data-rank=""></button>

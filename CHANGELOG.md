@@ -1,7 +1,6 @@
-# Loot Pathway 1.0.1
+# Loot Pathway 1.0.2
 
-- Expanded every guide with Best, Strong and Option choices.
-- Added exact Normal and Heroic dungeon labels.
-- Fixed weapon, ring, trinket and MET detection.
-- Improved the layout, wording and small-screen behaviour.
-- Added clearer guide selection and ownership controls.
+- Equipped guide items now stay visible and are marked as owned.
+- Added greyed-out shirt and tabard slots for a neater character layout.
+- Fixed cramped labels, clipped borders and uneven spacing.
+- Improved slot alignment and character-preview equipment updates.
